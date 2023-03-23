@@ -11,9 +11,10 @@ README = (APP_ROOT / "README.md").read_text()
 AUTHOR = "Shengrui Peng"
 AUTHOR_EMAIL = "peng@l3s.de"
 PROJECT_URLS = {
-    "Bug Tracker": "https://github.com/Peng-LUH/search_l3s_gateway/issues",
-    "Source Code": "https://github.com/Peng-LUH/search_l3s_gateway",
+    "Bug Tracker": "https://github.com/Peng-LUH/search_l3s_search_srv/issues",
+    "Source Code": "https://github.com/Peng-LUH/search_l3s_search_srv",
 }
+
 INSTALL_REQUIRES = [
     "Flask==2.2.2",
     "Flask-Bcrypt",
@@ -50,7 +51,7 @@ EXTRAS_REQUIRE = {
 }
 
 setup(
-    name="search_l3s_gateway",
+    name="search_l3s_search_srv",
     description=DESCRIPTION,
     long_description=README,
     long_description_content_type="text/markdown",
