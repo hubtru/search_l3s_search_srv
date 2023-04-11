@@ -9,9 +9,9 @@ class SimpleSearcher(object):
     def get_hits(self, query, dataset_name):
         # print(os.path.join(pathlib.Path(__name__).parent.absolute(), 'datasets/scidocs/index'))
         # searcher = LuceneSearcher(os.path.join(pathlib.Path(__name__).parent.absolute(), 'indexes/scidocs'))
-        print(f'base: {self.base_path_index}')
+        # print(f'base: {self.base_path_index}')
         path_index = os.path.join(self.base_path_index, dataset_name)
-        print(path_index)
+        # print(path_index)
         searcher = LuceneSearcher(path_index)
         hits = searcher.search(query)
         
