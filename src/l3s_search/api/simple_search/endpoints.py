@@ -2,10 +2,13 @@
 
 from http import HTTPStatus
 from flask_restx import Namespace, Resource
-from search_l3s_gateway import db
+# from search_l3s_gateway import db
 # from flask_api_tutorial.models.user import User
 # from flask_api_tutorial.api.auth.dto import auth_regparser
 # from flask_api_tutorial.api.auth.business import process_registration_request
+
+## import dto
+# from search
 
 ns_search = Namespace(name="search_gateway", validate=True)
 
