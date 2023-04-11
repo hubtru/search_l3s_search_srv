@@ -51,7 +51,11 @@ EXTRAS_REQUIRE = {
 }
 
 setup(
+<<<<<<< HEAD
     name="l3s_search",
+=======
+    name="search_l3s_search",
+>>>>>>> 96352708e0c61a8e58396c13f40016a0192e440f
     description=DESCRIPTION,
     long_description=README,
     long_description_content_type="text/markdown",
