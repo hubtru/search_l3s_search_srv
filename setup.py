@@ -33,6 +33,9 @@ INSTALL_REQUIRES = [
     "pytest-flake8==1.1.0",
     "flake8==3.9.2",
     "black",
+    "pyserini",
+    "faiss-cpu==1.7.2",
+    "torch",
 ]
 EXTRAS_REQUIRE = {
     "dev": [
@@ -51,11 +54,7 @@ EXTRAS_REQUIRE = {
 }
 
 setup(
-<<<<<<< HEAD
-    name="l3s_search",
-=======
     name="search_l3s_search",
->>>>>>> 96352708e0c61a8e58396c13f40016a0192e440f
     description=DESCRIPTION,
     long_description=README,
     long_description_content_type="text/markdown",

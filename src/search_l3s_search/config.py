@@ -20,7 +20,8 @@ class Config:
     SWAGGER_UI_DOC_EXPANSION = "list"
     RESTX_MASK_SWAGGER = False
     JSON_SORT_KEYS = False
-
+    BASE_PATH_INDEXES = os.path.join(os.getcwd(), 'indexes')
+    BASE_PATH_DATASETS = os.path.join(os.getcwd(), 'datasets')
 
 class TestingConfig(Config):
     """Testing configuration."""
