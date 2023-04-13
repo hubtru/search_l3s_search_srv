@@ -2,7 +2,6 @@ from http import HTTPStatus
 from flask import request
 from flask_restx import Namespace, Resource
 
-from search_l3s_search.util.mls_datasets import MLSConnector
 from .logic import Indexer
 from .dto import (
     request_mls_index_update_model,
@@ -74,24 +73,3 @@ class SparseIndexer(Resource):
     def post(self):
         return {"message": "Success: Dense Encoder"}
 
-
-@ns_indexer.route("/generate-mls-dataset", endpoint="generate_mls_dataset")
-class GenerateMlsDataset(Resource):
-    @ns_indexer.expect(corpus_model)
-    @ns_indexer.response(int(HTTPStatus.CREATED), description="Successfully created json file")
-    @ns_indexer.response(int(HTTPStatus.BAD_REQUEST), description="Request error, e.g., wrong corpus name")
-    # @ns_indexer.marshal_list_with(document_model)
-    def post(self):
-        """retrieval mls dataset and save as json file"""
-        request_data = ns_indexer.payload
-        corpus_name = request_data.get("name")
-        connector = MLSConnector()
-        mls_response = connector.get_response(corpus_name)
-        mls_response_json = mls_response.json()
-        
-        res = {
-            "message": "Success",
-            "corpus_name": corpus_name,
-            "context": mls_response_json.get("@context")
-        }
-        return res, HTTPStatus.CREATED
