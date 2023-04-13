@@ -5,6 +5,11 @@ corpus_model = Model("Corpus", {
     "name": fields.String()
 })
 
+document_model = Model("Document", {
+    "id": fields.String,
+    "content": fields.String,
+})
+
 request_mls_index_update_model = Model("MlsIndexUpdate", {
     "datasets": fields.List(fields.String),
 })

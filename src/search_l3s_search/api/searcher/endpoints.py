@@ -4,7 +4,7 @@ from flask import current_app as app
 from flask_restx import Namespace, Resource
 
 from .dto import query_model
-from .logic import SimpleSearcher
+from .logic import Searcher
 
 ns_searcher = Namespace("searcher", validate=True)
 
@@ -30,7 +30,7 @@ class SimpleSearch(Resource):
         dataset_name = request_data.get("dataset")
         index_name = request_data.get("index")
         print(index_name)
-        searcher = SimpleSearcher(app.config["BASE_PATH_INDEXES"])
+        searcher = Searcher(app.config["BASE_PATH_INDEXES"])
         results = searcher.traditional_retrieval(
             query,
             dataset_name=dataset_name,
