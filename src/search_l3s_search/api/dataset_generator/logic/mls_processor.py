@@ -41,13 +41,12 @@ class MLSConnector(object):
         login_server_url = os.getenv("MLS_LOGIN_SERVER_URL")
         realm = os.getenv("MLS_REALM")
         
-        
-        
         # get login response
         login_response = requests.post(login_server_url + "/realms/" + realm + "/protocol/openid-connect/token",
                 data = self.LOGIN_PAYLOAD,
                 headers =  {
                 "Content-Type": "application/x-www-form-urlencoded",
+                # "Content-Type": "application/json",
                 }
             )
 
@@ -99,7 +98,11 @@ class MLSConnector(object):
     @classmethod
     def get_object_response(self, object_id):
         auth_header = self.__get_auth_header()
-        response = requests.get(object_id, headers=auth_header)
+        base_url = os.getenv("MLS_BASE_URL")
+        
+        url = base_url + object_id
+        response = requests.get(url, headers=auth_header)
+        
         return response
     
 

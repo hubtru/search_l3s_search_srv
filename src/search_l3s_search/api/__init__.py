@@ -31,3 +31,6 @@ api.add_namespace(ns_reranker, path="/reranker")
 
 from search_l3s_search.api.dataset_generator.endpoints import ns_dataset_generator
 api.add_namespace(ns_dataset_generator, path="/dataset-generator")
+
+from search_l3s_search.api.encoder.endpoints import ns_encoder
+api.add_namespace(ns_encoder, path="/encoder")

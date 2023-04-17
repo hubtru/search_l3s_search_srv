@@ -62,14 +62,5 @@ class PyseriniIndexer(Resource):
         # return reqdata, 201
 
 
-@ns_indexer.route("/sparse-encoder", endpoint="sparse_encoder")
-class SparseIndexer(Resource):
-    def post(self):
-        return {"message": "Success: Sparse Encoder"}
 
-
-@ns_indexer.route("/dense-encoder", endpoint="dense_encoder")
-class SparseIndexer(Resource):
-    def post(self):
-        return {"message": "Success: Dense Encoder"}
 

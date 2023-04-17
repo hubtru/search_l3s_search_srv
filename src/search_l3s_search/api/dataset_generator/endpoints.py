@@ -21,16 +21,30 @@ class MlsContentType(Resource):
         return content_type, HTTPStatus.OK
 
 
-@ns_dataset_generator.route("/mls-response", endpoint="mls_response")
+@ns_dataset_generator.route("/mls-response-dataset", endpoint="mls_response_dataset")
+class MlsResponse(Resource):
+    @ns_dataset_generator.expect(dataset_model)
+    def post(self):
+        request_data = ns_dataset_generator.payload
+        dataset_name = request_data.get("name")
+        dataset_parameters = request_data.get("parameters")
+        
+        mls_response = MLSConnector.get_dataset_response(dataset_name, parameters=dataset_parameters)
+        mls_response_json = mls_response.json()
+        return mls_response_json, HTTPStatus.CREATED
+
+
+@ns_dataset_generator.route("/mls-response-object", endpoint="mls_response_object")
 class MlsResponse(Resource):
     @ns_dataset_generator.expect(object_model)
     def post(self):
         object_id = ns_dataset_generator.payload.get("object_id")
-        print(object_id)
-        # response = MLSConnector.get_object_response(object_id)
-        return {"msg": object_id}
+        
+        mls_response = MLSConnector.get_object_response(object_id)
+        mls_response_json = mls_response.json()
+        
+        return mls_response_json, HTTPStatus.CREATED
     
-# @ns_dataset_generator.route("/mls-object/<string: mls-id>", endpoint"")
 
 @ns_dataset_generator.route("/mls-corpus", endpoint="dataset_generator_mls")
 class GenerateMlsDataset(Resource):
