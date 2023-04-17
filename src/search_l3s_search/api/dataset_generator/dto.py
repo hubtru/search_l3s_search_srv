@@ -1,5 +1,14 @@
 from flask_restx import Model, fields
 
-dataset_model = Model("Dataset", {
-    "name": fields.String,
+parameter_model = Model("Parameter", {
+    "parameter_name": fields.String(description="mls-api parameter")
+})
+
+dataset_model = Model("Mls_Dataset", {
+    "name": fields.String(description="description: dataset name, e.g., tasks, documents"),
+    "parameters": fields.List(fields.Nested(parameter_model), description="List of mls-api parameters"),
+})
+
+object_model = Model("Mls_Object", {
+    "object_id": fields.String
 })
