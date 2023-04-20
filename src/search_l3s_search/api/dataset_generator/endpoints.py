@@ -2,14 +2,20 @@ from http import HTTPStatus
 import json
 from flask_restx import Namespace, Resource
 
-from .dto import dataset_model, parameter_model, object_model
+from .dto import (
+    dataset_model,
+    parameter_model,
+    object_model,
+    input_dataset_model
+)
 from .logic.mls_processor import MLSConnector, MLSCorpus
-
+from .logic.preprocessor import dataset_json2jsonl
 
 ns_dataset_generator = Namespace("dataset-generator", validate=True)
 ns_dataset_generator.models[dataset_model.name] = dataset_model
 ns_dataset_generator.models[parameter_model.name] = parameter_model
 ns_dataset_generator.models[object_model.name] = object_model
+ns_dataset_generator.models[input_dataset_model.name] = input_dataset_model
 
 @ns_dataset_generator.route("/mls-content-type", endpoint="mls_content_type")
 class MlsContentType(Resource):
@@ -71,3 +77,26 @@ class GenerateMlsDataset(Resource):
         #     "dataset": mls_response_json.get("hydra:member")
         # }
         return mls_response_json, HTTPStatus.CREATED
+
+
+@ns_dataset_generator.route("json-to-jsonl-converter", endpoint="json_to_jsonl_converter")
+class JsonToJsonl(Resource):
+    @ns_dataset_generator.expect(input_dataset_model)
+    def post(self):
+        dataset_name = ns_dataset_generator.payload.get("dataset_name")
+        print(dataset_name)
+        if not dataset_name:
+            raise ValueError("Dataset name is empty!")
+        
+        result = dataset_json2jsonl(dataset_name)
+        
+        if result == 1:
+            return {"message": "Success"}, HTTPStatus.CREATED
+        else:
+            return result.get("error"), result.get("code")
+    
+
+@ns_dataset_generator.route("get-datasets-name", endpoint="get_dataset_name")
+class GetDatasetName(Resource):
+    def get(self):
+        return {"message": "Success"}, HTTPStatus.OK

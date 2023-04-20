@@ -12,3 +12,8 @@ dataset_model = Model("Mls_Dataset", {
 object_model = Model("Mls_Object", {
     "object_id": fields.String
 })
+
+
+input_dataset_model = Model("Dataset", {
+    "dataset_name": fields.String(required=True),
+})

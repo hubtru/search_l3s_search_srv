@@ -8,6 +8,7 @@ from .dto import (
     corpus_model,
     document_model,
     BM25_INDEX_model,
+    hnsw_indexer_input_model
 )
 
 ns_indexer = Namespace("indexer", validate=True)
@@ -17,6 +18,7 @@ ns_indexer.models[request_mls_index_update_model.name] = request_mls_index_updat
 ns_indexer.models[corpus_model.name] = corpus_model
 ns_indexer.models[document_model.name] = document_model
 ns_indexer.models[BM25_INDEX_model.name] = BM25_INDEX_model
+ns_indexer.models[hnsw_indexer_input_model.name] = hnsw_indexer_input_model
 
 @ns_indexer.route("/test", endpoint="indexer-test")
 class IndexerTest(Resource):
@@ -48,19 +50,29 @@ class PyseriniIndexer(Resource):
         request_data = ns_indexer.payload
         #  = reqdata.get('name')
         idxer = Indexer()
-        corpus_name = request_data.get("corpus_name")
+        dataset_name = request_data.get("dataset_name")
         json_collection = request_data.get("json_collection")
         generator = request_data.get("generator")
         threads = request_data.get("threads")
-        idxer.bm25_indexer(corpus_name,
+        idxer.bm25_indexer(dataset_name,
                                json_collection=json_collection,
                                generator=generator,
                                threads=threads
                                )
         
-        return {"corpus_name": corpus_name}, 201
+        return {"corpus_name": dataset_name}, 201
         # return reqdata, 201
 
 
-
-
+@ns_indexer.route("/dense-indexer/hnsw")
+class HNSWIndexer(Resource):
+    @ns_indexer.expect(hnsw_indexer_input_model)
+    def post(self):
+        request_data = ns_indexer.payload
+        encode_cat = request_data.get("encode_cat")
+        model_name = request_data.get("model_name")
+        dataset_name = request_data.get("dataset_name")
+        print(request_data)
+        idxer = Indexer()
+        idxer.hnsw_indexer(encode_cat, model_name, dataset_name)
+        return {"message": "success"}, HTTPStatus.CREATED
