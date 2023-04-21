@@ -48,6 +48,7 @@ class DenseEncodeDataset(Resource):
     @ns_encoder.response(int(HTTPStatus.NOT_FOUND), description="Dataset not found")
     def post(self):
         dataset_name = ns_encoder.payload.get("dataset_name")
+        
         enc = DenseEncoder()
         p = enc.xlm_roberta_dataset_encoder(dataset_name)
         

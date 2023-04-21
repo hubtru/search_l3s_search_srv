@@ -1,4 +1,5 @@
 import ast, os, pathlib
+import json
 from pyserini.search.lucene import LuceneSearcher
 from pyserini.search.faiss import FaissSearcher, TctColBertQueryEncoder
 
@@ -29,6 +30,8 @@ class Searcher(object):
     def dense_retrieval(self, query, index_method, dataset_name):
         # encoder = DenseEncoder()
         # encoder = TctColBertQueryEncoder('castorini/tct_colbert-msmarco')
+        dataset_file_path = os.path.join(os.getenv("BASE_DATASETS_PATH"), f"{dataset_name}/jsonl/data.jsonl")
+        
         prebuilt_index_path = os.path.join(self.base_indexes_path, f"dense/{index_method}/{dataset_name}")
         print(prebuilt_index_path)
         search_engine = FaissSearcher(
@@ -48,8 +51,18 @@ class Searcher(object):
         #         results.append(temp)
         
         for i in range(0, 10):
+            docid = hits[i].docid
+            with open(dataset_file_path, "r") as dataset:
+                for line in dataset:
+                    json_obj = json.loads(line)
+                    if int(docid) == json_obj["id"]:
+                        temp = dict()
+                        temp["@id"] = json_obj["@id"]
+                        temp["contents"] = json_obj["contents"]
+                        temp["score"] = f"{hits[i].score:.5f}"
+                        results.append(temp)
             
-            print(f'{i+1:2} {hits[i].docid:7} {hits[i].score:.5f}')
+            # print(f'{i+1:2} {hits[i].docid:7} {hits[i].score:.5f}')
             
         return results
     

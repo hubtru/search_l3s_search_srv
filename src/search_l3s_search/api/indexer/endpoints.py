@@ -7,8 +7,8 @@ from .dto import (
     request_mls_index_update_model,
     corpus_model,
     document_model,
-    BM25_INDEX_model,
-    hnsw_indexer_input_model
+    bm25_indexer_input_model,
+    dense_indexer_input_model
 )
 
 ns_indexer = Namespace("indexer", validate=True)
@@ -17,8 +17,8 @@ ns_indexer = Namespace("indexer", validate=True)
 ns_indexer.models[request_mls_index_update_model.name] = request_mls_index_update_model
 ns_indexer.models[corpus_model.name] = corpus_model
 ns_indexer.models[document_model.name] = document_model
-ns_indexer.models[BM25_INDEX_model.name] = BM25_INDEX_model
-ns_indexer.models[hnsw_indexer_input_model.name] = hnsw_indexer_input_model
+ns_indexer.models[bm25_indexer_input_model.name] = bm25_indexer_input_model
+ns_indexer.models[dense_indexer_input_model.name] = dense_indexer_input_model
 
 @ns_indexer.route("/test", endpoint="indexer-test")
 class IndexerTest(Resource):
@@ -39,9 +39,9 @@ class MlsIndexUpdate(Resource):
         return {"message": "Success: MLS Index Update"}
 
 
-@ns_indexer.route("/bm25-indexer", endpoint="bm25_indexer")
+@ns_indexer.route("/traditional-indexer/bm25", endpoint="traditional_bm25_indexer")
 class PyseriniIndexer(Resource):
-    @ns_indexer.expect(BM25_INDEX_model)
+    @ns_indexer.expect(bm25_indexer_input_model)
     @ns_indexer.response(int(HTTPStatus.CREATED), "New user was successfully created.")
     @ns_indexer.response(int(HTTPStatus.CONFLICT), "Email address is already registered.")
     @ns_indexer.response(int(HTTPStatus.BAD_REQUEST), "Validation error.")
@@ -64,9 +64,9 @@ class PyseriniIndexer(Resource):
         # return reqdata, 201
 
 
-@ns_indexer.route("/dense-indexer/hnsw")
+@ns_indexer.route("/dense-indexer/hnsw", endpoint="dense_hnsw_indexer")
 class HNSWIndexer(Resource):
-    @ns_indexer.expect(hnsw_indexer_input_model)
+    @ns_indexer.expect(dense_indexer_input_model)
     def post(self):
         request_data = ns_indexer.payload
         encode_cat = request_data.get("encode_cat")
@@ -75,4 +75,17 @@ class HNSWIndexer(Resource):
         print(request_data)
         idxer = Indexer()
         idxer.hnsw_indexer(encode_cat, model_name, dataset_name)
+        return {"message": "success"}, HTTPStatus.CREATED
+    
+@ns_indexer.route("/dense-indexer/pq", endpoint="dense_pq_indexer")
+class PQIndexer(Resource):
+    @ns_indexer.expect(dense_indexer_input_model)
+    def post(self):
+        request_data = ns_indexer.payload
+        encode_cat = request_data.get("encode_cat")
+        model_name = request_data.get("model_name")
+        dataset_name = request_data.get("dataset_name")
+        print(request_data)
+        idxer = Indexer()
+        idxer.pq_indexer(encode_cat, model_name, dataset_name)
         return {"message": "success"}, HTTPStatus.CREATED

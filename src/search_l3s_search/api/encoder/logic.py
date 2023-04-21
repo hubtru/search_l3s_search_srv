@@ -25,10 +25,11 @@ class DenseEncoder(object):
                 self.model = XLMRobertaModel.from_pretrained("xlm-roberta-base")
         
         def xlm_roberta_query_encoder(self, input_text):
-                # Load the tokenizer and model
-                # tokenizer = XLMRobertaTokenizer.from_pretrained("xlm-roberta-base")
-                # model = XLMRobertaModel.from_pretrained("xlm-roberta-base")
-                tokens = self.tokenizer.encode(input_text, add_special_tokens=True, max_length=512, truncation=True)
+                tokens = self.tokenizer.encode(input_text,
+                                               add_special_tokens=True,
+                                               max_length=512,
+                                               truncation=True
+                                        )
                 input_ids = torch.tensor([tokens])
                 with torch.no_grad():
                         outputs = self.model(input_ids)
@@ -39,30 +40,25 @@ class DenseEncoder(object):
                 return dense_vector_list
 
         
-        def xlm_roberta_dataset_encoder(self, dataset_name):
-                # tokenizer = XLMRobertaTokenizer.from_pretrained("xlm-roberta-base")
-                # model = XLMRobertaModel.from_pretrained("xlm-roberta-base")
-                # tokens = self.tokenizer.encode(input_text, add_special_tokens=True, max_length=512, truncation=True)
-                model_name = "xlm_roberta_base"
+        def xlm_roberta_dataset_encoder(self, dataset_name):                
+                input_file_path = os.path.join(os.getenv("BASE_DATASETS_PATH"), f"{dataset_name}/jsonl/data.jsonl")
                 
-                input_file_dir = os.path.join(os.getenv("BASE_DATASETS_PATH"), f"{dataset_name}/jsonl/data.jsonl")
-                
-                output_dir = os.path.join(os.getenv("BASE_ENCODES_PATH"), f"dense_encoder/{model_name}/{dataset_name}")
+                output_dir_path = os.path.join(os.getenv("BASE_ENCODES_PATH"), f"dense/xlm-roberta-base/{dataset_name}")
                 
                 
-                if not os.path.exists(output_dir):
-                        os.makedirs(output_dir)
+                if not os.path.exists(output_dir_path):
+                        os.makedirs(output_dir_path)
                         
-                print(output_dir)
-                
+                output_file_path = os.path.join(output_dir_path, "data_encoded.jsonl")
+                                        
                 try:
-                        with open(input_file_dir) as input_file:
+                        with open(input_file_path) as input_file:
                                 for line in input_file:
                                         json_obj = json.loads(line)
                                         json_obj["vector"] = self.xlm_roberta_query_encoder(json_obj["contents"])
                                         # print(json_obj)
                                         
-                                        with open(f"{output_dir}/data_encoded.jsonl", "w") as jsonl_file:
+                                        with open(output_file_path, "a") as jsonl_file:
                                                 json.dump(json_obj, jsonl_file)
                                                 jsonl_file.write('\n')
                 except FileNotFoundError:

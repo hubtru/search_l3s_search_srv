@@ -79,12 +79,12 @@ class GenerateMlsDataset(Resource):
         return mls_response_json, HTTPStatus.CREATED
 
 
-@ns_dataset_generator.route("json-to-jsonl-converter", endpoint="json_to_jsonl_converter")
+@ns_dataset_generator.route("/json-to-jsonl-converter", endpoint="json_to_jsonl_converter")
 class JsonToJsonl(Resource):
     @ns_dataset_generator.expect(input_dataset_model)
     def post(self):
         dataset_name = ns_dataset_generator.payload.get("dataset_name")
-        print(dataset_name)
+
         if not dataset_name:
             raise ValueError("Dataset name is empty!")
         
@@ -96,7 +96,7 @@ class JsonToJsonl(Resource):
             return result.get("error"), result.get("code")
     
 
-@ns_dataset_generator.route("get-datasets-name", endpoint="get_dataset_name")
+@ns_dataset_generator.route("/get-datasets-name", endpoint="get_dataset_name")
 class GetDatasetName(Resource):
     def get(self):
         return {"message": "Success"}, HTTPStatus.OK

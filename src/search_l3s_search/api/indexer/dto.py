@@ -14,7 +14,7 @@ request_mls_index_update_model = Model("MlsIndexUpdate", {
     "datasets": fields.List(fields.String),
 })
 
-BM25_INDEX_model = Model("BM25Indexer", {
+bm25_indexer_input_model = Model("BM25Indexer", {
     "dataset_name": fields.String,
     "json_collection": fields.String(default="JsonCollection"),
     "generator": fields.String(default="DefaultLuceneDocumentGenerator"),
@@ -25,11 +25,7 @@ SPARSE_INDEX_model = Model("SparseIndex", {
     "corpus_name": fields.String,
 })
 
-DENSE_INDEX_model = Model("DenseIndex", {
-    "corpus_name": fields.String,
-})
-
-hnsw_indexer_input_model = Model("HNSW_Index", {
+dense_indexer_input_model = Model("HNSW_Index", {
     "encode_cat": fields.String,
     "model_name": fields.String,
     "dataset_name": fields.String

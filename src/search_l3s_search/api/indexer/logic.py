@@ -88,18 +88,32 @@ class Indexer(object):
                 --output {output_path} \
                 --hnsw
         """
+        
         subprocess.call(hnsw_cmd, shell=True)
         return 1
     
     
-    def pq_indexer():
-        cmd = """
+    def pq_indexer(self, encode_cat, model_name, dataset_name):
+        dataset_encode_path = os.path.join(os.getenv("BASE_ENCODES_PATH"),
+                                            f"{encode_cat}/{model_name}/{dataset_name}"
+                                        )
+        if not os.path.exists(dataset_encode_path):
+            raise FileNotFoundError
+        
+        output_path = os.path.join(os.getenv("BASE_INDEXES_PATH"), f"{encode_cat}/pq/{dataset_name}")
+        # print(output_path)
+        
+        if not os.path.exists(output_path):
+            os.makedirs(output_path)
+            
+        pq_cmd = f"""
             python -m pyserini.index.faiss \
-                --input path/to/encoded/corpus \  # either in the Faiss or the jsonl format
-                --output path/to/output/index \
+                --input {dataset_encode_path} \
+                --output {output_path} \
                 --pq
         """
-        pass
+        subprocess.call(pq_cmd, shell=True)
+        return 1
     
     
     def flat_indexer():

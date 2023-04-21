@@ -19,6 +19,7 @@ def create_app(config_name):
     app = Flask(__name__)
     app.config.from_object(get_config(config_name))
     os.environ["BASE_PATH"] = os.getcwd()
+    
     os.environ["BASE_DATASETS_PATH"] = os.path.join(os.getcwd(), "datasets")
     os.environ["BASE_ENCODES_PATH"] = os.path.join(os.getcwd(), "encodes")
     os.environ["BASE_INDEXES_PATH"] = os.path.join(os.getcwd(), "indexes")
