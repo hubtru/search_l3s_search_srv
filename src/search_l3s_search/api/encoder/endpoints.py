@@ -2,7 +2,7 @@ from http import HTTPStatus
 import os
 from flask_restx import Namespace, Resource
 
-from .logic import SparseEncoder, DenseEncoder
+from .logic import XlmRobertaDenseEncoder
 from .dto import (
     dense_encoder_model,
     input_encode_query_model,
@@ -36,7 +36,7 @@ class DenseEncodeQuery(Resource):
         
         input_data = ns_encoder.payload.get("text")
         if input_data:
-            enc = DenseEncoder()
+            enc = XlmRobertaDenseEncoder()
             dense_vector_list = enc.xlm_roberta_query_encoder(input_data)
         
         return {"dense encode": dense_vector_list}, HTTPStatus.CREATED
@@ -49,7 +49,7 @@ class DenseEncodeDataset(Resource):
     def post(self):
         dataset_name = ns_encoder.payload.get("dataset_name")
         
-        enc = DenseEncoder()
+        enc = XlmRobertaDenseEncoder()
         p = enc.xlm_roberta_dataset_encoder(dataset_name)
         
         if p == HTTPStatus.NOT_FOUND:
