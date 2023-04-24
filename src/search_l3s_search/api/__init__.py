@@ -29,7 +29,7 @@ api.add_namespace(ns_searcher, path="/searcher")
 from search_l3s_search.api.reranker.endpoints import ns_reranker
 api.add_namespace(ns_reranker, path="/reranker")
 
-from search_l3s_search.api.dataset_generator.endpoints import ns_dataset_generator
+from search_l3s_search.api.dataset_processor.endpoints import ns_dataset_generator
 api.add_namespace(ns_dataset_generator, path="/dataset-generator")
 
 from search_l3s_search.api.encoder.endpoints import ns_encoder
