@@ -76,7 +76,8 @@ class HNSWIndexer(Resource):
         idxer = Indexer()
         idxer.hnsw_indexer(encode_cat, model_name, dataset_name)
         return {"message": "success"}, HTTPStatus.CREATED
-    
+
+
 @ns_indexer.route("/dense-indexer/pq", endpoint="dense_pq_indexer")
 class PQIndexer(Resource):
     @ns_indexer.expect(dense_indexer_input_model)
@@ -89,3 +90,18 @@ class PQIndexer(Resource):
         idxer = Indexer()
         idxer.pq_indexer(encode_cat, model_name, dataset_name)
         return {"message": "success"}, HTTPStatus.CREATED
+    
+
+@ns_indexer.route("/dense-indexer/flat", endpoint="dense_flat_indexer")
+class PQIndexer(Resource):
+    @ns_indexer.expect(dense_indexer_input_model)
+    def post(self):
+        request_data = ns_indexer.payload
+        encode_cat = request_data.get("encode_cat")
+        model_name = request_data.get("model_name")
+        dataset_name = request_data.get("dataset_name")
+        idxer = Indexer()
+        idxer.flat_indexer(encode_cat, model_name, dataset_name)
+        return {"message": "success"}, HTTPStatus.CREATED
+
+

@@ -19,6 +19,7 @@ class SparseEncoder(object):
 		pass
 
 
+
 class DenseEncoer(object):
 	def __init__(self) -> None:
 		self.tokenizer = None
@@ -31,15 +32,12 @@ class DenseEncoer(object):
 
 
 	def query_encoder(self, input_text):
-		tokens = self.tokenizer.encode(input_text,
-										add_special_tokens=True,
-										max_length=512,
-										truncation=True
-								)
+		# tokens = self.tokenizer.encode(input_text, add_special_tokens=True, max_length=512, truncation=True)
+		tokens = self.tokenizer.encode(input_text, add_special_tokens=True, max_length=512)
 		input_ids = torch.tensor([tokens])
 		with torch.no_grad():
-				outputs = self.model(input_ids)
-				dense_vector = outputs[0][0][0]  # Extract the dense vector from the model output
+			outputs = self.model(input_ids)
+			dense_vector = outputs[0][0][0]  # Extract the dense vector from the model output
 
 		# Convert the dense vector to a numpy array
 		dense_vector_list = dense_vector.numpy().tolist()
@@ -53,8 +51,8 @@ class DenseEncoer(object):
 		input_file_path = os.path.join(os.getcwd(), f"datasets/{dataset_name}/jsonl/data.jsonl")
 		output_dir_path = os.path.join(os.getcwd(), f"encodes/dense/{self.model_name}/{dataset_name}")
   
-		print(input_file_path)
-		print(output_dir_path)
+		# print(input_file_path)
+		# print(output_dir_path)
                 
 		if not os.path.exists(output_dir_path):
 				os.makedirs(output_dir_path)
@@ -71,6 +69,7 @@ class DenseEncoer(object):
 					with open(output_file_path, "a") as jsonl_file:
 						json.dump(json_obj, jsonl_file)
 						jsonl_file.write('\n')
+      
 		except FileNotFoundError:
 				return HTTPStatus.NOT_FOUND
 		return 1

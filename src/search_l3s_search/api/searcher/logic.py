@@ -1,11 +1,19 @@
 import ast, os, pathlib
 import json
-from pyserini.search.lucene import LuceneSearcher
-from pyserini.search.faiss import FaissSearcher, TctColBertQueryEncoder
+import numpy as np
 
-# from search_l3s_search.api.encoder.logic import DenseEncoder
+from pyserini.search.lucene import LuceneSearcher
+# from pyserini.search.faiss import FaissSearcher, TctColBertQueryEncoder
+import faiss
+
+
+from search_l3s_search.api.encoder.logic import BertGermanUncasedDenseEncoder
 
 class Searcher(object):
+    language_models = {
+        "bert_german_uncased": "dbmdz/bert-base-german-cased"
+    }
+    
     def __init__(self, base_path_index):
         self.base_indexes_path = base_path_index
     
@@ -27,42 +35,42 @@ class Searcher(object):
         pass
     
     
-    def dense_retrieval(self, query, index_method, dataset_name):
-        # encoder = DenseEncoder()
-        # encoder = TctColBertQueryEncoder('castorini/tct_colbert-msmarco')
-        dataset_file_path = os.path.join(os.getenv("BASE_DATASETS_PATH"), f"{dataset_name}/jsonl/data.jsonl")
+    def dense_retrieval(self, query, language_model, index_method, dataset_name, num_results):
         
-        prebuilt_index_path = os.path.join(self.base_indexes_path, f"dense/{index_method}/{dataset_name}")
-        print(prebuilt_index_path)
-        search_engine = FaissSearcher(
-            prebuilt_index_path,
-            "xlm-roberta-base"
-        )
+        dataset_file_path = os.path.join(os.getenv("BASE_DATASETS_PATH"), f"{dataset_name}/json/data.json")
+        prebuilt_index_path = os.path.join(os.getenv("BASE_INDEXES_PATH"), f"dense/{language_model}/{index_method}/{dataset_name}")
         
-        print(search_engine)
+        # load index
+        if not os.path.exists(prebuilt_index_path):
+            raise ValueError
         
-        hits = search_engine.search(query)
-        results=[]
+        index = faiss.read_index(os.path.join(prebuilt_index_path, "index.faiss"))
+        if language_model == "bert_german_uncased":
+            encoder = BertGermanUncasedDenseEncoder()
+        else:
+            raise ValueError("search with the given language model is not implemented") 
+
+        query_enc = encoder.query_encoder(query)
         
-        # if hits:
-        #     for i in range(0, len(hits)):
-        #         temp = ast.literal_eval(hits[i].raw)
-        #         temp['score'] = f'{hits[i].score:.4f}'
-        #         results.append(temp)
+        xq = np.float32(np.array([query_enc]))
+
+        # transform distances and indexes to list
+        D, I = index.search(xq, num_results)
+        distance = [round(n, 2) for n in D[0].tolist()]
+        indexes = I[0].tolist()
         
-        for i in range(0, 10):
-            docid = hits[i].docid
-            with open(dataset_file_path, "r") as dataset:
-                for line in dataset:
-                    json_obj = json.loads(line)
-                    if int(docid) == json_obj["id"]:
-                        temp = dict()
-                        temp["@id"] = json_obj["@id"]
-                        temp["contents"] = json_obj["contents"]
-                        temp["score"] = f"{hits[i].score:.5f}"
-                        results.append(temp)
-            
-            # print(f'{i+1:2} {hits[i].docid:7} {hits[i].score:.5f}')
-            
+        
+        with open(dataset_file_path, "r") as f:
+            data = json.load(f)
+
+        with open(f"{prebuilt_index_path}/docid", "r") as f:
+            docid = f.read()
+        
+        results = [data[i] for i in indexes]
+        
+        # add distance to results
+        for i in range(int(num_results)):
+            results[i]["distance"] = distance[i]
+        
         return results
     

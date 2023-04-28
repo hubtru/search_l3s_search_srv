@@ -73,7 +73,7 @@ class DenseRetrieval(Resource):
     @ns_searcher.response(int(HTTPStatus.INTERNAL_SERVER_ERROR), "Internal server error.")
     def post(self):
         request_data = request.json
-        
+        language_model = request_data.get("language_model")
         index_method = request_data.get("index_method")
         dataset_name = request_data.get("dataset_name")
         query = request_data.get("query")
@@ -82,8 +82,31 @@ class DenseRetrieval(Resource):
         searcher = Searcher(os.getenv("BASE_INDEXES_PATH"))
         results = searcher.dense_retrieval(
             query=query,
+            language_model=language_model,
             dataset_name=dataset_name,
-            index_method=index_method
+            index_method=index_method,
+            num_results=nr_result
         )
         
         return results, HTTPStatus.OK
+    
+
+@ns_searcher.route("/hybrid-retrieval", endpoint="hybrid_retrieval")
+class DenseRetrieval(Resource):
+    @ns_searcher.expect(input_dense_search_model)
+    @ns_searcher.response(int(HTTPStatus.CREATED), "New user was successfully created.")
+    @ns_searcher.response(int(HTTPStatus.CONFLICT), "Email address is already registered.")
+    @ns_searcher.response(int(HTTPStatus.BAD_REQUEST), "Validation error.")
+    @ns_searcher.response(int(HTTPStatus.INTERNAL_SERVER_ERROR), "Internal server error.")
+    def post(self):
+        request_data = request.json
+        language_model = request_data.get("language_model")
+        index_method = request_data.get("index_method")
+        dataset_name = request_data.get("dataset_name")
+        query = request_data.get("query")
+        nr_result = request_data.get("nr_result")
+        
+        searcher = Searcher(os.getenv("BASE_INDEXES_PATH"))
+        results = []
+        
+        return request_data, HTTPStatus.OK
