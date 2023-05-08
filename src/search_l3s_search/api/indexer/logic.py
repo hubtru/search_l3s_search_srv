@@ -119,7 +119,7 @@ class Indexer(object):
         return 1
     
     
-    def flat_indexer(self, encoding_type, model_name, dataset_name):
+    def flat_l2(self, encoding_type, model_name, dataset_name):
         
         
         input_path = os.path.join(os.getenv("BASE_ENCODES_PATH"), f"{encoding_type}/{model_name}/{dataset_name}/data_encoded.jsonl")
@@ -131,13 +131,45 @@ class Indexer(object):
         if not os.path.exists(output_path):
             os.makedirs(output_path)
             
-            
-        # cmd = f"""
-        #     python -m pyserini.index.faiss \
-        #         --input {input_path} \
-        #         --output {output_path} \
-        # """
+        # p = subprocess.call(cmd, shell=True)
+        docid = []
+        temp = []
+        # load file and fetch the encodings
+        with open(input_path) as data:
+            for line in data:
+                json_obj = json.loads(line)
+                temp.append(json_obj["vector"])
+                docid.append(json_obj["id"])
+
+        embeddings = np.float32(np.array(temp))
+        dim = embeddings.shape[1]   # dimension of input
+        index = faiss.IndexFlatL2(dim)
         
+        if index.is_trained:
+            index.add(embeddings)
+        
+        # save file as index.faiss
+        faiss.write_index(index, f"{output_path}/index.faiss")
+        
+        # save the docid
+        with open(f"{output_path}/docid", "w") as output:
+            output.write(str(docid))
+        
+        return
+    
+    
+    def flat_ip(self, encoding_type, model_name, dataset_name):
+        
+        
+        input_path = os.path.join(os.getenv("BASE_ENCODES_PATH"), f"{encoding_type}/{model_name}/{dataset_name}/data_encoded.jsonl")
+        output_path = os.path.join(os.getenv("BASE_INDEXES_PATH"), f"{encoding_type}/{model_name}/flat/{dataset_name}")
+        
+        if not os.path.exists(input_path):
+            raise FileNotFoundError
+        
+        if not os.path.exists(output_path):
+            os.makedirs(output_path)
+            
         # p = subprocess.call(cmd, shell=True)
         docid = []
         temp = []

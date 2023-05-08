@@ -45,7 +45,7 @@ class Searcher(object):
             raise ValueError
         
         index = faiss.read_index(os.path.join(prebuilt_index_path, "index.faiss"))
-        if language_model == "bert_german_uncased":
+        if language_model == "bert-german-uncased":
             encoder = BertGermanUncasedDenseEncoder()
         else:
             raise ValueError("search with the given language model is not implemented") 

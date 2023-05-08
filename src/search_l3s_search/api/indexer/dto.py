@@ -25,8 +25,9 @@ SPARSE_INDEX_model = Model("SparseIndex", {
     "corpus_name": fields.String,
 })
 
-dense_indexer_input_model = Model("HNSW_Index", {
-    "encode_cat": fields.String,
-    "model_name": fields.String,
-    "dataset_name": fields.String
+indexer_input_model = Model("IndexerInput", {
+    "encode_type": fields.String(default="e.g., dense, sparse, traditional"),
+    "model_name": fields.String(default="bert_german_uncased"),
+    "index_method": fields.String(default="e.g. flat_l2, flat_ip, flat_pq, flat_hnsw"),
+    "dataset_name": fields.String(default="e.g. mls-tasks")
 })

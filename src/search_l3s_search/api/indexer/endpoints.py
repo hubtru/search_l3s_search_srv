@@ -8,7 +8,7 @@ from .dto import (
     corpus_model,
     document_model,
     bm25_indexer_input_model,
-    dense_indexer_input_model
+    indexer_input_model
 )
 
 ns_indexer = Namespace("indexer", validate=True)
@@ -18,12 +18,12 @@ ns_indexer.models[request_mls_index_update_model.name] = request_mls_index_updat
 ns_indexer.models[corpus_model.name] = corpus_model
 ns_indexer.models[document_model.name] = document_model
 ns_indexer.models[bm25_indexer_input_model.name] = bm25_indexer_input_model
-ns_indexer.models[dense_indexer_input_model.name] = dense_indexer_input_model
+ns_indexer.models[indexer_input_model.name] = indexer_input_model
 
-@ns_indexer.route("/test", endpoint="indexer-test")
-class IndexerTest(Resource):
-    def get(self):
-        return {"message": "Test message of indexer-service"}, HTTPStatus.OK
+# @ns_indexer.route("/test", endpoint="indexer-test")
+# class IndexerTest(Resource):
+#     def get(self):
+#         return {"message": "Test message of indexer-service"}, HTTPStatus.OK
 
 
 @ns_indexer.route("/index-mls-update", endpoint="index_mls_update")
@@ -64,9 +64,9 @@ class PyseriniIndexer(Resource):
         # return reqdata, 201
 
 
-@ns_indexer.route("/dense-indexer/hnsw", endpoint="dense_hnsw_indexer")
+@ns_indexer.route("/dense/hnsw", endpoint="indexer_dense_hnsw")
 class HNSWIndexer(Resource):
-    @ns_indexer.expect(dense_indexer_input_model)
+    @ns_indexer.expect(indexer_input_model)
     def post(self):
         request_data = ns_indexer.payload
         encode_cat = request_data.get("encode_cat")
@@ -78,9 +78,9 @@ class HNSWIndexer(Resource):
         return {"message": "success"}, HTTPStatus.CREATED
 
 
-@ns_indexer.route("/dense-indexer/pq", endpoint="dense_pq_indexer")
+@ns_indexer.route("/dense/pq", endpoint="indexer_dense_pq")
 class PQIndexer(Resource):
-    @ns_indexer.expect(dense_indexer_input_model)
+    @ns_indexer.expect(indexer_input_model)
     def post(self):
         request_data = ns_indexer.payload
         encode_cat = request_data.get("encode_cat")
@@ -92,16 +92,39 @@ class PQIndexer(Resource):
         return {"message": "success"}, HTTPStatus.CREATED
     
 
-@ns_indexer.route("/dense-indexer/flat", endpoint="dense_flat_indexer")
-class PQIndexer(Resource):
-    @ns_indexer.expect(dense_indexer_input_model)
+@ns_indexer.route("/dense/flat-l2", endpoint="indexer_dense_flatl2")
+class FlatL2Indexer(Resource):
+    @ns_indexer.expect(indexer_input_model)
     def post(self):
         request_data = ns_indexer.payload
-        encode_cat = request_data.get("encode_cat")
+        encode_type = request_data.get("encode_cat")
         model_name = request_data.get("model_name")
+        index_method = request_data.get("index_method")
         dataset_name = request_data.get("dataset_name")
+        
+        if index_method != "flat-l2":
+            raise ValueError("Wrong index method")
+        
         idxer = Indexer()
-        idxer.flat_indexer(encode_cat, model_name, dataset_name)
+        idxer.flat_l2(encode_type, model_name, index_method, dataset_name)
+        return {"message": "success"}, HTTPStatus.CREATED
+    
+
+@ns_indexer.route("/dense/flat-ip", endpoint="indexer_dense_flatip")
+class FlatL2Indexer(Resource):
+    @ns_indexer.expect(indexer_input_model)
+    def post(self):
+        request_data = ns_indexer.payload
+        encode_type = request_data.get("encode_cat")
+        model_name = request_data.get("model_name")
+        index_method = request_data.get("index_method")
+        dataset_name = request_data.get("dataset_name")
+        
+        if index_method != "flat-l2":
+            raise ValueError("Wrong index method")
+        
+        idxer = Indexer()
+        idxer.flat_ip(encode_type, model_name, index_method, dataset_name)
         return {"message": "success"}, HTTPStatus.CREATED
 
 

@@ -12,10 +12,10 @@ ns_searcher = Namespace("searcher", validate=True)
 ns_searcher.models[query_model.name] = query_model
 ns_searcher.models[input_dense_search_model.name] = input_dense_search_model
 
-@ns_searcher.route("/test", endpoint="searcher-test")
-class SearcherTest(Resource):
-    def get(self):
-        return {"message": "Test message of sercher-service"}, HTTPStatus.OK
+# @ns_searcher.route("/test", endpoint="searcher-test")
+# class SearcherTest(Resource):
+#     def get(self):
+#         return {"message": "Test message of sercher-service"}, HTTPStatus.OK
 
 
 @ns_searcher.route("/traditional-retrieval", endpoint="traditional_retrieval")
