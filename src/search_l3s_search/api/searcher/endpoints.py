@@ -54,7 +54,7 @@ class SimpleSearch(Resource):
         return results
 
 
-@ns_searcher.route("/sparse-retrieval", endpoint="sparse_retrieval")
+# @ns_searcher.route("/sparse-retrieval", endpoint="sparse_retrieval")
 class SparseRetrieval(Resource):
     @ns_searcher.response(int(HTTPStatus.CREATED), "New user was successfully created.")
     @ns_searcher.response(int(HTTPStatus.CONFLICT), "Email address is already registered.")
@@ -72,6 +72,7 @@ class DenseRetrieval(Resource):
     @ns_searcher.response(int(HTTPStatus.BAD_REQUEST), "Validation error.")
     @ns_searcher.response(int(HTTPStatus.INTERNAL_SERVER_ERROR), "Internal server error.")
     def post(self):
+        """Semantic Search using dense retrieval"""
         request_data = request.json
         language_model = request_data.get("language_model")
         index_method = request_data.get("index_method")
@@ -91,7 +92,7 @@ class DenseRetrieval(Resource):
         return results, HTTPStatus.OK
     
 
-@ns_searcher.route("/hybrid-retrieval", endpoint="hybrid_retrieval")
+# @ns_searcher.route("/hybrid-retrieval", endpoint="hybrid_retrieval")
 class DenseRetrieval(Resource):
     @ns_searcher.expect(input_dense_search_model)
     @ns_searcher.response(int(HTTPStatus.CREATED), "New user was successfully created.")

@@ -92,39 +92,24 @@ class PQIndexer(Resource):
         return {"message": "success"}, HTTPStatus.CREATED
     
 
-@ns_indexer.route("/dense/flat-l2", endpoint="indexer_dense_flatl2")
+@ns_indexer.route("/dense/flat", endpoint="indexer_dense_flatl2")
 class FlatL2Indexer(Resource):
+    
     @ns_indexer.expect(indexer_input_model)
     def post(self):
+        """service for flat indexing"""
         request_data = ns_indexer.payload
-        encode_type = request_data.get("encode_cat")
+        encode_type = request_data.get("encode_type")
         model_name = request_data.get("model_name")
         index_method = request_data.get("index_method")
         dataset_name = request_data.get("dataset_name")
         
-        if index_method != "flat-l2":
+        if index_method not in ["flat-l2", "flat-ip"]:
             raise ValueError("Wrong index method")
         
         idxer = Indexer()
-        idxer.flat_l2(encode_type, model_name, index_method, dataset_name)
+        idxer.flat(encode_type, model_name, index_method, dataset_name)
         return {"message": "success"}, HTTPStatus.CREATED
     
-
-@ns_indexer.route("/dense/flat-ip", endpoint="indexer_dense_flatip")
-class FlatL2Indexer(Resource):
-    @ns_indexer.expect(indexer_input_model)
-    def post(self):
-        request_data = ns_indexer.payload
-        encode_type = request_data.get("encode_cat")
-        model_name = request_data.get("model_name")
-        index_method = request_data.get("index_method")
-        dataset_name = request_data.get("dataset_name")
-        
-        if index_method != "flat-l2":
-            raise ValueError("Wrong index method")
-        
-        idxer = Indexer()
-        idxer.flat_ip(encode_type, model_name, index_method, dataset_name)
-        return {"message": "success"}, HTTPStatus.CREATED
 
 

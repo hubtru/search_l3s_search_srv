@@ -2,7 +2,7 @@ from http import HTTPStatus
 import os
 from flask_restx import Namespace, Resource
 
-from .logic import XlmRobertaDenseEncoder
+from .logic import XlmRobertaDenseEncoder, BertGermanCasedDenseEncoder
 from .dto import (
     dense_encoder_model,
     input_encode_query_model,
@@ -29,7 +29,7 @@ class SparseEncodeGenerator(Resource):
         return {"message": "Success: Sparse Encoder"}
 
 
-@ns_encoder.route("/dense-encoder/xlm-roberta-base/query", endpoint="dense_encoder_xml_roberta_query")
+@ns_encoder.route("/dense-encoder/query", endpoint="dense_encoder_xml_roberta_query")
 class DenseEncodeQuery(Resource):
     @ns_encoder.expect(input_encode_query_model)
     def post(self):
@@ -42,15 +42,23 @@ class DenseEncodeQuery(Resource):
         return {"dense encode": dense_vector_list}, HTTPStatus.CREATED
     
 
-@ns_encoder.route("/dense-encoder/xlm-roberta-base/dataset", endpoint="dense_encode_xml_roberta_dataset")
+@ns_encoder.route("/dense-encoder/dataset", endpoint="dense_encode_xml_roberta_dataset")
 class DenseEncodeDataset(Resource):
     @ns_encoder.expect(input_encode_dataset_model)
     @ns_encoder.response(int(HTTPStatus.NOT_FOUND), description="Dataset not found")
     def post(self):
+        model_name = ns_encoder.payload.get("model_name")
         dataset_name = ns_encoder.payload.get("dataset_name")
         
-        enc = XlmRobertaDenseEncoder()
-        p = enc.xlm_roberta_dataset_encoder(dataset_name)
+        if model_name == "german-bert-uncased":
+            enc = BertGermanCasedDenseEncoder()
+            p = enc.dataset_encoder(dataset_name)
+        elif model_name == "xlm-roberta-base":
+            enc = XlmRobertaDenseEncoder()
+            p = enc.dataset_encoder(dataset_name)
+            
+            
+        
         
         if p == HTTPStatus.NOT_FOUND:
             return {"message": "file not found"}, p

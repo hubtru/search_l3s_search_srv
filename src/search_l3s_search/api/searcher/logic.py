@@ -7,11 +7,11 @@ from pyserini.search.lucene import LuceneSearcher
 import faiss
 
 
-from search_l3s_search.api.encoder.logic import BertGermanUncasedDenseEncoder
+from search_l3s_search.api.encoder.logic import BertGermanCasedDenseEncoder
 
 class Searcher(object):
     language_models = {
-        "bert_german_uncased": "dbmdz/bert-base-german-cased"
+        "bert-german-uncased": "dbmdz/bert-base-german-cased"
     }
     
     def __init__(self, base_path_index):

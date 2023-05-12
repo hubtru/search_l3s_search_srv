@@ -119,13 +119,17 @@ class Indexer(object):
         return 1
     
     
-    def flat_l2(self, encoding_type, model_name, dataset_name):
+    def flat(self, encode_type, model_name, index_method, dataset_name):
         
+        # check if index method is valid
+        if index_method not in ["flat-l2", "flat-ip"]:
+            raise ValueError("Invalid index method")
         
-        input_path = os.path.join(os.getenv("BASE_ENCODES_PATH"), f"{encoding_type}/{model_name}/{dataset_name}/data_encoded.jsonl")
-        output_path = os.path.join(os.getenv("BASE_INDEXES_PATH"), f"{encoding_type}/{model_name}/flat/{dataset_name}")
+        input_path = os.path.join(os.getenv("BASE_ENCODES_PATH"), f"{encode_type}/{model_name}/{dataset_name}/data_encoded.jsonl")
+        output_path = os.path.join(os.getenv("BASE_INDEXES_PATH"), f"{encode_type}/{model_name}/{index_method}/{dataset_name}")
         
         if not os.path.exists(input_path):
+            # print(input_path)
             raise FileNotFoundError
         
         if not os.path.exists(output_path):
@@ -143,7 +147,11 @@ class Indexer(object):
 
         embeddings = np.float32(np.array(temp))
         dim = embeddings.shape[1]   # dimension of input
-        index = faiss.IndexFlatL2(dim)
+        
+        if index_method == "flat-l2":
+            index = faiss.IndexFlatL2(dim)
+        elif index_method == "flat-ip":
+            index = faiss.IndexFlatIP(dim)
         
         if index.is_trained:
             index.add(embeddings)
@@ -158,41 +166,41 @@ class Indexer(object):
         return
     
     
-    def flat_ip(self, encoding_type, model_name, dataset_name):
+    # def flat_ip(self, encoding_type, model_name, dataset_name):
         
         
-        input_path = os.path.join(os.getenv("BASE_ENCODES_PATH"), f"{encoding_type}/{model_name}/{dataset_name}/data_encoded.jsonl")
-        output_path = os.path.join(os.getenv("BASE_INDEXES_PATH"), f"{encoding_type}/{model_name}/flat/{dataset_name}")
+    #     input_path = os.path.join(os.getenv("BASE_ENCODES_PATH"), f"{encoding_type}/{model_name}/{dataset_name}/data_encoded.jsonl")
+    #     output_path = os.path.join(os.getenv("BASE_INDEXES_PATH"), f"{encoding_type}/{model_name}/flat/{dataset_name}")
         
-        if not os.path.exists(input_path):
-            raise FileNotFoundError
+    #     if not os.path.exists(input_path):
+    #         raise FileNotFoundError
         
-        if not os.path.exists(output_path):
-            os.makedirs(output_path)
+    #     if not os.path.exists(output_path):
+    #         os.makedirs(output_path)
             
-        # p = subprocess.call(cmd, shell=True)
-        docid = []
-        temp = []
-        # load file and fetch the encodings
-        with open(input_path) as data:
-            for line in data:
-                json_obj = json.loads(line)
-                temp.append(json_obj["vector"])
-                docid.append(json_obj["id"])
+    #     # p = subprocess.call(cmd, shell=True)
+    #     docid = []
+    #     temp = []
+    #     # load file and fetch the encodings
+    #     with open(input_path) as data:
+    #         for line in data:
+    #             json_obj = json.loads(line)
+    #             temp.append(json_obj["vector"])
+    #             docid.append(json_obj["id"])
 
-        embeddings = np.float32(np.array(temp))
-        dim = embeddings.shape[1]   # dimension of input
-        index = faiss.IndexFlatL2(dim)
+    #     embeddings = np.float32(np.array(temp))
+    #     dim = embeddings.shape[1]   # dimension of input
+    #     index = faiss.IndexFlatIP(dim)
         
-        if index.is_trained:
-            index.add(embeddings)
+    #     if index.is_trained:
+    #         index.add(embeddings)
         
-        # save file as index.faiss
-        faiss.write_index(index, f"{output_path}/index.faiss")
+    #     # save file as index.faiss
+    #     faiss.write_index(index, f"{output_path}/index.faiss")
         
-        # save the docid
-        with open(f"{output_path}/docid", "w") as output:
-            output.write(str(docid))
+    #     # save the docid
+    #     with open(f"{output_path}/docid", "w") as output:
+    #         output.write(str(docid))
         
-        return
+    #     return
     

@@ -33,7 +33,7 @@ class DenseEncoer(object):
 
 	def query_encoder(self, input_text):
 		# tokens = self.tokenizer.encode(input_text, add_special_tokens=True, max_length=512, truncation=True)
-		tokens = self.tokenizer.encode(input_text, add_special_tokens=True, max_length=512)
+		tokens = self.tokenizer.encode(input_text, add_special_tokens=True, padding='max_length', max_length=512, truncation=True)
 		input_ids = torch.tensor([tokens])
 		with torch.no_grad():
 			outputs = self.model(input_ids)
@@ -48,30 +48,48 @@ class DenseEncoer(object):
 		# input_file_path = os.path.join(os.getenv("BASE_DATASETS_PATH"), f"{dataset_name}/jsonl/data.jsonl")
 		# output_dir_path = os.path.join(os.getenv("BASE_ENCODES_PATH"), f"dense/{self.model_name}/{dataset_name}")
   
-		input_file_path = os.path.join(os.getcwd(), f"datasets/{dataset_name}/jsonl/data.jsonl")
+		input_file_path = os.path.join(os.getcwd(), f"datasets/{dataset_name}/json/data.json")
 		output_dir_path = os.path.join(os.getcwd(), f"encodes/dense/{self.model_name}/{dataset_name}")
-  
-		# print(input_file_path)
-		# print(output_dir_path)
+
+		if not os.path.exists(input_file_path):
+			raise ValueError("input file does not exist")
                 
 		if not os.path.exists(output_dir_path):
 				os.makedirs(output_dir_path)
                         
 		output_file_path = os.path.join(output_dir_path, "data_encoded.jsonl")
-                                        
-		try:
-			with open(input_file_path) as input_file:
-				for line in input_file:
-					json_obj = json.loads(line)
-					json_obj["vector"] = self.query_encoder(json_obj["contents"])
-					# print(json_obj)
+
+		with open(input_file_path) as input_file:
+			data = json.load(input_file)
+		
+		contents = []
+		for d in data:
+			contents.append(d["contents"])
+
+		input_ids = self.tokenizer(contents, add_special_tokens=True, padding='max_length', max_length=512, truncation=True).get("input_ids")
+
+		for i in range(len(data)):
+			data[i]["vector"] = input_ids[0]
+   
+		print(data)
+   
+		# with open(output_file_path, "w") as jsonl_file:
+		# 	json.dump(data, jsonl_file)
+		# 	jsonl_file.write('\n')
+   
+		# try:
+		# 	with open(input_file_path) as input_file:
+		# 		for line in input_file:
+		# 			json_obj = json.loads(line)
+		# 			json_obj["vector"] = self.query_encoder(json_obj["contents"])
+		# 			# print(json_obj)
 						
-					with open(output_file_path, "a") as jsonl_file:
-						json.dump(json_obj, jsonl_file)
-						jsonl_file.write('\n')
+		# 			with open(output_file_path, "a") as jsonl_file:
+		# 				json.dump(json_obj, jsonl_file)
+		# 				jsonl_file.write('\n')
       
-		except FileNotFoundError:
-				return HTTPStatus.NOT_FOUND
+		# except FileNotFoundError:
+		# 		return HTTPStatus.NOT_FOUND
 		return 1
 
 
@@ -80,15 +98,15 @@ class GermanGPT2DenseEncoder(DenseEncoer):
         super().__init__()
         self.tokenizer = AutoTokenizer.from_pretrained("dbmdz/german-gpt2-faust")
         self.model = AutoModelWithLMHead.from_pretrained("dbmdz/german-gpt2-faust")
-        self.model_name = "german_chatgpt_2"
+        self.model_name = "german-chatgpt-2"
 
 
-class BertGermanUncasedDenseEncoder(DenseEncoer):
+class BertGermanCasedDenseEncoder(DenseEncoer):
 	def __init__(self) -> None:
 		super().__init__()
 		self.tokenizer = AutoTokenizer.from_pretrained("dbmdz/bert-base-german-cased")
 		self.model = AutoModel.from_pretrained("dbmdz/bert-base-german-cased")
-		self.model_name = "bert_german_uncased"
+		self.model_name = "bert-german-cased"
 
 
 class XlmRobertaDenseEncoder(DenseEncoer):
@@ -96,7 +114,7 @@ class XlmRobertaDenseEncoder(DenseEncoer):
 		super().__init__()
 		self.tokenizer = XLMRobertaTokenizer.from_pretrained("xlm-roberta-base")
 		self.model = XLMRobertaModel.from_pretrained("xlm-roberta-base")
-		self.model_name = "xlm_roberta_model"
+		self.model_name = "xlm-roberta-model"
                 
         
         
