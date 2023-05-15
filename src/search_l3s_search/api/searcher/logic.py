@@ -40,13 +40,20 @@ class Searcher(object):
         dataset_file_path = os.path.join(os.getenv("BASE_DATASETS_PATH"), f"{dataset_name}/json/data.json")
         prebuilt_index_path = os.path.join(os.getenv("BASE_INDEXES_PATH"), f"dense/{language_model}/{index_method}/{dataset_name}")
         
+        if language_model not in ["bert-german-cased", "xlm-roberta-base"]:
+            raise ValueError("language model not defined")
+        
+        if index_method not in ["flat-l2", "flat-ip", "hnsw", "pq"]:
+            raise ValueError("index method not defined")
+
         # load index
         if not os.path.exists(prebuilt_index_path):
-            raise ValueError
+            print(prebuilt_index_path)
+            raise ValueError("index path not exists")
         
         index = faiss.read_index(os.path.join(prebuilt_index_path, "index.faiss"))
-        if language_model == "bert-german-uncased":
-            encoder = BertGermanUncasedDenseEncoder()
+        if language_model == "bert-german-cased":
+            encoder = BertGermanCasedDenseEncoder()
         else:
             raise ValueError("search with the given language model is not implemented") 
 

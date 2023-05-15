@@ -66,16 +66,42 @@ class DenseEncoer(object):
 		for d in data:
 			contents.append(d["contents"])
 
-		input_ids = self.tokenizer(contents, add_special_tokens=True, padding='max_length', max_length=512, truncation=True).get("input_ids")
+		tokens = self.tokenizer(
+      						contents,
+                            add_special_tokens=True,
+                            padding='max_length',
+                            max_length=512,
+                            truncation=True,
+                            return_tensors='pt'
+                        )
+		print(tokens.keys())
+		outputs = self.model(**tokens)
+		embeddings = outputs.last_hidden_state
+		print(embeddings.shape)
+		masks = tokens['attention_mask'].unsqueeze(-1).expand(embeddings.size()).float()
+		print(masks)
+		print(masks.shape)
+  
+		masked_embeddings = embeddings * masks
+		print(masked_embeddings.shape)
+  
+		summed = torch.sum(masked_embeddings, 1)
 
+		counted = torch.clamp(masks.sum(1), min=1e-9)
+		print(counted)
+  
+		mean_pooled = summed / counted
+		print(mean_pooled)
+		print(mean_pooled.shape)
+  
 		for i in range(len(data)):
-			data[i]["vector"] = input_ids[0]
+			data[i]["vector"] = mean_pooled[i]
    
-		print(data)
-   
-		# with open(output_file_path, "w") as jsonl_file:
-		# 	json.dump(data, jsonl_file)
-		# 	jsonl_file.write('\n')
+		# print(data)
+
+		with open(output_file_path, "w") as jsonl_file:
+			json.dump(data, jsonl_file)
+			jsonl_file.write('\n')
    
 		# try:
 		# 	with open(input_file_path) as input_file:
@@ -98,7 +124,7 @@ class GermanGPT2DenseEncoder(DenseEncoer):
         super().__init__()
         self.tokenizer = AutoTokenizer.from_pretrained("dbmdz/german-gpt2-faust")
         self.model = AutoModelWithLMHead.from_pretrained("dbmdz/german-gpt2-faust")
-        self.model_name = "german-chatgpt-2"
+        self.model_name = "german-gpt2-faust"
 
 
 class BertGermanCasedDenseEncoder(DenseEncoer):

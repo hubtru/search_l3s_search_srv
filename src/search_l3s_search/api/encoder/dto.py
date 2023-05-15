@@ -6,11 +6,11 @@ dense_encoder_model = Model("Dense_Encoder", {
 })
 
 input_encode_query_model = Model("Query_Encode", {
-    "model_name": fields.String(required=True, default="german-bert-uncased"),
+    "model_name": fields.String(required=True, default="bert-base-german-cased"),
     "text": fields.String(required=True),
 })
 
 input_encode_dataset_model = Model("Dataset_Encode", {
-    "model_name": fields.String(required=True, default="german-bert-uncased"),
+    "model_name": fields.String(required=True, default="bert-base-german-cased"),
     "dataset_name": fields.String(required=True),
 })

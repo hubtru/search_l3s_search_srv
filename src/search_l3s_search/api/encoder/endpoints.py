@@ -42,7 +42,7 @@ class DenseEncodeQuery(Resource):
         return {"dense encode": dense_vector_list}, HTTPStatus.CREATED
     
 
-@ns_encoder.route("/dense-encoder/dataset", endpoint="dense_encode_xml_roberta_dataset")
+@ns_encoder.route("/dense-encoder/dataset", endpoint="dense_encode_dataset")
 class DenseEncodeDataset(Resource):
     @ns_encoder.expect(input_encode_dataset_model)
     @ns_encoder.response(int(HTTPStatus.NOT_FOUND), description="Dataset not found")
@@ -50,7 +50,7 @@ class DenseEncodeDataset(Resource):
         model_name = ns_encoder.payload.get("model_name")
         dataset_name = ns_encoder.payload.get("dataset_name")
         
-        if model_name == "german-bert-uncased":
+        if model_name == "bert-base-german-cased":
             enc = BertGermanCasedDenseEncoder()
             p = enc.dataset_encoder(dataset_name)
         elif model_name == "xlm-roberta-base":
@@ -58,8 +58,6 @@ class DenseEncodeDataset(Resource):
             p = enc.dataset_encoder(dataset_name)
             
             
-        
-        
         if p == HTTPStatus.NOT_FOUND:
             return {"message": "file not found"}, p
         
