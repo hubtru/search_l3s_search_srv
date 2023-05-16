@@ -29,11 +29,17 @@ class DenseEncoer(object):
 	def print_model_name(self):
 		print(self.model_name)
 		return
-
+		
 
 	def query_encoder(self, input_text):
 		# tokens = self.tokenizer.encode(input_text, add_special_tokens=True, max_length=512, truncation=True)
-		tokens = self.tokenizer.encode(input_text, add_special_tokens=True, padding='max_length', max_length=512, truncation=True)
+		tokens = self.tokenizer.encode(input_text,
+                                 add_special_tokens=True,
+                                 padding='max_length',
+                                 max_length=512,
+                                 truncation=True,
+                                 return_tensors='pt'
+                                )
 		input_ids = torch.tensor([tokens])
 		with torch.no_grad():
 			outputs = self.model(input_ids)
@@ -75,33 +81,51 @@ class DenseEncoer(object):
                             return_tensors='pt'
                         )
 		print(tokens.keys())
-		outputs = self.model(**tokens)
-		embeddings = outputs.last_hidden_state
-		print(embeddings.shape)
-		masks = tokens['attention_mask'].unsqueeze(-1).expand(embeddings.size()).float()
-		print(masks)
-		print(masks.shape)
-  
-		masked_embeddings = embeddings * masks
-		print(masked_embeddings.shape)
-  
-		summed = torch.sum(masked_embeddings, 1)
+		print(tokens.input_ids.shape)
 
-		counted = torch.clamp(masks.sum(1), min=1e-9)
-		print(counted)
+		for i in range(len(tokens.input_ids)):
+			print(i)
+			with torch.no_grad():
+				input_ids = tokens.input_ids[i].unsqueeze(-1)
+				outputs = self.model(input_ids)
+   
+		print(outputs.shape)
   
-		mean_pooled = summed / counted
-		print(mean_pooled)
-		print(mean_pooled.shape)
+		# outputs = self.model(**tokens)
+		# embeddings = outputs.last_hidden_state
   
-		for i in range(len(data)):
-			data[i]["vector"] = mean_pooled[i]
+		# print(f"embeddings: {embeddings.shape}")
+
+		# masks = tokens['attention_mask'].unsqueeze(-1).expand(embeddings.size()).float()
+		# # print(masks)
+		# print(f"mask: {masks.shape}")
+  
+		# masked_embeddings = embeddings * masks
+		# print(f"masked embeddings: {masked_embeddings.shape}")
+  
+		# summed = torch.sum(masked_embeddings, 1)
+		# print(f"summed: {summed.shape}")
+
+		# counted = torch.clamp(masks.sum(1), min=1e-9)
+		# print(f"counted: {counted.shape}")
+
+		# mean_pooled = summed / counted
+   
+		# # print(mean_pooled)
+		# print(f"mean_pooled: {mean_pooled.shape}")
+
+
+
+		# print(mean_pooled[0].tolist())
+
+		# for i in range(len(data)):
+		# 	data[i]["vector"] = mean_pooled[i].tolist()
    
 		# print(data)
 
-		with open(output_file_path, "w") as jsonl_file:
-			json.dump(data, jsonl_file)
-			jsonl_file.write('\n')
+		# with open(output_file_path, "w") as jsonl_file:
+		# 	json.dump(data, jsonl_file)
+		# 	jsonl_file.write('\n')
    
 		# try:
 		# 	with open(input_file_path) as input_file:
@@ -118,6 +142,9 @@ class DenseEncoer(object):
 		# 		return HTTPStatus.NOT_FOUND
 		return 1
 
+
+	def __sbert_embedding():
+		pass
 
 class GermanGPT2DenseEncoder(DenseEncoer):
     def __init__(self) -> None:
@@ -186,3 +213,6 @@ class XlmRobertaDenseEncoder(DenseEncoer):
                         
         #         return 1
 
+
+
+    

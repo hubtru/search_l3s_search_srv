@@ -12,5 +12,5 @@ input_encode_query_model = Model("Query_Encode", {
 
 input_encode_dataset_model = Model("Dataset_Encode", {
     "model_name": fields.String(required=True, default="bert-base-german-cased"),
-    "dataset_name": fields.String(required=True),
+    "dataset_name": fields.String(required=True, default="mls-tasks"),
 })
