@@ -36,8 +36,8 @@ class DenseEncodeQuery(Resource):
         
         input_data = ns_encoder.payload.get("text")
         if input_data:
-            enc = XlmRobertaDenseEncoder()
-            dense_vector_list = enc.xlm_roberta_query_encoder(input_data)
+            enc = BertGermanCasedDenseEncoder()
+            dense_vector_list = enc.query_encoder(input_data)
         
         return {"dense encode": dense_vector_list}, HTTPStatus.CREATED
     

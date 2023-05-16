@@ -38,9 +38,10 @@ class DenseEncoer(object):
                                  padding='max_length',
                                  max_length=512,
                                  truncation=True,
-                                 return_tensors='pt'
                                 )
+		print(tokens)
 		input_ids = torch.tensor([tokens])
+		print(input_ids)
 		with torch.no_grad():
 			outputs = self.model(input_ids)
 			dense_vector = outputs[0][0][0]  # Extract the dense vector from the model output
@@ -88,10 +89,12 @@ class DenseEncoer(object):
 			with torch.no_grad():
 				input_ids = tokens.input_ids[i].unsqueeze(-1)
 				outputs = self.model(input_ids)
+				print(outputs.last_hidden_state.shape)
    
-		print(outputs.shape)
+		# print(outputs.shape)
   
 		# outputs = self.model(**tokens)
+  
 		# embeddings = outputs.last_hidden_state
   
 		# print(f"embeddings: {embeddings.shape}")
@@ -116,7 +119,9 @@ class DenseEncoer(object):
 
 
 
-		# print(mean_pooled[0].tolist())
+		
+  		
+    	# print(mean_pooled[0].tolist())
 
 		# for i in range(len(data)):
 		# 	data[i]["vector"] = mean_pooled[i].tolist()
