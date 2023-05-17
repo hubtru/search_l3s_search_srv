@@ -29,20 +29,22 @@ class SparseEncodeGenerator(Resource):
         return {"message": "Success: Sparse Encoder"}
 
 
-@ns_encoder.route("/dense-encoder/query", endpoint="dense_encoder_xml_roberta_query")
+@ns_encoder.route("/dense/query", endpoint="dense_encoder_query")
 class DenseEncodeQuery(Resource):
     @ns_encoder.expect(input_encode_query_model)
     def post(self):
         
         input_data = ns_encoder.payload.get("text")
+        model_name = ns_encoder.payload.get("model_name")
         if input_data:
-            enc = BertGermanCasedDenseEncoder()
-            dense_vector_list = enc.query_encoder(input_data)
+            if model_name == "bert-base-german-cased":
+                enc = BertGermanCasedDenseEncoder()
+                dense_vector_list = enc.query_encoder(input_data)
         
         return {"dense encode": dense_vector_list}, HTTPStatus.CREATED
     
 
-@ns_encoder.route("/dense-encoder/dataset", endpoint="dense_encode_dataset")
+@ns_encoder.route("/dense/dataset", endpoint="dense_encode_dataset")
 class DenseEncodeDataset(Resource):
     @ns_encoder.expect(input_encode_dataset_model)
     @ns_encoder.response(int(HTTPStatus.NOT_FOUND), description="Dataset not found")

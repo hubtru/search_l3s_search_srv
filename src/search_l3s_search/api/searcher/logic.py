@@ -11,7 +11,7 @@ from search_l3s_search.api.encoder.logic import BertGermanCasedDenseEncoder
 
 class Searcher(object):
     language_models = {
-        "bert-german-uncased": "dbmdz/bert-base-german-cased"
+        "bert-base-german-uncased": "dbmdz/bert-base-german-cased"
     }
     
     def __init__(self, base_path_index):
@@ -40,7 +40,7 @@ class Searcher(object):
         dataset_file_path = os.path.join(os.getenv("BASE_DATASETS_PATH"), f"{dataset_name}/json/data.json")
         prebuilt_index_path = os.path.join(os.getenv("BASE_INDEXES_PATH"), f"dense/{language_model}/{index_method}/{dataset_name}")
         
-        if language_model not in ["bert-german-cased", "xlm-roberta-base"]:
+        if language_model not in ["bert-base-german-cased", "xlm-roberta-base"]:
             raise ValueError("language model not defined")
         
         if index_method not in ["flat-l2", "flat-ip", "hnsw", "pq"]:
@@ -52,7 +52,7 @@ class Searcher(object):
             raise ValueError("index path not exists")
         
         index = faiss.read_index(os.path.join(prebuilt_index_path, "index.faiss"))
-        if language_model == "bert-german-cased":
+        if language_model == "bert-base-german-cased":
             encoder = BertGermanCasedDenseEncoder()
         else:
             raise ValueError("search with the given language model is not implemented") 

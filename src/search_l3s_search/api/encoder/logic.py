@@ -29,25 +29,36 @@ class DenseEncoer(object):
 	def print_model_name(self):
 		print(self.model_name)
 		return
-		
+
 
 	def query_encoder(self, input_text):
 		# tokens = self.tokenizer.encode(input_text, add_special_tokens=True, max_length=512, truncation=True)
-		tokens = self.tokenizer.encode(input_text,
+		tokens = self.tokenizer(input_text,
                                  add_special_tokens=True,
                                  padding='max_length',
                                  max_length=512,
                                  truncation=True,
+                                 return_tensors='pt'
                                 )
-		print(tokens)
-		input_ids = torch.tensor([tokens])
-		print(input_ids)
-		with torch.no_grad():
-			outputs = self.model(input_ids)
-			dense_vector = outputs[0][0][0]  # Extract the dense vector from the model output
+		
+		input_ids = tokens.get('input_ids')
+		outputs = self.model(input_ids)
+		embeddings = outputs.last_hidden_state
+		masks = tokens.get('attention_mask').unsqueeze(-1).expand(embeddings.size()).float()
+		masked_embeddings = embeddings * masks
+		summed = torch.sum(masked_embeddings, 1)
+		counted = torch.clamp(masks.sum(1), min=1e-9)
+		mean_pooled = summed / counted
+
+		print(mean_pooled.shape)
+		# print(input_ids)
+		# with torch.no_grad():
+		# 	outputs = self.model(input_ids)
+		# 	dense_vector = outputs[0][0][0]  # Extract the dense vector from the model output
 
 		# Convert the dense vector to a numpy array
-		dense_vector_list = dense_vector.numpy().tolist()
+		dense_vector_list = mean_pooled.tolist()[0]
+		# print(len(dense_vector_list))
 		return dense_vector_list
 
         
@@ -71,25 +82,31 @@ class DenseEncoer(object):
 		
 		contents = []
 		for d in data:
-			contents.append(d["contents"])
+			# contents.append(d["contents"])
+			d["vector"] = self.query_encoder(d["contents"])
+   
+			with open(output_file_path, "a") as jsonl_file:
+				json.dump(d, jsonl_file)
+				jsonl_file.write('\n')
+  
+		# tokens = self.tokenizer(
+      	# 					contents,
+        #                     add_special_tokens=True,
+        #                     padding='max_length',
+        #                     max_length=512,
+        #                     truncation=True,
+        #                     return_tensors='pt'
+        #                 )
+  
+		# print(tokens.keys())
+		# print(tokens.input_ids.shape)
 
-		tokens = self.tokenizer(
-      						contents,
-                            add_special_tokens=True,
-                            padding='max_length',
-                            max_length=512,
-                            truncation=True,
-                            return_tensors='pt'
-                        )
-		print(tokens.keys())
-		print(tokens.input_ids.shape)
-
-		for i in range(len(tokens.input_ids)):
-			print(i)
-			with torch.no_grad():
-				input_ids = tokens.input_ids[i].unsqueeze(-1)
-				outputs = self.model(input_ids)
-				print(outputs.last_hidden_state.shape)
+		# for i in range(len(tokens.input_ids)):
+		# 	print(i)
+		# 	with torch.no_grad():
+		# 		input_ids = tokens.input_ids[i].unsqueeze(-1)
+		# 		outputs = self.model(input_ids)
+		# 		print(outputs.last_hidden_state.shape)
    
 		# print(outputs.shape)
   
@@ -164,7 +181,7 @@ class BertGermanCasedDenseEncoder(DenseEncoer):
 		super().__init__()
 		self.tokenizer = AutoTokenizer.from_pretrained("dbmdz/bert-base-german-cased")
 		self.model = AutoModel.from_pretrained("dbmdz/bert-base-german-cased")
-		self.model_name = "bert-german-cased"
+		self.model_name = "bert-base-german-cased"
 
 
 class XlmRobertaDenseEncoder(DenseEncoer):
