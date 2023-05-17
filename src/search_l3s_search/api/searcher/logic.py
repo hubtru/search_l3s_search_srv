@@ -1,5 +1,6 @@
 import ast, os, pathlib
 import json
+from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 
 from pyserini.search.lucene import LuceneSearcher
@@ -37,7 +38,7 @@ class Searcher(object):
     
     def dense_retrieval(self, query, language_model, index_method, dataset_name, num_results):
         
-        dataset_file_path = os.path.join(os.getenv("BASE_DATASETS_PATH"), f"{dataset_name}/json/data.json")
+        dataset_file_path = os.path.join(os.getenv("BASE_ENCODES_PATH"), f"dense/{language_model}/{dataset_name}/data_encoded.jsonl")
         prebuilt_index_path = os.path.join(os.getenv("BASE_INDEXES_PATH"), f"dense/{language_model}/{index_method}/{dataset_name}")
         
         if language_model not in ["bert-base-german-cased", "xlm-roberta-base"]:
@@ -75,9 +76,22 @@ class Searcher(object):
         
         results = [data[i] for i in indexes]
         
+        
         # add distance to results
         for i in range(int(num_results)):
             results[i]["distance"] = distance[i]
+            print(type(query_enc), type(data[i]["vector"]))
+            # results[i]["score"] = cosine_similarity(query_enc, data[i]["vector"])[0]
+        
+        # # convert to numpy array from torch tensor
+        # mean_pooled = mean_pooled.detach().numpy()
+
+        # scores = np.zeros(1, num_results)
+
+        # for i in range(mean_pooled.shape[0]):
+        #     scores[i, :] = cosine_similarity(mean_pooled[i], mean_pooled)[0]
+
+        # scores
         
         return results
     
