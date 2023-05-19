@@ -93,7 +93,7 @@ class DenseRetrieval(Resource):
     
 
 # @ns_searcher.route("/hybrid-retrieval", endpoint="hybrid_retrieval")
-class DenseRetrieval(Resource):
+class HybridRetrieval(Resource):
     @ns_searcher.expect(input_dense_search_model)
     @ns_searcher.response(int(HTTPStatus.CREATED), "New user was successfully created.")
     @ns_searcher.response(int(HTTPStatus.CONFLICT), "Email address is already registered.")

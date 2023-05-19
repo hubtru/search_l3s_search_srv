@@ -58,9 +58,6 @@ class Indexer(object):
         return 1
         
     
-    
-    
-    
     def hnswpq_indexer(self):
         cmd = """
             python -m pyserini.index.faiss \

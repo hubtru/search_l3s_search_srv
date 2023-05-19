@@ -8,7 +8,7 @@ from pyserini.search.lucene import LuceneSearcher
 import faiss
 
 
-from search_l3s_search.api.encoder.logic import BertGermanCasedDenseEncoder
+from search_l3s_search.api.encoder.logic import BertGermanCasedDenseEncoder, XlmRobertaDenseEncoder
 
 class Searcher(object):
     language_models = {
@@ -38,7 +38,7 @@ class Searcher(object):
     
     def dense_retrieval(self, query, language_model, index_method, dataset_name, num_results):
         
-        dataset_file_path = os.path.join(os.getenv("BASE_ENCODES_PATH"), f"dense/{language_model}/{dataset_name}/data_encoded.jsonl")
+        encodes_file_path = os.path.join(os.getenv("BASE_ENCODES_PATH"), f"dense/{language_model}/{dataset_name}/data_encoded.jsonl")
         prebuilt_index_path = os.path.join(os.getenv("BASE_INDEXES_PATH"), f"dense/{language_model}/{index_method}/{dataset_name}")
         
         if language_model not in ["bert-base-german-cased", "xlm-roberta-base"]:
@@ -55,6 +55,8 @@ class Searcher(object):
         index = faiss.read_index(os.path.join(prebuilt_index_path, "index.faiss"))
         if language_model == "bert-base-german-cased":
             encoder = BertGermanCasedDenseEncoder()
+        elif language_model == "xlm-roberta-base":
+            encoder = XlmRobertaDenseEncoder()
         else:
             raise ValueError("search with the given language model is not implemented") 
 
@@ -62,36 +64,54 @@ class Searcher(object):
         
         xq = np.float32(np.array([query_enc]))
 
-        # transform distances and indexes to list
         D, I = index.search(xq, num_results)
+        print(D)
+        print(I)
+        # transform distances and indexes to list
         distance = [round(n, 2) for n in D[0].tolist()]
         indexes = I[0].tolist()
         
-        
-        with open(dataset_file_path, "r") as f:
-            data = json.load(f)
-
+        data = []
+        with open(encodes_file_path, "r") as f:
+            data_list = list(f)
+            for d in data_list:
+                data.append(json.loads(d))
+            
         with open(f"{prebuilt_index_path}/docid", "r") as f:
             docid = f.read()
         
-        results = [data[i] for i in indexes]
-        
-        
+        results = []
+        for i in indexes:
+            results.append(data[i])
+
         # add distance to results
         for i in range(int(num_results)):
             results[i]["distance"] = distance[i]
-            print(type(query_enc), type(data[i]["vector"]))
-            # results[i]["score"] = cosine_similarity(query_enc, data[i]["vector"])[0]
+            results[i]["ranking"] = i+1
+            results[i]["jaccard"] = self.__jac(query, results[i]["contents"])
+            results[i]["cosine_similarity"] = self.__cosine_sim(query_enc, results[i]["vector"])
+            
+                    
+        # reranking the result
+        sorted_results = sorted(results, key=lambda x: x["jaccard"], reverse=True)
         
-        # # convert to numpy array from torch tensor
-        # mean_pooled = mean_pooled.detach().numpy()
-
-        # scores = np.zeros(1, num_results)
-
-        # for i in range(mean_pooled.shape[0]):
-        #     scores[i, :] = cosine_similarity(mean_pooled[i], mean_pooled)[0]
-
-        # scores
+        for item in sorted_results:
+            item.pop("vector", None)
         
-        return results
+        return sorted_results
     
+    
+    def __cosine_sim(self, query, content):
+        x = np.array(query).reshape(1, -1)
+        y = np.array(content).reshape(1, -1)
+        r = cosine_similarity(x, y)[0][0]
+        return float("{:.4f}".format(r))
+    
+    def __jac(self, query, content):
+        # if not type(x) == set or not type(y) == set:
+        #     raise ValueError("input must be set.")
+        x = set(query.split())
+        y = set(content.split())
+        n_shared = len(x.intersection(y))
+        n_total = len(x.union(y))
+        return float("{:.2f}".format(n_shared/n_total))

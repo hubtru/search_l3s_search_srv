@@ -34,7 +34,7 @@ class DenseEncoer(object):
 	def query_encoder(self, input_text):
 		# tokens = self.tokenizer.encode(input_text, add_special_tokens=True, max_length=512, truncation=True)
 		tokens = self.tokenizer(input_text,
-                                 add_special_tokens=True,
+                                #  add_special_tokens=True,
                                  padding='max_length',
                                  max_length=512,
                                  truncation=True,
@@ -49,13 +49,6 @@ class DenseEncoer(object):
 		summed = torch.sum(masked_embeddings, 1)
 		counted = torch.clamp(masks.sum(1), min=1e-9)
 		mean_pooled = summed / counted
-
-		print(mean_pooled.shape)
-		# print(input_ids)
-		# with torch.no_grad():
-		# 	outputs = self.model(input_ids)
-		# 	dense_vector = outputs[0][0][0]  # Extract the dense vector from the model output
-
 		# Convert the dense vector to a numpy array
 		dense_vector_list = mean_pooled.tolist()[0]
 		# print(len(dense_vector_list))
@@ -63,11 +56,11 @@ class DenseEncoer(object):
 
         
 	def dataset_encoder(self, dataset_name):                
-		# input_file_path = os.path.join(os.getenv("BASE_DATASETS_PATH"), f"{dataset_name}/jsonl/data.jsonl")
-		# output_dir_path = os.path.join(os.getenv("BASE_ENCODES_PATH"), f"dense/{self.model_name}/{dataset_name}")
+		input_file_path = os.path.join(os.getenv("BASE_DATASETS_PATH"), f"{dataset_name}/json/data.json")
+		output_dir_path = os.path.join(os.getenv("BASE_ENCODES_PATH"), f"dense/{self.model_name}/{dataset_name}")
   
-		input_file_path = os.path.join(os.getcwd(), f"datasets/{dataset_name}/json/data.json")
-		output_dir_path = os.path.join(os.getcwd(), f"encodes/dense/{self.model_name}/{dataset_name}")
+		# input_file_path = os.path.join(os.getcwd(), f"datasets/{dataset_name}/json/data.json")
+		# output_dir_path = os.path.join(os.getcwd(), f"encodes/dense/{self.model_name}/{dataset_name}")
 
 		if not os.path.exists(input_file_path):
 			raise ValueError("input file does not exist")
@@ -80,7 +73,8 @@ class DenseEncoer(object):
 		with open(input_file_path) as input_file:
 			data = json.load(input_file)
 		
-		contents = []
+		i = 1
+		l = len(data)
 		for d in data:
 			# contents.append(d["contents"])
 			d["vector"] = self.query_encoder(d["contents"])
@@ -88,7 +82,10 @@ class DenseEncoer(object):
 			with open(output_file_path, "a") as jsonl_file:
 				json.dump(d, jsonl_file)
 				jsonl_file.write('\n')
-  
+
+			print(f"Progress: {(i/l)*100:.2f}%")
+			i += 1
+   
 		# tokens = self.tokenizer(
       	# 					contents,
         #                     add_special_tokens=True,
@@ -134,10 +131,6 @@ class DenseEncoer(object):
 		# # print(mean_pooled)
 		# print(f"mean_pooled: {mean_pooled.shape}")
 
-
-
-		
-  		
     	# print(mean_pooled[0].tolist())
 
 		# for i in range(len(data)):
@@ -189,7 +182,7 @@ class XlmRobertaDenseEncoder(DenseEncoer):
 		super().__init__()
 		self.tokenizer = XLMRobertaTokenizer.from_pretrained("xlm-roberta-base")
 		self.model = XLMRobertaModel.from_pretrained("xlm-roberta-base")
-		self.model_name = "xlm-roberta-model"
+		self.model_name = "xlm-roberta-base"
                 
         
         
