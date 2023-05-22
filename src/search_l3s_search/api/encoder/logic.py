@@ -35,10 +35,11 @@ class DenseEncoer(object):
 		# tokens = self.tokenizer.encode(input_text, add_special_tokens=True, max_length=512, truncation=True)
 		tokens = self.tokenizer(input_text,
                                 #  add_special_tokens=True,
-                                 padding='max_length',
-                                 max_length=512,
-                                 truncation=True,
-                                 return_tensors='pt'
+                                #  padding='max_length',
+								padding=False,
+                                max_length=512,
+                                truncation=True,
+                                return_tensors='pt'
                                 )
 		
 		input_ids = tokens.get('input_ids')

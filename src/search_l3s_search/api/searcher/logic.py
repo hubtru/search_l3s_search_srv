@@ -2,7 +2,7 @@ import ast, os, pathlib
 import json
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
-
+import string
 from pyserini.search.lucene import LuceneSearcher
 # from pyserini.search.faiss import FaissSearcher, TctColBertQueryEncoder
 import faiss
@@ -110,8 +110,10 @@ class Searcher(object):
     def __jac(self, query, content):
         # if not type(x) == set or not type(y) == set:
         #     raise ValueError("input must be set.")
-        x = set(query.split())
-        y = set(content.split())
+        
+        # len(dataset.iloc[0]["task_text"].translate(str.maketrans('', '', string.punctuation)).split())
+        x = set(query.translate(str.maketrans('', '', string.punctuation)).split())
+        y = set(content.translate(str.maketrans('', '', string.punctuation)).split())
         n_shared = len(x.intersection(y))
         n_total = len(x.union(y))
         return float("{:.2f}".format(n_shared/n_total))
