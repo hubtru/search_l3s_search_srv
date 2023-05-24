@@ -69,23 +69,25 @@ class DenseEncoer(object):
 		if not os.path.exists(output_dir_path):
 				os.makedirs(output_dir_path)
                         
-		output_file_path = os.path.join(output_dir_path, "data_encoded.jsonl")
+		output_file_path = os.path.join(output_dir_path, "data_encoded.json")
 
 		with open(input_file_path) as input_file:
 			data = json.load(input_file)
 		
 		i = 1
 		l = len(data)
+		encoded_data = []
 		for d in data:
 			# contents.append(d["contents"])
 			d["vector"] = self.query_encoder(d["contents"])
-   
-			with open(output_file_path, "a") as jsonl_file:
-				json.dump(d, jsonl_file)
-				jsonl_file.write('\n')
-
+			encoded_data.append(d)
 			print(f"Progress: {(i/l)*100:.2f}%")
 			i += 1
+
+		with open(output_file_path, "a") as json_file:
+			json.dump(encoded_data, json_file)
+			json_file.write('\n')
+   
    
 		# tokens = self.tokenizer(
       	# 					contents,

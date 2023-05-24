@@ -122,7 +122,7 @@ class Indexer(object):
         if index_method not in ["flat-l2", "flat-ip"]:
             raise ValueError("Invalid index method")
         
-        input_path = os.path.join(os.getenv("BASE_ENCODES_PATH"), f"{encode_type}/{model_name}/{dataset_name}/data_encoded.jsonl")
+        input_path = os.path.join(os.getenv("BASE_ENCODES_PATH"), f"{encode_type}/{model_name}/{dataset_name}/data_encoded.json")
         output_path = os.path.join(os.getenv("BASE_INDEXES_PATH"), f"{encode_type}/{model_name}/{index_method}/{dataset_name}")
         
         if not os.path.exists(input_path):
@@ -135,12 +135,14 @@ class Indexer(object):
         # p = subprocess.call(cmd, shell=True)
         docid = []
         temp = []
+        
         # load file and fetch the encodings
-        with open(input_path) as data:
-            for line in data:
-                json_obj = json.loads(line)
-                temp.append(json_obj["vector"])
-                docid.append(json_obj["id"])
+        with open(input_path) as file:
+            data_json = json.loads(file)
+            print(len(data_json))
+            for d in data_json:
+                temp.append(d["vector"])
+                docid.append(d["id"])
 
         embeddings = np.float32(np.array(temp))
         dim = embeddings.shape[1]   # dimension of input

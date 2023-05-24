@@ -27,7 +27,7 @@ SPARSE_INDEX_model = Model("SparseIndex", {
 
 indexer_input_model = Model("IndexerInput", {
     "encode_type": fields.String(default="e.g., dense, traditional"),
-    "model_name": fields.String(default="bert-german-cased"),
+    "model_name": fields.String(default="bert-base-german-cased"),
     "index_method": fields.String(default="e.g. flat-l2, flat-ip"),
     "dataset_name": fields.String(default="e.g. mls-tasks")
 })

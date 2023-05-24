@@ -3,6 +3,7 @@ import json
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 import string
+import regex as re
 from pyserini.search.lucene import LuceneSearcher
 # from pyserini.search.faiss import FaissSearcher, TctColBertQueryEncoder
 import faiss
@@ -12,9 +13,10 @@ from search_l3s_search.api.encoder.logic import BertGermanCasedDenseEncoder, Xlm
 
 class Searcher(object):
     language_models = {
+        "bert-base-german-cased": "dbmdz/bert-base-german-cased",
         "bert-base-german-uncased": "dbmdz/bert-base-german-cased"
     }
-    
+    punctuation_marks = string.punctuation.replace("-", "")
     def __init__(self, base_path_index):
         self.base_indexes_path = base_path_index
     
@@ -37,7 +39,12 @@ class Searcher(object):
     
     
     def dense_retrieval(self, query, language_model, index_method, dataset_name, num_results):
+        # remove the punctuations from the query
         
+            
+        # query = re.sub(r"\p{P}(?<!-)", "", query)
+        query = query.translate(str.maketrans('', '', self.punctuation_marks))
+        print(query)
         encodes_file_path = os.path.join(os.getenv("BASE_ENCODES_PATH"), f"dense/{language_model}/{dataset_name}/data_encoded.jsonl")
         prebuilt_index_path = os.path.join(os.getenv("BASE_INDEXES_PATH"), f"dense/{language_model}/{index_method}/{dataset_name}")
         
@@ -88,7 +95,7 @@ class Searcher(object):
         for i in range(int(num_results)):
             results[i]["distance"] = distance[i]
             results[i]["ranking"] = i+1
-            results[i]["jaccard"] = self.__jac(query, results[i]["contents"])
+            results[i]["jaccard"] = self.__jaccard(query, results[i]["contents"])
             results[i]["cosine_similarity"] = self.__cosine_sim(query_enc, results[i]["vector"])
             
                     
@@ -107,13 +114,17 @@ class Searcher(object):
         r = cosine_similarity(x, y)[0][0]
         return float("{:.4f}".format(r))
     
-    def __jac(self, query, content):
+    def __jaccard(self, query, content):
         # if not type(x) == set or not type(y) == set:
         #     raise ValueError("input must be set.")
         
         # len(dataset.iloc[0]["task_text"].translate(str.maketrans('', '', string.punctuation)).split())
+        query = query.lower()
+        content = content.lower()
+        
         x = set(query.translate(str.maketrans('', '', string.punctuation)).split())
         y = set(content.translate(str.maketrans('', '', string.punctuation)).split())
+
         n_shared = len(x.intersection(y))
         n_total = len(x.union(y))
         return float("{:.2f}".format(n_shared/n_total))
