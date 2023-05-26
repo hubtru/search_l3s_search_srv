@@ -131,14 +131,15 @@ class Indexer(object):
         
         if not os.path.exists(output_path):
             os.makedirs(output_path)
-            
-        # p = subprocess.call(cmd, shell=True)
+        
+        print(input_path)
+        print(output_path)
         docid = []
         temp = []
         
         # load file and fetch the encodings
         with open(input_path) as file:
-            data_json = json.loads(file)
+            data_json = json.load(file)
             print(len(data_json))
             for d in data_json:
                 temp.append(d["vector"])

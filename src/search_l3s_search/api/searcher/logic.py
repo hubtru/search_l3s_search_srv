@@ -45,7 +45,7 @@ class Searcher(object):
         # query = re.sub(r"\p{P}(?<!-)", "", query)
         query = query.translate(str.maketrans('', '', self.punctuation_marks))
         print(query)
-        encodes_file_path = os.path.join(os.getenv("BASE_ENCODES_PATH"), f"dense/{language_model}/{dataset_name}/data_encoded.jsonl")
+        encodes_file_path = os.path.join(os.getenv("BASE_ENCODES_PATH"), f"dense/{language_model}/{dataset_name}/data_encoded.json")
         prebuilt_index_path = os.path.join(os.getenv("BASE_INDEXES_PATH"), f"dense/{language_model}/{index_method}/{dataset_name}")
         
         if language_model not in ["bert-base-german-cased", "xlm-roberta-base"]:
@@ -71,30 +71,27 @@ class Searcher(object):
         
         xq = np.float32(np.array([query_enc]))
 
-        D, I = index.search(xq, num_results)
-        print(D)
-        print(I)
-        # transform distances and indexes to list
-        distance = [round(n, 2) for n in D[0].tolist()]
-        indexes = I[0].tolist()
-        
-        data = []
-        with open(encodes_file_path, "r") as f:
-            data_list = list(f)
-            for d in data_list:
-                data.append(json.loads(d))
+        # data = []
+        with open(encodes_file_path, "r") as file:
+            data = json.load(file)
             
         with open(f"{prebuilt_index_path}/docid", "r") as f:
             docid = f.read()
+            
+        D, I = index.search(xq, len(data))
+
+        # transform distances and indexes to list
+        distance = [round(n, 2) for n in D[0].tolist()]
+        indexes = I[0].tolist()
         
         results = []
         for i in indexes:
             results.append(data[i])
 
         # add distance to results
-        for i in range(int(num_results)):
+        for i in range(len(data)):
             results[i]["distance"] = distance[i]
-            results[i]["ranking"] = i+1
+            # results[i]["ranking"] = i+1
             results[i]["jaccard"] = self.__jaccard(query, results[i]["contents"])
             results[i]["cosine_similarity"] = self.__cosine_sim(query_enc, results[i]["vector"])
             
@@ -105,7 +102,7 @@ class Searcher(object):
         for item in sorted_results:
             item.pop("vector", None)
         
-        return sorted_results
+        return sorted_results[:num_results]
     
     
     def __cosine_sim(self, query, content):
@@ -127,4 +124,4 @@ class Searcher(object):
 
         n_shared = len(x.intersection(y))
         n_total = len(x.union(y))
-        return float("{:.2f}".format(n_shared/n_total))
+        return float("{:.2f}".format(n_shared/len(x)))

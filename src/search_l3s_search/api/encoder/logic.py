@@ -84,7 +84,7 @@ class DenseEncoer(object):
 			print(f"Progress: {(i/l)*100:.2f}%")
 			i += 1
 
-		with open(output_file_path, "a") as json_file:
+		with open(output_file_path, "w") as json_file:
 			json.dump(encoded_data, json_file)
 			json_file.write('\n')
    
