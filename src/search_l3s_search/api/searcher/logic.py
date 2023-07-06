@@ -17,6 +17,7 @@ class Searcher(object):
         "bert-base-german-uncased": "dbmdz/bert-base-german-cased"
     }
     punctuation_marks = string.punctuation.replace("-", "")
+    
     def __init__(self, base_path_index):
         self.base_indexes_path = base_path_index
     
