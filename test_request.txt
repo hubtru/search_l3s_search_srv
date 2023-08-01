@@ -1,0 +1,86 @@
+### indexer/dense/flat-ip
+
+{
+  "encode_type": "dense",
+  "model_name": "bert-base-german-uncased",
+  "index_method": "flat-l2",
+  "dataset_name": "mls-tasks"
+}
+
+
+[
+  {
+    "id": "/mls-api/tasks/158",
+    "contents": "Elektromotoren 1 - Versuch 4: Bürstenloser Gleichstrommotor (BLDC); Einführung; Versuchsprinzip; Aufbau; Elektrischer Anschluss; Messungen im stationären Betrieb; Messung von Kennlinien",
+    "distance": 315.48
+  },
+  {
+    "id": "/mls-api/tasks/30",
+    "contents": "Verbindungsteil_außen [1_6] - informieren; Start; informieren Funktion Verbindungsteil_außen; informieren technische Darstellung; informieren Verfahrenshinweise; informieren Sägen",
+    "distance": 317.07
+  },
+  {
+    "id": "/mls-api/tasks/231",
+    "contents": "Erstellen eines Testprogramms; Erstellen eines einfachen Testprogramms; PLC-Variablentabelle; Programmbausteine einfügen; Programmablauf",
+    "distance": 320.2
+  },
+  {
+    "id": "/mls-api/tasks/310",
+    "contents": "Grundlagen der Sensorik: RFID - Versuch 1: Lesebereich; Verwendete Materialien; Versuchsaufbau; Verbindung mit dem Reader (1); Verbindung mit dem Reader (2); Lesebereich ermitteln - 0°-Orientierung; Lesebereich ermitteln - 90°-Orientierung",
+    "distance": 321.14
+  },
+  {
+    "id": "/mls-api/tasks/154",
+    "contents": "Einführung und Grundlagen; Magnetisches Feld; Durchflutungsgesetz; Induktionsgesetz; Lorentzkraft; Aufbau einer rotierenden elektrischen Maschine; Verständnisfragen",
+    "distance": 321.82
+  },
+  {
+    "id": "/mls-api/tasks/289",
+    "contents": "Grundlagen der Sensorik: Drehgeber - Versuch 2: Seilzug-Encoder am Gabelstapler; Einführung; Versuchsbeschreibung und verwendete Materialien; Versuchsdurchführung",
+    "distance": 321.89
+  },
+  {
+    "id": "/mls-api/tasks/40",
+    "contents": "Deckplatte [2_4]; Start; informieren technische Darstellungen; informieren Verfahrenshinweise; planen Deckplatte; entscheiden Deckplatte; Arbeitsplan Deckplatte; durchführen Deckplatte; kontrollieren Deckplatte; Erfolgskontrolle Deckplatte; Lernprozess bewerten",
+    "distance": 321.97
+  },
+  {
+    "id": "/mls-api/tasks/254",
+    "contents": "Elektromotoren 1 - Versuch 1: Gleichstrom-Nebenschlussmaschine; Einführung; Versuchsprinzip; Aufbau; Elektrischer Anschluss; Messungen im stationären Betrieb; Auswertung der Ergebnisse; Messung von Kennlinien",
+    "distance": 322.03
+  },
+  {
+    "id": "/mls-api/tasks/232",
+    "contents": "Testprogramm mit Programmvariablen; Programmiervariablen festlegen (1); Programmiervariablen festlegen (2)",
+    "distance": 322.57
+  },
+  {
+    "id": "/mls-api/tasks/44",
+    "contents": "Pressensäule / BG2 Montage [2_8]; Start; informieren technische Darstellungen; informieren Montage Pressensäule (BG2); planen Montage Pressensäule (BG2); entscheiden Montage Pressensäule (BG2); Montageanleitung Pressensäule (BG2); durchführen Montage Pressensäule (GB2); kontrollieren Montage Pressensäule (BG2); Erfolgskongrolle Montage Pressensäule (BG2); Lernprozess bewerten",
+    "distance": 323.45
+  }
+]
+
+
+
+ 0.20927637815475464,
+    0.07377197593450546,
+    0.028950205072760582,
+    -0.0741225853562355,
+    -0.4180004596710205,
+    0.028706535696983337,
+    0.7010543942451477,
+    1.2861906290054321,
+    -0.02558903582394123,
+    0.4224965572357178,
+    0.5480872988700867,
+    0.1623491644859314,
+    0.8716763854026794,
+    -0.17242665588855743,
+    0.8113626837730408,
+    -0.3925255835056305,
+    0.47416576743125916,
+    -0.3702322542667389,
+    0.5010167956352234,
+    0.11319418996572495,
+    0.22636328637599945,

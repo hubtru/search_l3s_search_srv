@@ -14,8 +14,8 @@ request_mls_index_update_model = Model("MlsIndexUpdate", {
     "datasets": fields.List(fields.String),
 })
 
-BM25_INDEX_model = Model("BM25Indexer", {
-    "corpus_name": fields.String,
+bm25_indexer_input_model = Model("BM25Indexer", {
+    "dataset_name": fields.String,
     "json_collection": fields.String(default="JsonCollection"),
     "generator": fields.String(default="DefaultLuceneDocumentGenerator"),
     "threads": fields.Integer(min=1, default=1)
@@ -25,6 +25,9 @@ SPARSE_INDEX_model = Model("SparseIndex", {
     "corpus_name": fields.String,
 })
 
-DENSE_INDEX_model = Model("DenseIndex", {
-    "corpus_name": fields.String,
+indexer_input_model = Model("IndexerInput", {
+    "encode_type": fields.String(default="e.g., dense, traditional"),
+    "model_name": fields.String(default="bert-base-german-cased"),
+    "index_method": fields.String(default="e.g. flat-l2, flat-ip"),
+    "dataset_name": fields.String(default="e.g. mls-tasks")
 })

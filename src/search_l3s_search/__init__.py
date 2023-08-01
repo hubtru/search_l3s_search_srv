@@ -1,4 +1,5 @@
 """Flask app initialization via factory pattern."""
+import os
 
 from flask import Flask
 from flask_bcrypt import Bcrypt
@@ -17,7 +18,13 @@ bcrypt = Bcrypt()
 def create_app(config_name):
     app = Flask(__name__)
     app.config.from_object(get_config(config_name))
+    os.environ["BASE_PATH"] = os.getcwd()
+    
+    os.environ["BASE_DATASETS_PATH"] = os.path.join(os.getcwd(), "datasets")
+    os.environ["BASE_ENCODES_PATH"] = os.path.join(os.getcwd(), "encodes")
+    os.environ["BASE_INDEXES_PATH"] = os.path.join(os.getcwd(), "indexes")
 
+    
     # to avoid a circular import
     from search_l3s_search.api import api_bp
     
