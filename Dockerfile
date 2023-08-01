@@ -3,6 +3,9 @@ FROM python:3.11.2-slim-buster
 WORKDIR /code
 COPY . /code
 
+RUN python -m venv .venv --prompt l3s_serach_srv
+RUN source .venv/bin/activate
+ 
 RUN pip install --upgrade pip setuptools wheel
 RUN pip install -e .
 
