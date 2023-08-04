@@ -11,7 +11,7 @@ authorizations = {"Bearer": {"type": "apiKey", "in": "header", "name": "Authoriz
 api = Api(api_bp,
           version="1.0",
           title="L3S Search Service for SEARCH",
-          description="Welcome to the Swagger UI documentation site!",
+          description="Welcome to the Swagger UI documentation site test!",
           doc="/ui",
           authorizations=authorizations,
           )
