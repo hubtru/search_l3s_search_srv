@@ -33,7 +33,7 @@ INSTALL_REQUIRES = [
     "pytest-flake8==1.1.0",
     "flake8==3.9.2",
     "black",
-    "pyserini",
+    # "pyserini",
     "faiss-cpu==1.7.2",
     "torch",
 ]
