@@ -1,7 +1,5 @@
 # search_l3s_search_srv
 
-import secrets
+To install the api run:
 
-s = secrets.token_hex(16)
-
-print(s)
+>pip install -e .
