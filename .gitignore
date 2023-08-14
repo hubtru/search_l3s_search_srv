@@ -1,3 +1,6 @@
 .env
 .venv
 **/__pycache__/*
+src/search_l3s_search.egg-info/PKG-INFO
+src/search_l3s_search.egg-info/requires.txt
+src/search_l3s_search.egg-info/SOURCES.txt
