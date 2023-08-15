@@ -11,7 +11,9 @@ RUN java --version
 
 RUN apt-get -y install python3-dev
 RUN pip install --upgrade pip setuptools wheel pybind11
+RUN pip install -r requirement.txt
 RUN pip install -e .[dev]
+
 # RUN pip install --upgrade pip setuptools wheel
 # RUN python -m pip install python-dev-tools --user --upgrade
 # RUN conda install -c conda-forge hdbscan
