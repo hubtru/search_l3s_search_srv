@@ -33,3 +33,4 @@ src/search_l3s_search/api/test/dto.py
 src/search_l3s_search/api/test/endpoints.py
 src/search_l3s_search/util/__init__.py
 src/search_l3s_search/util/path.py
+src/search_l3s_search/util/preprocess.py
