@@ -16,7 +16,7 @@ RUN pip install --upgrade pip setuptools wheel pybind11
 
 # COPY requirements.txt /code
 # RUN pip install --upgrade pip
-RUN pip3 install -r requirements.txt
+RUN pip install -r requirements.txt
 
 RUN pip install -e .[dev]
 
