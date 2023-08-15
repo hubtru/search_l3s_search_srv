@@ -4,6 +4,7 @@ Flask-Cors
 Flask-Migrate
 flask-restx
 Flask-SQLAlchemy
+regex
 PyJWT
 python-dateutil
 python-dotenv
