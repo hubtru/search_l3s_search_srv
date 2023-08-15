@@ -89,7 +89,6 @@ pathspec==0.11.1
 pathy==0.10.1
 pexpect==4.8.0
 pickleshare==0.7.5
-pkg_resources
 platformdirs==3.6.0
 pluggy==1.0.0
 pprintpp==0.4.0
