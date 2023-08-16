@@ -11,13 +11,7 @@ RUN java --version
 
 RUN apt-get -y install python3-dev
 RUN pip install --upgrade pip setuptools wheel pybind11
-
-# RUN pip install -r requirement.txt
-
-# COPY requirements.txt /code
-# RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
-
 RUN pip install -e .[dev]
 
 # RUN pip install --upgrade pip setuptools wheel
