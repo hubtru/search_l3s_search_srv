@@ -19,6 +19,9 @@ RUN pip install -e .[dev]
 # RUN conda install -c conda-forge hdbscan
 # RUN pip install --no-binary :all: faiss-cpu
 # RUN pip install -e .
+RUN python initializer.py
+
+EXPOSE 5000
 
 ENV FLASK_APP=run.py
 CMD [ "flask", "run", "--host=0.0.0.0"]
