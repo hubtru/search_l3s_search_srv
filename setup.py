@@ -55,7 +55,7 @@ EXTRAS_REQUIRE = {
 }
 
 setup(
-    name="l3s_search_srv",
+    name="search_l3s_srv",
     description=DESCRIPTION,
     long_description=README,
     long_description_content_type="text/markdown",
