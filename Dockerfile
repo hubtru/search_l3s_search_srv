@@ -4,6 +4,7 @@ WORKDIR /code
 COPY . /code
 
 RUN apt-get update
+
 RUN apt-get install -y default-jre
 RUN apt-get install -y default-jdk
 RUN java --version
@@ -21,8 +22,7 @@ RUN pip install -e .[dev]
 # RUN pip install -e .
 RUN python initializer.py
 
-EXPOSE 5000
 
 ENV FLASK_APP=run.py
-CMD [ "flask", "run", "--host=0.0.0.0"]
+CMD [ "flask", "run", "--host=0.0.0.0 --port=5000"]
 

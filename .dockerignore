@@ -1,11 +1,10 @@
-dist
-**/.env
+**/.env_env
 **/__pycache__
 **/*.pyc
 **/*.pyo
 **/*.pyd
 **/.Python
-**/env
+**/.venv
 **/pip-log.txt
 **/pip-delete-this-directory.txt
 **/.tox
@@ -20,3 +19,4 @@ dist
 **/.mypy_cache
 **/.pytest_cache
 **/.hypothesis
+**/search_l3s_search.egg-info
