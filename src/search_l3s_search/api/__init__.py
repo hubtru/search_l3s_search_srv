@@ -5,15 +5,15 @@ from flask_restx import Api
 
 
 api_bp = Blueprint("api", __name__, url_prefix="/l3s-search")
-authorizations = {"Bearer": {"type": "apiKey", "in": "header", "name": "Authorization"}}
+# authorizations = {"Bearer": {"type": "apiKey", "in": "header", "name": "Authorization"}}
 
 
 api = Api(api_bp,
           version="0.0.1",
           title="L3S Search Service for SEARCH",
           description="Welcome to the Swagger UI documentation site test!",
-          doc="/ui",
-          authorizations=authorizations,
+          #   doc="/ui",
+          #   authorizations=authorizations,
           )
 
 

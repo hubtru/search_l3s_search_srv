@@ -16,5 +16,8 @@ src/search_l3s_search/api/searcher/__pycache__/logic.cpython-39.pyc
 src/search_l3s_search/api/test/__pycache__/__init__.cpython-39.pyc
 src/search_l3s_search/api/test/__pycache__/endpoints.cpython-39.pyc
 
+**/test_ipynb/*
 ./*.log
-./src/search_l3s_search.egg-info
+**/search_l3s_search.egg-info/*
+**/.python-version
+.dockercmd

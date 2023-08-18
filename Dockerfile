@@ -23,6 +23,15 @@ RUN pip install -e .[dev]
 RUN python initializer.py
 
 
+# Flask
 ENV FLASK_APP=run.py
-CMD [ "flask", "run", "--host=0.0.0.0 --port=5000"]
+ENV FLASK_DEBUG=1
+ENV FLASK_RUN_PORT=5000
+
+# DB
+ENV DB_IP=db
+ENV DB_USER=postgres
+ENV DB_PASSWORD=admin
+
+CMD [ "flask", "run", "--host=0.0.0.0"]
 
