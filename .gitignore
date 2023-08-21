@@ -4,5 +4,5 @@
 **/*.egg-info
 **/test_ipynb/*
 **/*.log
-**/.python-version
+.python-version
 .dockercmd
