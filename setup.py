@@ -41,14 +41,12 @@ INSTALL_REQUIRES = [
 EXTRAS_REQUIRE = {
     "dev": [
         "black",
-        "flake8==3.9.2",
         "pre-commit",
         "pydocstyle",
         "pytest",
         "pytest-black",
         "pytest-clarity",
         "pytest-dotenv",
-        "pytest-flake8==1.1.0",
         "pytest-flask",
         "tox",
     ]
