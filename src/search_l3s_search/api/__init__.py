@@ -20,6 +20,9 @@ api = Api(api_bp,
 from search_l3s_search.api.test.endpoints import ns_test
 api.add_namespace(ns_test, path="/search-test")
 
+from search_l3s_search.api.metadata.endpoints import ns_metadata
+api.add_namespace(ns_metadata, path="/search-metadata")
+
 from search_l3s_search.api.dataset_processor.endpoints import ns_dataset_generator
 api.add_namespace(ns_dataset_generator, path="/dataset-generator")
 

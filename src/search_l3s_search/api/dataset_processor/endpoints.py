@@ -96,7 +96,7 @@ class JsonToJsonl(Resource):
             return result.get("error"), result.get("code")
     
 
-@ns_dataset_generator.route("/get-datasets-name", endpoint="get_dataset_name")
-class GetDatasetName(Resource):
-    def get(self):
-        return {"message": "Success"}, HTTPStatus.OK
+# @ns_dataset_generator.route("/get-datasets-name", endpoint="get_dataset_name")
+# class GetDatasetName(Resource):
+#     def get(self):
+#         return {"message": "Success"}, HTTPStatus.OK
