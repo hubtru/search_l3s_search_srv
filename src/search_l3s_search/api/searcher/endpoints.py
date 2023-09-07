@@ -4,14 +4,19 @@ from flask import jsonify, request
 from flask import current_app as app
 from flask_restx import Namespace, Resource
 
-from .dto import query_model, input_dense_search_model
+from .dto import (
+    simple_search_request_model, simple_search_response_model,
+    dense_search_request_model, dense_search_response_model
+)
 from .logic import Searcher
 
 ns_searcher = Namespace("searcher", validate=True)
 
-ns_searcher.models[query_model.name] = query_model
-ns_searcher.models[input_dense_search_model.name] = input_dense_search_model
+ns_searcher.models[simple_search_request_model.name] = simple_search_request_model
+ns_searcher.models[simple_search_response_model.name] = simple_search_response_model
 
+ns_searcher.models[dense_search_request_model.name] = dense_search_request_model
+ns_searcher.models[dense_search_response_model.name] = dense_search_response_model
 # @ns_searcher.route("/test", endpoint="searcher-test")
 # class SearcherTest(Resource):
 #     def get(self):
@@ -20,7 +25,7 @@ ns_searcher.models[input_dense_search_model.name] = input_dense_search_model
 
 @ns_searcher.route("/traditional-retrieval", endpoint="traditional_retrieval")
 class SimpleSearch(Resource):
-    @ns_searcher.expect(query_model)
+    @ns_searcher.expect(simple_search_request_model)
     @ns_searcher.response(int(HTTPStatus.CREATED), "New user was successfully created.")
     @ns_searcher.response(int(HTTPStatus.CONFLICT), "Email address is already registered.")
     @ns_searcher.response(int(HTTPStatus.BAD_REQUEST), "Validation error.")
@@ -55,22 +60,23 @@ class SimpleSearch(Resource):
 
 
 # @ns_searcher.route("/sparse-retrieval", endpoint="sparse_retrieval")
-class SparseRetrieval(Resource):
-    @ns_searcher.response(int(HTTPStatus.CREATED), "New user was successfully created.")
-    @ns_searcher.response(int(HTTPStatus.CONFLICT), "Email address is already registered.")
-    @ns_searcher.response(int(HTTPStatus.BAD_REQUEST), "Validation error.")
-    @ns_searcher.response(int(HTTPStatus.INTERNAL_SERVER_ERROR), "Internal server error.")
-    def post(self):
-        return {"message": "Success: Sparse Retrieval"}
+# class SparseRetrieval(Resource):
+#     @ns_searcher.response(int(HTTPStatus.CREATED), "New user was successfully created.")
+#     @ns_searcher.response(int(HTTPStatus.CONFLICT), "Email address is already registered.")
+#     @ns_searcher.response(int(HTTPStatus.BAD_REQUEST), "Validation error.")
+#     @ns_searcher.response(int(HTTPStatus.INTERNAL_SERVER_ERROR), "Internal server error.")
+#     def post(self):
+#         return {"message": "Success: Sparse Retrieval"}
 
 
 @ns_searcher.route("/dense-retrieval", endpoint="dense_retrieval")
 class DenseRetrieval(Resource):
-    @ns_searcher.expect(input_dense_search_model)
+    @ns_searcher.expect(dense_search_request_model)
     @ns_searcher.response(int(HTTPStatus.CREATED), "New user was successfully created.")
     @ns_searcher.response(int(HTTPStatus.CONFLICT), "Email address is already registered.")
     @ns_searcher.response(int(HTTPStatus.BAD_REQUEST), "Validation error.")
     @ns_searcher.response(int(HTTPStatus.INTERNAL_SERVER_ERROR), "Internal server error.")
+    @ns_searcher.marshal_list_with(dense_search_response_model)
     def post(self):
         """Semantic Search using dense retrieval"""
         request_data = request.json
@@ -93,21 +99,21 @@ class DenseRetrieval(Resource):
     
 
 # @ns_searcher.route("/hybrid-retrieval", endpoint="hybrid_retrieval")
-class HybridRetrieval(Resource):
-    @ns_searcher.expect(input_dense_search_model)
-    @ns_searcher.response(int(HTTPStatus.CREATED), "New user was successfully created.")
-    @ns_searcher.response(int(HTTPStatus.CONFLICT), "Email address is already registered.")
-    @ns_searcher.response(int(HTTPStatus.BAD_REQUEST), "Validation error.")
-    @ns_searcher.response(int(HTTPStatus.INTERNAL_SERVER_ERROR), "Internal server error.")
-    def post(self):
-        request_data = request.json
-        language_model = request_data.get("language_model")
-        index_method = request_data.get("index_method")
-        dataset_name = request_data.get("dataset_name")
-        query = request_data.get("query")
-        nr_result = request_data.get("nr_result")
+# class HybridRetrieval(Resource):
+#     @ns_searcher.expect(input_dense_search_model)
+#     @ns_searcher.response(int(HTTPStatus.CREATED), "New user was successfully created.")
+#     @ns_searcher.response(int(HTTPStatus.CONFLICT), "Email address is already registered.")
+#     @ns_searcher.response(int(HTTPStatus.BAD_REQUEST), "Validation error.")
+#     @ns_searcher.response(int(HTTPStatus.INTERNAL_SERVER_ERROR), "Internal server error.")
+#     def post(self):
+#         request_data = request.json
+#         language_model = request_data.get("language_model")
+#         index_method = request_data.get("index_method")
+#         dataset_name = request_data.get("dataset_name")
+#         query = request_data.get("query")
+#         nr_result = request_data.get("nr_result")
         
-        searcher = Searcher(os.getenv("BASE_INDEXES_PATH"))
-        results = []
+#         searcher = Searcher(os.getenv("BASE_INDEXES_PATH"))
+#         results = []
         
-        return request_data, HTTPStatus.OK
+#         return request_data, HTTPStatus.OK

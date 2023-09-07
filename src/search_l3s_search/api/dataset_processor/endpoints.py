@@ -28,7 +28,7 @@ class MlsContentType(Resource):
 
 
 @ns_dataset_generator.route("/mls-response-dataset", endpoint="mls_response_dataset")
-class MlsResponse(Resource):
+class MlsResponseDataset(Resource):
     @ns_dataset_generator.expect(dataset_model)
     def post(self):
         request_data = ns_dataset_generator.payload
@@ -41,7 +41,7 @@ class MlsResponse(Resource):
 
 
 @ns_dataset_generator.route("/mls-response-object", endpoint="mls_response_object")
-class MlsResponse(Resource):
+class MlsResponseObject(Resource):
     @ns_dataset_generator.expect(object_model)
     def post(self):
         object_id = ns_dataset_generator.payload.get("object_id")

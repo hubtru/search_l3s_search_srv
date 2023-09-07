@@ -39,5 +39,5 @@ ENV L3S_AIMETA_PORT=9041
 ENV L3S_RECSYS_PORT=9042
 ENV L3S_SEARCH_PORT=9043
 
-CMD [ "flask", "run", "--host=0.0.0.0"]
+CMD [ "flask", "run", "--port=9043", "--host=0.0.0.0"]
 
