@@ -5,7 +5,8 @@ pipeline {
 	agent any
 	
 	environment {
-        DEMO_SERVER = 'staging.sse.uni-hildesheim.de'
+        DOCKER_TARGET = 'e-learning-by-sse/search-l3s_search-service:latest'
+		DEMO_SERVER = 'staging.sse.uni-hildesheim.de'
         DEMO_SERVER_USER = "elscha"
         
         dockerImage = ''
