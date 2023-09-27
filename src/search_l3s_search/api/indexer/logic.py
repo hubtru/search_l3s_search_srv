@@ -166,6 +166,29 @@ class Indexer(object):
         return
     
     
+    def flat_update(document, dataset_name, encode_type, model_name, index_method):
+        # add the new document to the dataset
+        
+        index = faiss.read_index()
+        return 1
+    
+    
+    def __add_new_doc(document, dataset_name):
+        json_file_path = os.path.join(os.getenv("BASE_DATASETS_PATH"), dataset_name+"/data.json")
+        try:
+            with open(json_file_path, "r") as json_file:
+                data = json.load(json_file)
+        except FileNotFoundError:
+            data = {}
+        
+        if type(document) is dict:
+            new_element = {
+                "id": document["id"],
+                "contents": document["contents"],
+                "@id": document["@id"]
+            }
+            
+        return 1
     # def flat_ip(self, encoding_type, model_name, dataset_name):
         
         

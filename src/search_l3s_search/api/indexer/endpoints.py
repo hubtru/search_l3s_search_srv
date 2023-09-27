@@ -64,7 +64,7 @@ class PyseriniIndexer(Resource):
         # return reqdata, 201
 
 
-@ns_indexer.route("/dense/hnsw", endpoint="indexer_dense_hnsw")
+# @ns_indexer.route("/dense/hnsw", endpoint="indexer_dense_hnsw")
 class HNSWIndexer(Resource):
     @ns_indexer.expect(indexer_input_model)
     def post(self):
@@ -78,7 +78,7 @@ class HNSWIndexer(Resource):
         return {"message": "success"}, HTTPStatus.CREATED
 
 
-@ns_indexer.route("/dense/pq", endpoint="indexer_dense_pq")
+# @ns_indexer.route("/dense/pq", endpoint="indexer_dense_pq")
 class PQIndexer(Resource):
     @ns_indexer.expect(indexer_input_model)
     def post(self):

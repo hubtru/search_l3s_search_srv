@@ -31,3 +31,7 @@ dense_search_response_model = Model("DenseSearchResponse", {
     "id": fields.String(),
     "similarity": fields.Float(attribute='cosine_similarity')
 })
+
+dense_search_response_list = Model("DenseSearchResponseList",{
+    "results": fields.List(fields.Nested(dense_search_response_model))
+})
