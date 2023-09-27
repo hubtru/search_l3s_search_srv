@@ -23,7 +23,7 @@ ns_searcher.models[dense_search_response_model.name] = dense_search_response_mod
 #         return {"message": "Test message of sercher-service"}, HTTPStatus.OK
 
 
-@ns_searcher.route("/traditional-retrieval", endpoint="traditional_retrieval")
+# @ns_searcher.route("/traditional-retrieval", endpoint="traditional_retrieval")
 class SimpleSearch(Resource):
     @ns_searcher.expect(simple_search_request_model)
     @ns_searcher.response(int(HTTPStatus.CREATED), "New user was successfully created.")
@@ -55,7 +55,6 @@ class SimpleSearch(Resource):
             ## filtering based on user's query history
             pass
         
-        
         return results
 
 
@@ -86,16 +85,19 @@ class DenseRetrieval(Resource):
         query = request_data.get("query")
         nr_result = request_data.get("nr_result")
         
-        searcher = Searcher(os.getenv("BASE_INDEXES_PATH"))
-        results = searcher.dense_retrieval(
-            query=query,
-            language_model=language_model,
-            dataset_name=dataset_name,
-            index_method=index_method,
-            num_results=nr_result
-        )
-        
-        return results, HTTPStatus.OK
+        try:
+            searcher = Searcher(os.getenv("BASE_INDEXES_PATH"))
+            results = searcher.dense_retrieval(
+                query=query,
+                language_model=language_model,
+                dataset_name=dataset_name,
+                index_method=index_method,
+                num_results=nr_result
+            )
+            
+            return results, HTTPStatus.CREATED
+        except ValueError as e:
+            return ("Exception when calling Api-> %s\n" % e)
     
 
 # @ns_searcher.route("/hybrid-retrieval", endpoint="hybrid_retrieval")
