@@ -12,9 +12,6 @@ ns_metadata = Namespace(name="Metadata",
 
 
 
-
-
-
 def get_subdirs(dir):
     try:
         subdirs = [d for d in os.listdir(dir) if os.path.isdir(os.path.join(dir, d))]
@@ -23,8 +20,8 @@ def get_subdirs(dir):
         return e
     
 
-from .dto import model_host
-ns_metadata.models[model_host.name] = model_host
+from .dto import dto_host
+ns_metadata.models[dto_host.name] = dto_host
 @ns_metadata.route('/host', endpoint="host")
 class Host(Resource):
     def get(self):
@@ -34,9 +31,9 @@ class Host(Resource):
 
 
 ## ------------ Datasets ------------- ##
-from .dto import model_dataset, model_dataset_list
-ns_metadata.models[model_dataset.name] = model_dataset
-ns_metadata.models[model_dataset_list.name] = model_dataset_list
+from .dto import dto_dataset, dto_dataset_list
+ns_metadata.models[dto_dataset.name] = dto_dataset
+ns_metadata.models[dto_dataset_list.name] = dto_dataset_list
 
 @ns_metadata.route("/test")
 class DatasetTest(Resource):
@@ -46,7 +43,7 @@ class DatasetTest(Resource):
 
 @ns_metadata.route("/datasets", endpoint="get_datasets")
 class GetDatasets(Resource):
-    @ns_metadata.marshal_with(model_dataset_list)
+    @ns_metadata.marshal_with(dto_dataset_list)
     def get(self):
         """Get the list of available datasets"""
         try:
@@ -68,12 +65,12 @@ class GetDatasets(Resource):
 
 
 ## ---------- Encoding Types ---------- ##
-from .dto import model_encode_type, model_encode_type_list
-ns_metadata.models[model_encode_type.name] = model_encode_type
-ns_metadata.models[model_encode_type_list.name] = model_encode_type_list
+from .dto import dto_encode_type, dto_encode_type_list
+ns_metadata.models[dto_encode_type.name] = dto_encode_type
+ns_metadata.models[dto_encode_type_list.name] = dto_encode_type_list
 @ns_metadata.route("/encoding-types", endpoint="encoding_types")
 class GetEncodingType(Resource):
-    @ns_metadata.marshal_with(model_encode_type_list)
+    @ns_metadata.marshal_with(dto_encode_type_list)
     def get(self):
         """Get the list of available encoding types"""
         encodes_dir = os.getenv("BASE_ENCODES_PATH")
@@ -92,14 +89,14 @@ class GetEncodingType(Resource):
 
 ## ------- language models ------- ##
 
-from .dto import model_language_model, model_language_model_list
+from .dto import dto_language_model, dto_language_model_list
 
-ns_metadata.models[model_language_model.name] = model_language_model
-ns_metadata.models[model_language_model_list.name] = model_language_model_list
+ns_metadata.models[dto_language_model.name] = dto_language_model
+ns_metadata.models[dto_language_model_list.name] = dto_language_model_list
 
 @ns_metadata.route("/language-models")
 class GetLanguageModels(Resource):
-    @ns_metadata.marshal_with(model_language_model_list)
+    @ns_metadata.marshal_with(dto_language_model_list)
     def get(self):
         """Get the list of available language models"""
         encodes_dense_dir = os.path.join(os.getenv("BASE_ENCODES_PATH"), 'dense')
@@ -116,13 +113,13 @@ class GetLanguageModels(Resource):
 
 
 ## --------- index methods --------- ##
-from .dto import model_index_method, model_index_method_list
-ns_metadata.models[model_index_method.name] = model_index_method
-ns_metadata.models[model_index_method_list.name] = model_index_method_list
+from .dto import dto_index_method, dto_index_method_list
+ns_metadata.models[dto_index_method.name] = dto_index_method
+ns_metadata.models[dto_index_method_list.name] = dto_index_method_list
 
 @ns_metadata.route("/index-methods", endpoint="metadata_index_methods")
 class GetIndexMethod(Resource):
-    @ns_metadata.marshal_with(model_index_method_list)
+    @ns_metadata.marshal_with(dto_index_method_list)
     def get(self):
         """Get the list of available index methods"""
         index_method_dir = os.getenv("BASE_INDEXES_PATH")

@@ -36,53 +36,53 @@ class Indexer(object):
     
     
     ## ------------- bm25 -------------- ##
-    def bm25_indexer(
-        self,
-        dataset_name,
-        json_collection="JsonCollection",
-        generator="DefaultLuceneDocumentGenerator",
-        threads=1,
-        ):
-        # cmd = f"""
-        #     python3 -m pyserini.index.lucene \
-        #     --collection JsonCollection \
-        #     --input ./datasets/{corpus_name} \
-        #     --index ./indexes/{corpus_name} \
-        #     --generator DefaultLuceneDocumentGenerator \
-        #     --threads 1 \
-        #     --storePositions --storeDocvectors --storeRaw
-        # """
-        dataset_jsonl_path = os.path.join(os.getenv("BASE_DATASETS_PATH"), f"{dataset_name}/jsonl")
-        index_path = os.path.join(os.getenv("BASE_INDEXES_PATH"), f"bm25/{dataset_name}")
+    # def bm25_indexer(
+    #     self,
+    #     dataset_name,
+    #     json_collection="JsonCollection",
+    #     generator="DefaultLuceneDocumentGenerator",
+    #     threads=1,
+    #     ):
+    #     # cmd = f"""
+    #     #     python3 -m pyserini.index.lucene \
+    #     #     --collection JsonCollection \
+    #     #     --input ./datasets/{corpus_name} \
+    #     #     --index ./indexes/{corpus_name} \
+    #     #     --generator DefaultLuceneDocumentGenerator \
+    #     #     --threads 1 \
+    #     #     --storePositions --storeDocvectors --storeRaw
+    #     # """
+    #     dataset_jsonl_path = os.path.join(os.getenv("BASE_DATASETS_PATH"), f"{dataset_name}/jsonl")
+    #     index_path = os.path.join(os.getenv("BASE_INDEXES_PATH"), f"bm25/{dataset_name}")
 
-        print(dataset_jsonl_path)
-        print(index_path)
+    #     print(dataset_jsonl_path)
+    #     print(index_path)
         
         
-        if not os.path.exists(dataset_jsonl_path): 
-            raise NotADirectoryError("The dataset does not exist.")
+    #     if not os.path.exists(dataset_jsonl_path): 
+    #         raise NotADirectoryError("The dataset does not exist.")
         
-        if not os.path.exists(index_path):
-            os.makedirs(index_path)
+    #     if not os.path.exists(index_path):
+    #         os.makedirs(index_path)
         
-        cmd = f"""
-            python3 -m pyserini.index.lucene \
-            --collection {json_collection} \
-            --input {dataset_jsonl_path} \
-            --index {index_path} \
-            --generator  {generator} \
-            --threads {threads} \
-            --storePositions \
-            --storeDocvectors \
-            --storeRaw \
-        """
+    #     cmd = f"""
+    #         python3 -m pyserini.index.lucene \
+    #         --collection {json_collection} \
+    #         --input {dataset_jsonl_path} \
+    #         --index {index_path} \
+    #         --generator  {generator} \
+    #         --threads {threads} \
+    #         --storePositions \
+    #         --storeDocvectors \
+    #         --storeRaw \
+    #     """
         
-        # dataset_path = f"./datasets/{corpus_name}"
+    #     # dataset_path = f"./datasets/{corpus_name}"
         
         
-        p1 = subprocess.call(cmd, shell=True)
+    #     p1 = subprocess.call(cmd, shell=True)
         
-        return 1
+    #     return 1
         
     
     

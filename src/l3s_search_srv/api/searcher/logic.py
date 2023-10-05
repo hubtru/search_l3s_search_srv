@@ -4,7 +4,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 import string
 import regex as re
-from pyserini.search.lucene import LuceneSearcher
+# from pyserini.search.lucene import LuceneSearcher
 # from pyserini.search.faiss import FaissSearcher, TctColBertQueryEncoder
 import faiss
 
@@ -21,18 +21,18 @@ class Searcher(object):
     def __init__(self):
         self.base_indexes_path = os.getenv("BASE_INDEXES_PATH")
     
-    def traditional_retrieval(self, query, index_name, dataset_name):
-        index_path = os.path.join(self.base_indexes_path, f"{index_name}/{dataset_name}")
-        searcher = LuceneSearcher(index_path)
-        hits = searcher.search(query)
-        results=[]
+    # def traditional_retrieval(self, query, index_name, dataset_name):
+    #     index_path = os.path.join(self.base_indexes_path, f"{index_name}/{dataset_name}")
+    #     searcher = LuceneSearcher(index_path)
+    #     hits = searcher.search(query)
+    #     results=[]
         
-        if hits:
-            for i in range(0, len(hits)):
-                temp = ast.literal_eval(hits[i].raw)
-                temp['score'] = f'{hits[i].score:.4f}'
-                results.append(temp)
-        return results
+    #     if hits:
+    #         for i in range(0, len(hits)):
+    #             temp = ast.literal_eval(hits[i].raw)
+    #             temp['score'] = f'{hits[i].score:.4f}'
+    #             results.append(temp)
+    #     return results
     
     
     def sparse_retrieval(self):

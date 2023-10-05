@@ -11,20 +11,12 @@ from .logic.preprocessor import dataset_json2jsonl
 
 ns_dataset_generator = Namespace("Dataset Processor", validate=True)
 
+from .dto import dto_parameter, dto_dataset_request, dto_mls_dataset, dto_mls_object
 
-
-
-from .dto import (
-    dataset_model,
-    parameter_model,
-    object_model,
-    input_dataset_model
-)
-
-ns_dataset_generator.models[dataset_model.name] = dataset_model
-ns_dataset_generator.models[parameter_model.name] = parameter_model
-ns_dataset_generator.models[object_model.name] = object_model
-ns_dataset_generator.models[input_dataset_model.name] = input_dataset_model
+ns_dataset_generator.models[dto_parameter.name] = dto_parameter
+ns_dataset_generator.models[dto_dataset_request.name] = dto_dataset_request
+ns_dataset_generator.models[dto_mls_dataset.name] = dto_mls_dataset
+ns_dataset_generator.models[dto_mls_object.name] = dto_mls_object
 
 @ns_dataset_generator.route("/mls-content-type", endpoint="mls_content_type")
 class MlsContentType(Resource):
@@ -38,7 +30,7 @@ class MlsContentType(Resource):
 
 @ns_dataset_generator.route("/mls-response-dataset", endpoint="mls_response_dataset")
 class MlsResponseDataset(Resource):
-    @ns_dataset_generator.expect(dataset_model)
+    @ns_dataset_generator.expect(dto_mls_dataset)
     def post(self):
         request_data = ns_dataset_generator.payload
         dataset_name = request_data.get("name")
@@ -51,7 +43,7 @@ class MlsResponseDataset(Resource):
 
 @ns_dataset_generator.route("/mls-response-object", endpoint="mls_response_object")
 class MlsResponseObject(Resource):
-    @ns_dataset_generator.expect(object_model)
+    @ns_dataset_generator.expect(dto_mls_object)
     def post(self):
         object_id = ns_dataset_generator.payload.get("object_id")
         
@@ -63,7 +55,7 @@ class MlsResponseObject(Resource):
 
 @ns_dataset_generator.route("/mls-corpus", endpoint="dataset_generator_mls")
 class GenerateMlsDataset(Resource):
-    @ns_dataset_generator.expect(dataset_model)
+    @ns_dataset_generator.expect(dto_mls_dataset)
     @ns_dataset_generator.response(int(HTTPStatus.CREATED), description="Successfully created json file")
     @ns_dataset_generator.response(int(HTTPStatus.BAD_REQUEST), description="Request error, e.g., wrong corpus name")
     # @ns_dataset_generator.marshal_list_with(document_model)
@@ -90,7 +82,7 @@ class GenerateMlsDataset(Resource):
 
 @ns_dataset_generator.route("/json-to-jsonl-converter", endpoint="json_to_jsonl_converter")
 class JsonToJsonl(Resource):
-    @ns_dataset_generator.expect(input_dataset_model)
+    @ns_dataset_generator.expect(dto_dataset_request)
     def post(self):
         dataset_name = ns_dataset_generator.payload.get("dataset_name")
 

@@ -5,15 +5,14 @@ from flask import current_app as app
 from flask_restx import Namespace, Resource
 
 from .dto import (
-    simple_search_request_model, simple_search_response_model,
-    
+    dto_simple_search_request, dto_simple_search_response
 )
 from .logic import Searcher
 
 ns_searcher = Namespace("searcher", validate=True)
 
-ns_searcher.models[simple_search_request_model.name] = simple_search_request_model
-ns_searcher.models[simple_search_response_model.name] = simple_search_response_model
+ns_searcher.models[dto_simple_search_request.name] = dto_simple_search_request
+ns_searcher.models[dto_simple_search_response.name] = dto_simple_search_response
 
 
 # @ns_searcher.route("/test", endpoint="searcher-test")
@@ -24,7 +23,7 @@ ns_searcher.models[simple_search_response_model.name] = simple_search_response_m
 
 # @ns_searcher.route("/traditional-retrieval", endpoint="traditional_retrieval")
 class SimpleSearch(Resource):
-    @ns_searcher.expect(simple_search_request_model)
+    @ns_searcher.expect(dto_simple_search_request)
     @ns_searcher.response(int(HTTPStatus.CREATED), "New user was successfully created.")
     @ns_searcher.response(int(HTTPStatus.CONFLICT), "Email address is already registered.")
     @ns_searcher.response(int(HTTPStatus.BAD_REQUEST), "Validation error.")
@@ -68,21 +67,21 @@ class SimpleSearch(Resource):
 
 ## ----------------------- Dense Retrieval ---------------------- ##
 
-from .dto import dense_search_request_model, dense_search_response_model, dense_search_response_list
-ns_searcher.models[dense_search_request_model.name] = dense_search_request_model
-ns_searcher.models[dense_search_response_model.name] = dense_search_response_model
-ns_searcher.models[dense_search_response_list.name] = dense_search_response_list    
+from .dto import dto_dense_search_request, dto_dense_search_response, dto_dense_search_response_list
+ns_searcher.models[dto_dense_search_request.name] = dto_dense_search_request
+ns_searcher.models[dto_dense_search_response.name] = dto_dense_search_response
+ns_searcher.models[dto_dense_search_response_list.name] = dto_dense_search_response_list    
 
 
 
 @ns_searcher.route("/dense-retrieval", endpoint="dense_retrieval")
 class DenseRetrieval(Resource):
-    @ns_searcher.expect(dense_search_request_model)
+    @ns_searcher.expect(dto_dense_search_request)
     @ns_searcher.response(int(HTTPStatus.CREATED), "New user was successfully created.")
     @ns_searcher.response(int(HTTPStatus.CONFLICT), "Email address is already registered.")
     @ns_searcher.response(int(HTTPStatus.BAD_REQUEST), "Validation error.")
     @ns_searcher.response(int(HTTPStatus.INTERNAL_SERVER_ERROR), "Internal server error.")
-    @ns_searcher.marshal_with(dense_search_response_model)
+    @ns_searcher.marshal_with(dto_dense_search_response_list)
     def post(self):
         """Semantic Search using dense retrieval"""
         request_data = request.json
@@ -106,8 +105,8 @@ class DenseRetrieval(Resource):
             )
             
             # print("results")
-            # response = {"results": results}
-            response = results
+            response = {"results": results}
+            # response = results
             
             return response, HTTPStatus.CREATED
         except ValueError as e:

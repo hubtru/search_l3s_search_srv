@@ -1,22 +1,22 @@
 import os, subprocess, json
-from http import HTTPStatus
+# from http import HTTPStatus
 from transformers import XLMRobertaTokenizer, XLMRobertaModel
 from transformers import AutoModel, AutoTokenizer, AutoModelWithLMHead
 import torch
 
-class SparseEncoder(object):
-	def sparse_encoder(path_json_file):
-		cmd = f"""
-		python -m pyserini.encode \
-		input   --corpus {path_json_file} \
-				--fields text \
-		output  --embeddings path/to/output/dir \
-		encoder --encoder castorini/unicoil-d2q-msmarco-passage \
-				--fields text \
-				--batch 32 \
-				--fp16 # if inference with autocast()
-		"""
-		pass
+# class SparseEncoder(object):
+# 	def sparse_encoder(path_json_file):
+# 		cmd = f"""
+# 		python -m pyserini.encode \
+# 		input   --corpus {path_json_file} \
+# 				--fields text \
+# 		output  --embeddings path/to/output/dir \
+# 		encoder --encoder castorini/unicoil-d2q-msmarco-passage \
+# 				--fields text \
+# 				--batch 32 \
+# 				--fp16 # if inference with autocast()
+# 		"""
+# 		pass
 
 
 

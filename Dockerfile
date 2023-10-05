@@ -5,9 +5,9 @@ COPY . /code
 
 RUN apt-get update
 
-RUN apt-get install -y default-jre
-RUN apt-get install -y default-jdk
-RUN java --version
+# RUN apt-get install -y default-jre
+# RUN apt-get install -y default-jdk
+# RUN java --version
 
 
 RUN apt-get -y install python3-dev
