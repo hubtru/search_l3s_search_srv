@@ -2,7 +2,7 @@ import subprocess, os
 import json
 import numpy as np
 import faiss
-
+from rank_bm25 import BM25Okapi
 
 from l3s_search_srv.util.meta import get_subdirs
 
@@ -34,6 +34,8 @@ class Indexer(object):
     def test(self):
         return {"Indexer": "Test funtion"}
     
+    
+    ## ------------- bm25 -------------- ##
     def bm25_indexer(
         self,
         dataset_name,
