@@ -5,9 +5,9 @@ COPY . /code
 
 RUN apt-get update
 
-# RUN apt-get install -y default-jre
-# RUN apt-get install -y default-jdk
-# RUN java --version
+RUN apt-get install -y default-jre
+RUN apt-get install -y default-jdk
+RUN java --version
 
 
 RUN apt-get -y install python3-dev
@@ -19,7 +19,7 @@ RUN pip install -e .[dev]
 # RUN python -m pip install python-dev-tools --user --upgrade
 # RUN conda install -c conda-forge hdbscan
 # RUN pip install --no-binary :all: faiss-cpu
-# RUN pip install -e .
+
 RUN python initializer.py
 
 
