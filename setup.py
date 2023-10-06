@@ -36,11 +36,10 @@ INSTALL_REQUIRES = [
     "rank_bm25",
     "scikit-learn",
     "transformers",
-    # "pyserini",
+    "pyserini",
     "faiss-cpu==1.7.2",
     "torch",
     "regex",
-    "sentencepiece",
 ]
 EXTRAS_REQUIRE = {
     "dev": [
