@@ -40,6 +40,7 @@ INSTALL_REQUIRES = [
     "faiss-cpu==1.7.2",
     "torch",
     "regex",
+    "sentencepiece",
 ]
 EXTRAS_REQUIRE = {
     "dev": [
