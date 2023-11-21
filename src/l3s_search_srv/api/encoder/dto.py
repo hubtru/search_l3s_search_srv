@@ -4,8 +4,18 @@ dto_dense_encoder = Model("DtoDenseEncoder", {
     "dataset_dir": fields.String,
     "dataset_json": fields.String
 })
+## ------------- Encode Updater ---------------##
+dto_encode_update_response = Model("DtoEncodeUpdateResponse", {
+    "language_model": fields.String(),
+    "datasets": fields.List(fields.String),
+    "states": fields.List(fields.Integer),
+    "message": fields.String()
+})
+dto_dense_encode_updater_response = Model("DtoDenseEncodeUpdaterResponse", {
+    "results": fields.List(fields.Nested(dto_encode_update_response))
+})
 
-## ------------- Encode Query ---------------- ##
+# ## ------------- Encode Query ---------------- ##
 dto_dense_encode_query_input = Model("DtoDenseEncodeQueryInput", {
     "model_name": fields.String(required=True, default="bert-base-german-cased"),
     "text": fields.String(required=True, default="Elektrotechnik 1 Versuch 8: Wirkleistung von Wechselspannungen; Wirkleistung der Sinuswechselspannung in der praktischen Übung"),

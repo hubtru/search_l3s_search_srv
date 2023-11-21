@@ -143,7 +143,7 @@ class Indexer(object):
         with open(f"{output_index_path}/docid", "w") as output:
             output.write(str(docid))
         
-        return
+        return 1
     
     
     def flat_update(document, dataset_name, encode_type, model_name, index_method):

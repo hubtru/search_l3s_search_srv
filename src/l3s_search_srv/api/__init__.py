@@ -9,7 +9,7 @@ api_bp = Blueprint("api", __name__, url_prefix="/l3s-search")
 
 
 api = Api(api_bp,
-          version="0.0.1",
+          version="1.0.0",
           title="L3S Search Service for SEARCH",
           description="Welcome to the Swagger UI documentation site test!",
           #   doc="/ui",
@@ -23,8 +23,8 @@ api.add_namespace(ns_test, path="/search-test")
 from l3s_search_srv.api.metadata.endpoints import ns_metadata
 api.add_namespace(ns_metadata, path="/search-metadata")
 
-from l3s_search_srv.api.dataset.endpoints import ns_dataset_generator
-api.add_namespace(ns_dataset_generator, path="/dataset-processor")
+# from l3s_search_srv.api.dataset.endpoints import ns_dataset_processor
+# api.add_namespace(ns_dataset_processor, path="/dataset-processor")
 
 from l3s_search_srv.api.encoder.endpoints import ns_encoder
 api.add_namespace(ns_encoder, path="/encoder")

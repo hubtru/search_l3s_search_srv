@@ -17,3 +17,14 @@ dto_mls_object = Model("DtoMlsObject", {
 dto_dataset_request = Model("DtoDatasetRequest", {
     "dataset_name": fields.String(required=True),
 })
+
+
+dto_dataset_modifier_request = Model("DtoDatasetModifierRequest", {
+    "dataset": fields.String(),
+    "id": fields.String()
+})
+
+dto_dataset_modifier_response = Model("DtoDatasetModifierResponse", {
+    "message": fields.String(),
+    "status": fields.String()
+})

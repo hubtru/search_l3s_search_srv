@@ -6,11 +6,9 @@ from flask_bcrypt import Bcrypt
 from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
-
 from l3s_search_srv.config import get_config
-
 import os, socket
-
+from pprint import pprint
 from l3s_search_srv.util.meta import SearchSrvMeta
 
 cors = CORS()
@@ -30,43 +28,33 @@ def create_app(config_name):
     os.environ["BASE_INDEXES_PATH"] = os.path.join(os.getcwd(), "indexes")
     
     path_checker = SearchSrvMeta().check_dirs()
-    print(path_checker)
+    pprint(path_checker)
     
     
     # os.environ["HOST_NAME"] = socket.gethostname()
     # os.environ["HOST_IP"] = socket.gethostbyname(os.getenv("HOST_NAME"))
 
-    ## ----------- init encodes ----------- ##
-    not_encoded_datasets = SearchSrvMeta().get_not_dense_encoded_dataset()
-    print(not_encoded_datasets)
+    ## ----------- update encodes ----------- ##
     
-    from l3s_search_srv.api.encoder.logic import BertGermanCasedDenseEncoder, XlmRobertaDenseEncoder
-    for i in not_encoded_datasets:
-        print(type(i))
-        language_model, datasets = list(i.items())[0]
-        print((language_model))
-        print(datasets)
-        for d in datasets:
-            if language_model == "bert-base-german-cased":
-                enc = BertGermanCasedDenseEncoder()
-                p = enc.dataset_encoder(d)
-            elif language_model == "xlm-roberta-base":
-                enc = XlmRobertaDenseEncoder()
-                p = enc.dataset_encoder(d)
+    # not_encoded_datasets = SearchSrvMeta().get_not_dense_encoded_dataset()
+    # print(not_encoded_datasets)
+    
+    # from l3s_search_srv.api.encoder.logic import BertGermanCasedDenseEncoder, XlmRobertaDenseEncoder
+    # for i in not_encoded_datasets:
+    #     print(type(i))
+    #     language_model, datasets = list(i.items())[0]
+    #     print((language_model))
+    #     print(datasets)
+    #     for d in datasets:
+    #         if language_model == "bert-base-german-cased":
+    #             enc = BertGermanCasedDenseEncoder()
+    #             p = enc.dataset_encoder(d)
+    #         elif language_model == "xlm-roberta-base":
+    #             enc = XlmRobertaDenseEncoder()
+    #             p = enc.dataset_encoder(d)
     
     ## --------------- init indexes --------------- ##
-    not_indexed_datasets = SearchSrvMeta().get_not_indexed_datasets()
-    print(not_indexed_datasets)
-    
-    from l3s_search_srv.api.indexer.logic import Indexer
-    encode_type = "dense"
-    for i in not_indexed_datasets:
-        index_method, datasets = list(i.items())[0]
-        for dataset_name in datasets:
-            for model_name in SearchSrvMeta().LANGUAGE_MODELS:
-                print(model_name)
-                idxer = Indexer()
-                idxer.flat(encode_type, model_name, index_method, dataset_name)     
+         
 
     @app.route('/')
     def index():

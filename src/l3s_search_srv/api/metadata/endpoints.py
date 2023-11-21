@@ -5,6 +5,7 @@ from flask_restx import Namespace, Resource
 from flask import request, url_for
 import os
 
+from l3s_search_srv.util.meta import SearchSrvMeta
 
 ns_metadata = Namespace(name="Metadata", 
                         validate=True, 
@@ -63,6 +64,12 @@ class GetDatasets(Resource):
             response = {"results": None}
             return response, HTTPStatus.INTERNAL_SERVER_ERROR
 
+
+@ns_metadata.route("/datasets/latest", endpoint="datasets_latest")
+class DatasetsLatest(Resource):
+    def get(self):
+        print(SearchSrvMeta().get_latest_dataset())
+        return {"result": SearchSrvMeta().get_latest_dataset()}
 
 ## ---------- Encoding Types ---------- ##
 from .dto import dto_encode_type, dto_encode_type_list

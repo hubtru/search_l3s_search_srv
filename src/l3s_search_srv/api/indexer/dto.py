@@ -39,3 +39,16 @@ dto_indexer_request = Model("DtoIndexerRequest", {
 dto_indexer_response = Model("DtoIndexerResponse", {
     "message": fields.String()
 })
+
+
+## ------------- Encode Updater ---------------##
+dto_index_updater = Model("DtoIndexUpdater", {
+    "index_method": fields.String(),
+    "language_model": fields.String(),
+    "dataset": fields.String(),
+    "state": fields.Integer(),
+})
+
+dto_index_updater_response = Model("DtoIndexUpdaterResponse", {
+    "results": fields.List(fields.Nested(dto_index_updater))
+})

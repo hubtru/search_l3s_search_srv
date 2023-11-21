@@ -94,3 +94,17 @@ class SearchSrvMeta(object):
             not_indexed_datasets.append({i: not_encoded})
         
         return not_indexed_datasets
+
+    def get_latest_dataset():
+        directory_path = os.getenv("BASE_DATASETS_PATH")
+        directories = [d for d in os.listdir(directory_path) if os.path.isdir(os.path.join(directory_path, d))]
+        if not directories:
+            print("No directories found in the specified path.")
+        else:
+            # Sort the directories by their creation timestamp (most recent first)
+            directories.sort(key=lambda d: os.path.getctime(os.path.join(directory_path, d)), reverse=True)
+
+            # Get the latest created folder
+            latest_folder = directories[0]
+            print(f"The latest created folder is: {latest_folder}")
+        return latest_folder

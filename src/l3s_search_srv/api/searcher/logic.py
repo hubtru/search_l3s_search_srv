@@ -39,7 +39,7 @@ class Searcher(object):
         pass
     
     
-    def dense_retrieval(self, query, language_model, index_method, dataset_name, num_results):
+    def dense_retrieval(self, query, language_model, index_method, dataset_name):
         # remove the punctuations from the query
         # query = re.sub(r"\p{P}(?<!-)", "", query)
         query = query.translate(str.maketrans('', '', self.punctuation_marks))
@@ -99,12 +99,13 @@ class Searcher(object):
             
                     
         # reranking the result
-        sorted_results = sorted(results, key=lambda x: x["jaccard"], reverse=True)
+        rerank_category = ["jaccard", "cosine_similarity"]
+        sorted_results = sorted(results, key=lambda x: x[rerank_category[1]], reverse=True)
         
         for item in sorted_results:
             item.pop("vector", None)
         
-        return sorted_results[:num_results]
+        return sorted_results
     
     
     def __cosine_sim(self, query, content):
@@ -127,3 +128,7 @@ class Searcher(object):
         n_shared = len(x.intersection(y))
         n_total = len(x.union(y))
         return float("{:.2f}".format(n_shared/len(x)))
+
+
+
+

@@ -1,7 +1,9 @@
 from http import HTTPStatus
 from flask import request
-from flask_restx import Namespace, Resource
-
+from flask_restx import Namespace, Resource, marshal
+from l3s_search_srv.util.meta import SearchSrvMeta
+import os
+from pprint import pprint
 from .logic import Indexer
 from .dto import (
     dto_mls_index_update_request,
@@ -10,6 +12,9 @@ from .dto import (
     dto_bm25_indexer_request,
     dto_indexer_request,
     dto_indexer_response)
+
+## Flags
+flag_show_private_endpoints = False
 
 ns_indexer = Namespace("indexer", validate=True)
 
@@ -27,7 +32,52 @@ ns_indexer.models[dto_bm25_indexer_request.name] = dto_bm25_indexer_request
 #         return {"message": "Test message of indexer-service"}, HTTPStatus.OK
 
 
-@ns_indexer.route("/index-mls-update", endpoint="index_mls_update")
+## ----------------------- Index Updater ---------------------------- ##
+from .dto import dto_index_updater, dto_index_updater_response
+ns_indexer.models[dto_index_updater.name] = dto_index_updater
+ns_indexer.models[dto_index_updater_response.name] = dto_index_updater_response
+
+@ns_indexer.route("/updater", endpoint="l3s_search_indexer_updater")
+class IndexUpdater(Resource):
+    @ns_indexer.marshal_with(dto_index_updater_response)
+    def get(self):
+        '''update the indexes'''
+        not_indexed_datasets = SearchSrvMeta().get_not_indexed_datasets()
+        
+        if not_indexed_datasets == []:
+            return {"results": []}, HTTPStatus.OK
+        
+        results = []
+
+        encode_type = "dense"
+        
+        for idx in not_indexed_datasets:
+            result = {}
+            index_method, datasets = list(idx.items())[0]
+            
+            print(f"{index_method} {datasets}")
+            
+            if datasets == []:
+                continue
+            
+            for dataset_name in datasets:
+                for model_name in SearchSrvMeta().LANGUAGE_MODELS:
+                    result["index_method"] = index_method
+                    result["dataset"] = dataset_name
+                    result["language_model"] = model_name
+                    idxer = Indexer()
+                    state = idxer.flat(encode_type, model_name, index_method, dataset_name)
+                    result["state"] = state
+                    pprint(result)
+                    results.append(result)
+        
+        
+        return {"results": results}, HTTPStatus.OK
+
+
+
+
+@ns_indexer.route("/index-mls-update", endpoint="index_mls_update", doc=flag_show_private_endpoints)
 class MlsIndexUpdate(Resource):
     @ns_indexer.expect(dto_mls_index_update_request)
     def post(self):
@@ -40,7 +90,8 @@ class MlsIndexUpdate(Resource):
         return {"message": "Success: MLS Index Update"}
 
 
-@ns_indexer.route("/traditional/bm25", endpoint="traditional_bm25_indexer")
+
+@ns_indexer.route("/traditional/bm25", endpoint="traditional_bm25_indexer", doc=flag_show_private_endpoints)
 class PyseriniIndexer(Resource):
     @ns_indexer.expect(dto_bm25_indexer_request)
     @ns_indexer.response(int(HTTPStatus.CREATED), "index file was successfully created.")
@@ -95,7 +146,7 @@ class PQIndexer(Resource):
     
 
 
-@ns_indexer.route("/dense/flat", endpoint="indexer_dense_flat")
+@ns_indexer.route("/dense/flat", endpoint="indexer_dense_flat", doc=flag_show_private_endpoints)
 class FlatL2Indexer(Resource):
     @ns_indexer.response(int(HTTPStatus.CREATED), "Index file was successfully created.")
     # @ns_indexer.response(int(HTTPStatus.CONFLICT), "Email address is already registered.")

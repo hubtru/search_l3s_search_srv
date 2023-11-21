@@ -67,7 +67,7 @@ class DenseEncoer(object):
 			raise ValueError("input file does not exist")
                 
 		if not os.path.exists(output_dir_path):
-				os.makedirs(output_dir_path)
+			os.makedirs(output_dir_path)
                         
 		output_file_path = os.path.join(output_dir_path, "data_encoded.json")
 
