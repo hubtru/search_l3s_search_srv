@@ -65,7 +65,7 @@ class GetDatasets(Resource):
             return response, HTTPStatus.INTERNAL_SERVER_ERROR
 
 
-@ns_metadata.route("/datasets/latest", endpoint="datasets_latest")
+@ns_metadata.route("/datasets/latest", endpoint="l3s_search_metadata_datasets_latest")
 class DatasetsLatest(Resource):
     def get(self):
         print(SearchSrvMeta().get_latest_dataset())
@@ -92,6 +92,19 @@ class GetEncodingType(Resource):
             
         return response, HTTPStatus.OK
 
+
+
+from .dto import dto_encoded_datasets, dto_encoded_datasets_list
+ns_metadata.models[dto_encoded_datasets.name] = dto_encoded_datasets
+ns_metadata.models[dto_encoded_datasets_list.name] = dto_encoded_datasets_list
+
+@ns_metadata.route('/encodings', endpoint='l3s_search_metadata_encodings')
+class Encodings(Resource):
+    @ns_metadata.marshal_with(dto_encoded_datasets_list)
+    def get(self):
+        '''get list of existing encodings'''
+        results = SearchSrvMeta().get_existing_dense_encodings()
+        return {"results": results}, HTTPStatus.OK
 
 
 ## ------- language models ------- ##
@@ -124,7 +137,7 @@ from .dto import dto_index_method, dto_index_method_list
 ns_metadata.models[dto_index_method.name] = dto_index_method
 ns_metadata.models[dto_index_method_list.name] = dto_index_method_list
 
-@ns_metadata.route("/index-methods", endpoint="metadata_index_methods")
+@ns_metadata.route("/index-methods", endpoint="l3s_search_metadata_index_methods")
 class GetIndexMethod(Resource):
     @ns_metadata.marshal_with(dto_index_method_list)
     def get(self):
@@ -147,3 +160,16 @@ class GetIndexMethod(Resource):
             print("Directory not found-> %s\n" % e)
             response = {"results": [{"name": None}]}
             return response, HTTPStatus.INTERNAL_SERVER_ERROR
+
+
+
+from .dto import dto_indexed_datasets, dto_indexed_datasets_list
+ns_metadata.models[dto_indexed_datasets.name] = dto_indexed_datasets
+ns_metadata.models[dto_indexed_datasets_list.name] = dto_indexed_datasets_list
+@ns_metadata.route('/indexes', endpoint='l3s_search_metadata_indexes')
+class MetadataIndexes(Resource):
+    @ns_metadata.marshal_with(dto_indexed_datasets_list)
+    def get(self):
+        '''get the list of existing indexes'''
+        results = SearchSrvMeta().get_existing_indexes()
+        return {"results": results}, HTTPStatus.OK

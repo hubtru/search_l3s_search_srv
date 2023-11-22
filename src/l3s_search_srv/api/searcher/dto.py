@@ -36,7 +36,8 @@ dto_dense_search_response = Model("DtoDenseSearchResponse", {
 })
 
 dto_dense_search_response_list = Model("DtoDenseSearchResponseList",{
-    "results": fields.List(fields.Nested(dto_dense_search_response))
+    "results": fields.List(fields.Nested(dto_dense_search_response)),
+    "message": fields.String()
 })
 
 

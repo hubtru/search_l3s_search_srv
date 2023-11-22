@@ -5,14 +5,15 @@ dto_dense_encoder = Model("DtoDenseEncoder", {
     "dataset_json": fields.String
 })
 ## ------------- Encode Updater ---------------##
-dto_encode_update_response = Model("DtoEncodeUpdateResponse", {
+dto_dense_encode_updater = Model("DtoDenseEncodeUpdater", {
     "language_model": fields.String(),
-    "datasets": fields.List(fields.String),
-    "states": fields.List(fields.Integer),
-    "message": fields.String()
+    "dataset": fields.String(),
+    "state": fields.Integer(),
+    # "message": fields.String()
 })
-dto_dense_encode_updater_response = Model("DtoDenseEncodeUpdaterResponse", {
-    "results": fields.List(fields.Nested(dto_encode_update_response))
+
+dto_dense_encode_updater_list = Model("DtoDenseEncodeUpdaterList", {
+    "results": fields.List(fields.Nested(dto_dense_encode_updater))
 })
 
 # ## ------------- Encode Query ---------------- ##

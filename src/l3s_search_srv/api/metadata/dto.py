@@ -37,3 +37,22 @@ dto_host = Model("DtoHost", {
     "port": fields.String(),
     "host_url": fields.Url()
 })
+
+
+dto_encoded_datasets = Model("DtoEncodedDatasets", {
+    "language_model": fields.String(),
+    "datasets": fields.List(fields.String())
+})
+
+dto_encoded_datasets_list = Model("DtoEncodedDatasetsList", {
+    "results": fields.List(fields.Nested(dto_encoded_datasets))
+})
+
+dto_indexed_datasets = Model("DtoIndexedDatasets", {
+    "index_method": fields.String(),
+    "datasets": fields.List(fields.String())
+})
+
+dto_indexed_datasets_list = Model("DtoIndexedDatasetsList", {
+    "results": fields.List(fields.Nested(dto_indexed_datasets))
+})

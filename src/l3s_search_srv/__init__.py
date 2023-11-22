@@ -7,9 +7,11 @@ from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from l3s_search_srv.config import get_config
-import os, socket
+import os
 from pprint import pprint
 from l3s_search_srv.util.meta import SearchSrvMeta
+
+
 
 cors = CORS()
 db = SQLAlchemy()
@@ -54,7 +56,8 @@ def create_app(config_name):
     #             p = enc.dataset_encoder(d)
     
     ## --------------- init indexes --------------- ##
-         
+    
+        
 
     @app.route('/')
     def index():

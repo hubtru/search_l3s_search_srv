@@ -63,7 +63,7 @@ class SearcherUpdate(Resource):
         print(encoder_response.json())
         ## index the new dataset
         indexer_request_url = get_request_url(endpoint="api.l3s_search_indexer_updater")
-        indexer_response = request.get(indexer_request_url)
+        indexer_response = requests.get(indexer_request_url)
         print(indexer_response.json())
         
         
@@ -105,12 +105,16 @@ class DenseRetrieval(Resource):
         entity_type = request_data.get("entity_type")
         nr_result = request_data.get("nr_result")
         
-        dataset_name = SearchSrvMeta().get_latest_dataset()
+        try:
+            dataset_name = SearchSrvMeta().get_latest_dataset()
+            print(dataset_name)
+            if dataset_name == "" or dataset_name == None:
+                raise FileExistsError("No dataset") 
         
-        # print(request_data)
-        if not use_skill_profile and not use_learning_profile:
-            ## case 1: not using skill profile and learning profile
-            try:
+            # print(request_data)
+            if not use_skill_profile and not use_learning_profile:
+                ## case 1: not using skill profile and learning profile
+                
                 # print(os.getenv("BASE_INDEXES_PATH"))
                 searcher = Searcher()
                 results = searcher.dense_retrieval(
@@ -119,39 +123,45 @@ class DenseRetrieval(Resource):
                     dataset_name=dataset_name,
                     index_method=index_method
                 )
-                
-                if entity_type:
+                pprint(results[0])
+                    
+                if entity_type != "all":
                     if entity_type in ["task", "skill", "path"]:
                         key_to_check = "entity_type"
                         results = [d for d in results if d.get(key_to_check) == entity_type]
                     else:
                         raise ValueError('Invalid entity type.')
-                    
+                        
                 if nr_result != 0:
                     results = results[:nr_result]
-                
+                    
                 # print("results")
                 response = {"results": results}
                 # response = results
-                
+                    
                 return response, HTTPStatus.CREATED
-            except ValueError as e:
-                return ("Exception when calling Api-> %s\n" % e)
-        elif not use_skill_profile and use_learning_profile:
-            ## case 2: not using skill profile but using learning profile
-            # get the learning profile of the user
-            print("*** case 2: not using skill profile but using learning profile ***")
-            return [], HTTPStatus.OK
-        elif use_skill_profile and not use_learning_profile:
-            ## case 3: using skill profile but not learning profile
-            # get the skill profile of the user
-            print("*** case 3: using skill profile but not learning profile ***")
-            return [], HTTPStatus.OK
-        else:
-            ## case 4: using both skill profile and learning profile
-            # get the skill and learning profile of the user
-            print("*** case 4: using both skill profile and learning profile ***")
-            return [], HTTPStatus.OK
+        
+            elif not use_skill_profile and use_learning_profile:
+                ## case 2: not using skill profile but using learning profile
+                # get the learning profile of the user
+                print("*** case 2: not using skill profile but using learning profile ***")
+                return {"results": [], "message": "case 2 not implemented"}, HTTPStatus.OK
+            elif use_skill_profile and not use_learning_profile:
+                ## case 3: using skill profile but not learning profile
+                # get the skill profile of the user
+                print("*** case 3: using skill profile but not learning profile ***")
+                return {"results": [], "message": "case 3 not implemented"}, HTTPStatus.OK
+            else:
+                ## case 4: using both skill profile and learning profile
+                # get the skill and learning profile of the user
+                print("*** case 4: using both skill profile and learning profile ***")
+                return {"results": [], "message": "case 4 not implemented"}, HTTPStatus.OK
+            
+        except ValueError as e:
+            return {"results": [], "message": e.args[0]}, HTTPStatus.INTERNAL_SERVER_ERROR
+        except FileExistsError as e:
+            return {"results": [], "message": e.args[0]}, HTTPStatus.NOT_FOUND
+            
 
 
 

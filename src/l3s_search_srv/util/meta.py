@@ -61,6 +61,18 @@ class SearchSrvMeta(object):
 
         return response
     
+    def get_existing_dense_encodings(self):
+        datasets = self.get_datasets()
+        dense_encodes_dir = os.path.join(os.getenv("BASE_ENCODES_PATH"), "dense")
+        existing_encodings = []
+        
+        for l in self.LANGUAGE_MODELS:
+            encode_dir = os.path.join(dense_encodes_dir, l)
+            encode_subdirs = self.__get_subdirs(encode_dir)
+            existing_encodings.append({"language_model": l, "datasets": encode_subdirs})
+            
+        return existing_encodings
+        
     def get_not_dense_encoded_dataset(self):
         
         datasets = self.get_datasets()
@@ -78,6 +90,17 @@ class SearchSrvMeta(object):
             not_encoded_dataset.append({l: not_encoded})
         
         return not_encoded_dataset
+    
+    def get_existing_indexes(self):
+        # datasets = self.get_datasets()
+        base_indexes_path = os.getenv("BASE_INDEXES_PATH")
+        
+        existing_indexes = []
+        for i in self.INDEX_METHODS:
+            indexed_datasets = self.__get_subdirs(os.path.join(base_indexes_path, i))
+            existing_indexes.append({"index_method": i, "datasets": indexed_datasets})
+            
+        return existing_indexes
                     
     def get_not_indexed_datasets(self):
         datasets = self.get_datasets()
@@ -95,16 +118,20 @@ class SearchSrvMeta(object):
         
         return not_indexed_datasets
 
-    def get_latest_dataset():
+    def get_latest_dataset(self):
         directory_path = os.getenv("BASE_DATASETS_PATH")
-        directories = [d for d in os.listdir(directory_path) if os.path.isdir(os.path.join(directory_path, d))]
-        if not directories:
-            print("No directories found in the specified path.")
+        
+        if os.listdir(directory_path) == []:
+            latest_folder = ""
         else:
-            # Sort the directories by their creation timestamp (most recent first)
-            directories.sort(key=lambda d: os.path.getctime(os.path.join(directory_path, d)), reverse=True)
+            directories = [d for d in os.listdir(directory_path) if os.path.isdir(os.path.join(directory_path, d))]
+            if not directories:
+                print("No directories found in the specified path.")
+            else:
+                # Sort the directories by their creation timestamp (most recent first)
+                directories.sort(key=lambda d: os.path.getctime(os.path.join(directory_path, d)), reverse=True)
 
-            # Get the latest created folder
-            latest_folder = directories[0]
-            print(f"The latest created folder is: {latest_folder}")
-        return latest_folder
+                # Get the latest created folder
+                latest_folder = directories[0]
+                print(f"The latest created folder is: {latest_folder}")
+            return latest_folder

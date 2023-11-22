@@ -16,7 +16,7 @@ from .dto import (
 ## Flags
 flag_show_private_endpoints = False
 
-ns_indexer = Namespace("indexer", validate=True)
+ns_indexer = Namespace("Indexer", validate=True)
 
 ## registration api.models
 ns_indexer.models[dto_indexer_request.name] = dto_indexer_request
@@ -43,7 +43,7 @@ class IndexUpdater(Resource):
     def get(self):
         '''update the indexes'''
         not_indexed_datasets = SearchSrvMeta().get_not_indexed_datasets()
-        
+        # print(f"not_indexed_datasets: {not_indexed_datasets}")
         if not_indexed_datasets == []:
             return {"results": []}, HTTPStatus.OK
         

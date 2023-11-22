@@ -27,45 +27,54 @@ class EncoderTest(Resource):
 
 
 ## ---------------------- Encode Updater ----------------------- ##
-from .dto import dto_encode_update_response, dto_dense_encode_updater_response
-ns_encoder.models[dto_encode_update_response.name] = dto_encode_update_response
-ns_encoder.models[dto_dense_encode_updater_response.name] = dto_dense_encode_updater_response
+from .dto import dto_dense_encode_updater, dto_dense_encode_updater_list
+ns_encoder.models[dto_dense_encode_updater.name] = dto_dense_encode_updater
+ns_encoder.models[dto_dense_encode_updater_list.name] = dto_dense_encode_updater_list
 
 @ns_encoder.route('/updater', endpoint='l3s_search_encoder_updater')
 class EncodeUpdater(Resource):
-    @ns_encoder.marshal_with(dto_dense_encode_updater_response)
+    @ns_encoder.marshal_with(dto_dense_encode_updater_list)
     def get(self):
         '''update the encodings'''
         ## ----------- init encodes ----------- ##
         # get the list of not encoded datasets for different language models
         # e.g. [{'bert-base-german-cased': []}, {'xlm-roberta-base': []}]
+        
+        existing_datasets = SearchSrvMeta().get_datasets()
+        if existing_datasets == []:
+            return {"results": []}, HTTPStatus.OK
+        
         not_encoded_datasets = SearchSrvMeta().get_not_dense_encoded_dataset()
+        # print(f"not_encoded_datasets: {not_encoded_datasets}")
+        
         results = []
         for dictionary in not_encoded_datasets:
             r = {}
             language_model, datasets = list(dictionary.items())[0]
             r["language_model"] = language_model
-            r["datasets"] = datasets
+            # r["datasets"] = datasets
             
             if datasets == []:
-                r["states"] = []
-                r["message"] = "Everything is up to date."
+                r["dataset"] = "Everything is up to date."
+                r["state"] = 2
+                # r["message"] = ""
                 results.append(r)
                 continue
             
-            r["states"] = []
+            # r["states"] = []
             for d in datasets:
+                r["dataset"] = d
                 if language_model == "bert-base-german-cased":
                     enc = BertGermanCasedDenseEncoder()
                     p = enc.dataset_encoder(d)
-                    r["states"].append(p)
+                    r["state"] = p
                 elif language_model == "xlm-roberta-base":
                     enc = XlmRobertaDenseEncoder()
                     p = enc.dataset_encoder(d)
-                    r["states"].append(p)
+                    r["state"] = p
                 
-            r["message"] = f"Number of encoded datasets: {len(datasets)}"
-            results.append(r)
+            # r["message"] = f"Number of encoded datasets: {len(datasets)}"
+                results.append(r)
             
         return {"results": results}, HTTPStatus.OK
 
