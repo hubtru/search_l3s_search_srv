@@ -1,0 +1,18 @@
+[
+    {
+        "id": 2039,
+        "owner": [],
+        "entity_id": "2",
+        "entity_id_full": "sse/skill/2",
+        "entity_type": "skill",
+        "contents": "Die F\u00e4higkeit 'Interpreter Calling' umfasst das Aufrufen von Java ohne genaues Wissen \u00fcber dessen Funktionsweise. Es ist eine grundlegende Kompetenz (Level 1) im Bereich der Computerprogrammierung und steht in Verbindung mit \u00fcbergeordneten F\u00e4higkeiten aus dem Bereich 'Commands Usage'. Diese Kompetenz ist eine fundamentale Fertigkeit f\u00fcr die Ausf\u00fchrung von skriptbasierten Operationen und eine Voraussetzung f\u00fcr die Aneignung weiterer, darauf aufbauender F\u00e4higkeiten im IT-Bereich, die derzeit jedoch keine weiteren Unterkompetenzen ('nested_skills') beinhaltet."
+    },
+    {
+        "id": 2040,
+        "owner": [],
+        "entity_id": "4",
+        "entity_id_full": "sse/skill/4",
+        "entity_type": "skill",
+        "contents": "Die F\u00e4higkeit 'Interpreter Usage' bezeichnet das Wissen um die Verwendung und die Gr\u00fcnde f\u00fcr den Einsatz von Java auf Kompetenzstufe 3. Diese Kompetenz umfasst keine untergeordneten F\u00e4higkeiten (nested_skills: []). Als \u00fcbergeordnete F\u00e4higkeiten (parent_skills) sind 'Commands Understanding' angegeben, was auf ein grundlegendes Verst\u00e4ndnis der Befehlsinterpretation hinweist. Die Kenntnis in 'Interpreter Usage' spielt eine wichtige Rolle f\u00fcr die effiziente Nutzung und das Verst\u00e4ndnis der Java-Programmierung, was f\u00fcr die Entwicklung von Softwareanwendungen von entscheidender Bedeutung sein kann."
+    }
+]

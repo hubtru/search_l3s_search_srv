@@ -48,7 +48,7 @@ class GetDatasets(Resource):
     def get(self):
         """Get the list of available datasets"""
         try:
-            dataset_dir = os.getenv("BASE_DATASETS_PATH")
+            dataset_dir = os.getenv("BASE_DATASETS_DIR")
             subdirs = get_subdirs(dataset_dir)
             
             datasets = []
@@ -80,7 +80,7 @@ class GetEncodingType(Resource):
     @ns_metadata.marshal_with(dto_encode_type_list)
     def get(self):
         """Get the list of available encoding types"""
-        encodes_dir = os.getenv("BASE_ENCODES_PATH")
+        encodes_dir = os.getenv("BASE_ENCODES_DIR")
         subdirs = get_subdirs(encodes_dir)
         
         encode_types = []
@@ -119,7 +119,7 @@ class GetLanguageModels(Resource):
     @ns_metadata.marshal_with(dto_language_model_list)
     def get(self):
         """Get the list of available language models"""
-        encodes_dense_dir = os.path.join(os.getenv("BASE_ENCODES_PATH"), 'dense')
+        encodes_dense_dir = os.path.join(os.getenv("BASE_ENCODES_DIR"), 'dense')
         subdirs = get_subdirs(encodes_dense_dir)
         
         language_models = []
@@ -142,7 +142,7 @@ class GetIndexMethod(Resource):
     @ns_metadata.marshal_with(dto_index_method_list)
     def get(self):
         """Get the list of available index methods"""
-        index_method_dir = os.getenv("BASE_INDEXES_PATH")
+        index_method_dir = os.getenv("BASE_INDEXES_DIR")
         print(f'Get indexes base directory: {index_method_dir}')
             
         try:

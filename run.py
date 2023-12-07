@@ -3,9 +3,9 @@ import os, requests
 from l3s_search_srv import create_app, db
 from l3s_search_srv.util.util import get_request_url
 
-# os.environ["BASE_DATASETS_PATH"] = os.path.join(os.getcwd(), "datasets")
-# os.environ["BASE_ENCODES_PATH"] = os.path.join(os.getcwd(), "encodes")
-# os.environ["BASE_INDEXES_PATH"] = os.path.join(os.getcwd(), "indexes")
+# os.environ["BASE_DATASETS_DIR"] = os.path.join(os.getcwd(), "datasets")
+# os.environ["BASE_ENCODES_DIR"] = os.path.join(os.getcwd(), "encodes")
+# os.environ["BASE_INDEXES_DIR"] = os.path.join(os.getcwd(), "indexes")
 
 
 app = create_app(os.getenv("FLASK_ENV", "development")) 

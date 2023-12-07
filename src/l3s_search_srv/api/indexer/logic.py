@@ -14,7 +14,7 @@ class Indexer(object):
     
     ## ---------- private methods ------------- ##
     def __add_new_doc(document, dataset_name):
-        json_file_path = os.path.join(os.getenv("BASE_DATASETS_PATH"), dataset_name+"/data.json")
+        json_file_path = os.path.join(os.getenv("BASE_DATASETS_DIR"), dataset_name+"/data.json")
         try:
             with open(json_file_path, "r") as json_file:
                 data = json.load(json_file)
@@ -52,8 +52,8 @@ class Indexer(object):
     #     #     --threads 1 \
     #     #     --storePositions --storeDocvectors --storeRaw
     #     # """
-    #     dataset_jsonl_path = os.path.join(os.getenv("BASE_DATASETS_PATH"), f"{dataset_name}/jsonl")
-    #     index_path = os.path.join(os.getenv("BASE_INDEXES_PATH"), f"bm25/{dataset_name}")
+    #     dataset_jsonl_path = os.path.join(os.getenv("BASE_DATASETS_DIR"), f"{dataset_name}/jsonl")
+    #     index_path = os.path.join(os.getenv("BASE_INDEXES_DIR"), f"bm25/{dataset_name}")
 
     #     print(dataset_jsonl_path)
     #     print(index_path)
@@ -90,7 +90,7 @@ class Indexer(object):
         print("supported index methods: ", self.FLAT_INDEX_METHOD)
         # check if index method is valid
         
-        datasets = get_subdirs(os.getenv('BASE_DATASETS_PATH'))
+        datasets = get_subdirs(os.getenv('BASE_DATASETS_DIR'))
         # print(datasets)
         if dataset_name not in datasets:
             raise ValueError("Invalid dataset!")
@@ -102,8 +102,8 @@ class Indexer(object):
             raise ValueError("Invalid index method, try 'flat-ip' or 'flat-l2' instead!")
         
         
-        input_encode_path = os.path.join(os.getenv("BASE_ENCODES_PATH"), f"{encode_type}/{model_name}/{dataset_name}/data_encoded.json")
-        output_index_path = os.path.join(os.getenv("BASE_INDEXES_PATH"), f"{index_method}/{dataset_name}/{encode_type}/{model_name}/")
+        input_encode_path = os.path.join(os.getenv("BASE_ENCODES_DIR"), f"{encode_type}/{model_name}/{dataset_name}/data_encoded.json")
+        output_index_path = os.path.join(os.getenv("BASE_INDEXES_DIR"), f"{index_method}/{dataset_name}/{encode_type}/{model_name}/")
         
         if not os.path.exists(input_encode_path):
             # print(input_path)
@@ -165,13 +165,13 @@ class Indexer(object):
     
     
     def hnsw_indexer(self, encode_cat, model_name, dataset_name):
-        dataset_encode_path = os.path.join(os.getenv("BASE_ENCODES_PATH"),
+        dataset_encode_path = os.path.join(os.getenv("BASE_ENCODES_DIR"),
                                             f"{encode_cat}/{model_name}/{dataset_name}"
                                         )
         if not os.path.exists(dataset_encode_path):
             raise FileNotFoundError
         
-        output_path = os.path.join(os.getenv("BASE_INDEXES_PATH"), f"{encode_cat}/hnsw/{dataset_name}")
+        output_path = os.path.join(os.getenv("BASE_INDEXES_DIR"), f"{encode_cat}/hnsw/{dataset_name}")
         # print(output_path)
         
         if not os.path.exists(output_path):
@@ -189,13 +189,13 @@ class Indexer(object):
     
     
     def pq_indexer(self, encode_cat, model_name, dataset_name):
-        dataset_encode_path = os.path.join(os.getenv("BASE_ENCODES_PATH"),
+        dataset_encode_path = os.path.join(os.getenv("BASE_ENCODES_DIR"),
                                             f"{encode_cat}/{model_name}/{dataset_name}"
                                         )
         if not os.path.exists(dataset_encode_path):
             raise FileNotFoundError
         
-        output_path = os.path.join(os.getenv("BASE_INDEXES_PATH"), f"{encode_cat}/pq/{dataset_name}")
+        output_path = os.path.join(os.getenv("BASE_INDEXES_DIR"), f"{encode_cat}/pq/{dataset_name}")
         # print(output_path)
         
         if not os.path.exists(output_path):
@@ -213,8 +213,8 @@ class Indexer(object):
     # def flat_ip(self, encoding_type, model_name, dataset_name):
         
         
-    #     input_path = os.path.join(os.getenv("BASE_ENCODES_PATH"), f"{encoding_type}/{model_name}/{dataset_name}/data_encoded.jsonl")
-    #     output_path = os.path.join(os.getenv("BASE_INDEXES_PATH"), f"{encoding_type}/{model_name}/flat/{dataset_name}")
+    #     input_path = os.path.join(os.getenv("BASE_ENCODES_DIR"), f"{encoding_type}/{model_name}/{dataset_name}/data_encoded.jsonl")
+    #     output_path = os.path.join(os.getenv("BASE_INDEXES_DIR"), f"{encoding_type}/{model_name}/flat/{dataset_name}")
         
     #     if not os.path.exists(input_path):
     #         raise FileNotFoundError

@@ -52,5 +52,10 @@ dto_document = Model("DtoDocument", {
 
 
 dto_document_list = Model("DtoDocumentList", {
+    "secret": fields.String(),
     "documents": fields.List(fields.Nested(dto_document))
+})
+
+dto_searcher_update_response = Model("DtoSearcherUpdateResponse", {
+    "message": fields.String()
 })

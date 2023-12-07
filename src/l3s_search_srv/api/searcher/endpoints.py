@@ -9,7 +9,8 @@ from .dto import (
     dto_simple_search_request, dto_simple_search_response
 )
 from .logic import Searcher
-from l3s_search_srv.util.util import get_request_url
+from l3s_search_srv.util.util import get_request_url, dirs_pruning
+from l3s_search_srv.util.meta import SearchSrvMeta
 
 ns_searcher = Namespace("searcher", validate=True)
 
@@ -25,49 +26,82 @@ ns_searcher.models[dto_simple_search_response.name] = dto_simple_search_response
 
 ## ------------------------- Searcher Updater ------------------------ ##
 from datetime import datetime
-from .dto import dto_document, dto_document_list
+from .dto import dto_document, dto_document_list, dto_searcher_update_response
 ns_searcher.models[dto_document.name] = dto_document
 ns_searcher.models[dto_document_list.name] = dto_document_list
+ns_searcher.models[dto_searcher_update_response.name] = dto_searcher_update_response
+# @ns_searcher.hide
 @ns_searcher.route('/searcher-update', endpoint="searcher_update")
 class SearcherUpdate(Resource):
     @ns_searcher.expect(dto_document_list)
+    @ns_searcher.marshal_with(dto_searcher_update_response)
     def post(self):
         '''update the serch service'''
+        ## Get the data from payload
         request_data = request.json
+        secret = request_data["secret"]
+        if secret != os.getenv('MLS_CLIENT_SECRET'):
+            return {"message": "secret does not match!"}, HTTPStatus.BAD_REQUEST
         list_documents = request_data["documents"]
         
+        ## if empty list -> return ok
         if list_documents == []:
             return {"message": "empty list of documents."}, HTTPStatus.OK
         
-        
         ## save the file to ./datasets
+        ## create the file and directory
         file_name = "data.json"
         formatted_time = datetime.now().strftime("%Y%m%d%H%M%S")
-        save_to = os.path.join(os.getenv("BASE_DATASETS_PATH"), f"documents_{formatted_time}")
+        save_to = os.path.join(os.getenv("BASE_DATASETS_DIR"), f"documents_{formatted_time}")
+        
+        ## check whether the directory already exists
         if not os.path.exists(save_to):
             # If it doesn't exist, create the directory
             os.makedirs(save_to)
             print(f"Directory '{save_to}' created.")
         else:
+            ## if exists, raise error
             print(f"Directory '{save_to}' already exists.")
+            raise 
         
         file_dir = os.path.join(save_to, file_name)
         
         with open(file_dir, 'w') as file:
             json.dump(list_documents, file, indent=4)
         
-        ## encode the new dataset
+        ## remove old datesets
+        dirs_pruning(os.getenv("BASE_DATASETS_DIR"))
+        
+        
+        
+        ## Encoding: encode the new dataset
         encoder_request_url = get_request_url(endpoint="api.l3s_search_encoder_updater")
         print(encoder_request_url)
         encoder_response = requests.get(encoder_request_url)
         print(encoder_response.json())
-        ## index the new dataset
+        
+        ## remove old encodings
+        for l in SearchSrvMeta().LANGUAGE_MODELS:
+            target_dir = os.path.join(os.getenv("BASE_ENCODES_DIR"), f'dense/{l}')
+            dirs_pruning(target_dir)
+        
+        
+        ## Indexing: index the new dataset
         indexer_request_url = get_request_url(endpoint="api.l3s_search_indexer_updater")
+        print(f"indexer url: {indexer_request_url}")
         indexer_response = requests.get(indexer_request_url)
-        print(indexer_response.json())
+        print(f"indexer response: {indexer_response.json()}")
+        
+        ## remove old indexes
+        for i in SearchSrvMeta().INDEX_METHODS:
+            target_dir = os.path.join(os.getenv("BASE_INDEXES_DIR"), i)
+            dirs_pruning(target_dir)
         
         
         return {"message": "data received"}, HTTPStatus.CREATED
+        ## ---------------------------------------------------------------------------------
+
+        # return {"message": "data received"}, HTTPStatus.CREATED
 
 
 
@@ -109,13 +143,12 @@ class DenseRetrieval(Resource):
             dataset_name = SearchSrvMeta().get_latest_dataset()
             print(dataset_name)
             if dataset_name == "" or dataset_name == None:
-                raise FileExistsError("No dataset") 
-        
+                raise FileExistsError("No dataset")
             # print(request_data)
             if not use_skill_profile and not use_learning_profile:
                 ## case 1: not using skill profile and learning profile
                 
-                # print(os.getenv("BASE_INDEXES_PATH"))
+                # print(os.getenv("BASE_INDEXES_DIR"))
                 searcher = Searcher()
                 results = searcher.dense_retrieval(
                     query=query,
@@ -164,12 +197,6 @@ class DenseRetrieval(Resource):
             
 
 
-
-
-
-
-
-
 # @ns_searcher.route("/traditional-retrieval", endpoint="traditional_retrieval")
 class SimpleSearch(Resource):
     @ns_searcher.expect(dto_simple_search_request)
@@ -184,7 +211,7 @@ class SimpleSearch(Resource):
         dataset_name = request_data.get("dataset")
         index_name = request_data.get("index")
 
-        searcher = Searcher(os.getenv("BASE_INDEXES_PATH"))
+        searcher = Searcher(os.getenv("BASE_INDEXES_DIR"))
         results = searcher.traditional_retrieval(
             query,
             dataset_name=dataset_name,
@@ -232,7 +259,7 @@ class SimpleSearch(Resource):
 #         query = request_data.get("query")
 #         nr_result = request_data.get("nr_result")
         
-#         searcher = Searcher(os.getenv("BASE_INDEXES_PATH"))
+#         searcher = Searcher(os.getenv("BASE_INDEXES_DIR"))
 #         results = []
         
 #         return request_data, HTTPStatus.OK

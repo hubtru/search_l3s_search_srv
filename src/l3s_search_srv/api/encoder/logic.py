@@ -57,8 +57,8 @@ class DenseEncoer(object):
 
         
 	def dataset_encoder(self, dataset_name):                
-		input_file_path = os.path.join(os.getenv("BASE_DATASETS_PATH"), f"{dataset_name}/data.json")
-		output_dir_path = os.path.join(os.getenv("BASE_ENCODES_PATH"), f"dense/{self.model_name}/{dataset_name}")
+		input_file_path = os.path.join(os.getenv("BASE_DATASETS_DIR"), f"{dataset_name}/data.json")
+		output_dir_path = os.path.join(os.getenv("BASE_ENCODES_DIR"), f"dense/{self.model_name}/{dataset_name}")
   
 		# input_file_path = os.path.join(os.getcwd(), f"datasets/{dataset_name}/json/data.json")
 		# output_dir_path = os.path.join(os.getcwd(), f"encodes/dense/{self.model_name}/{dataset_name}")
@@ -206,9 +206,9 @@ class XlmRobertaDenseEncoder(DenseEncoer):
 
         
         # def xlm_roberta_dataset_encoder(self, dataset_name):                
-        #         input_file_path = os.path.join(os.getenv("BASE_DATASETS_PATH"), f"{dataset_name}/jsonl/data.jsonl")
+        #         input_file_path = os.path.join(os.getenv("BASE_DATASETS_DIR"), f"{dataset_name}/jsonl/data.jsonl")
                 
-        #         output_dir_path = os.path.join(os.getenv("BASE_ENCODES_PATH"), f"dense/xlm-roberta-base/{dataset_name}")
+        #         output_dir_path = os.path.join(os.getenv("BASE_ENCODES_DIR"), f"dense/xlm-roberta-base/{dataset_name}")
                 
                 
         #         if not os.path.exists(output_dir_path):

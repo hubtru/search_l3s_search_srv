@@ -26,10 +26,12 @@ ns_indexer.models[dto_corpus.name] = dto_corpus
 ns_indexer.models[dto_document.name] = dto_document
 ns_indexer.models[dto_bm25_indexer_request.name] = dto_bm25_indexer_request
 
-# @ns_indexer.route("/test", endpoint="indexer-test")
-# class IndexerTest(Resource):
-#     def get(self):
-#         return {"message": "Test message of indexer-service"}, HTTPStatus.OK
+@ns_indexer.route("/indexes", endpoint="l3s_search_indexes", doc=False)
+class IndexerTest(Resource):
+    def get(self):
+        '''get existing indexes'''
+        indexes = SearchSrvMeta().get_existing_indexes()
+        return {"Indexes": indexes}, HTTPStatus.OK
 
 
 ## ----------------------- Index Updater ---------------------------- ##
@@ -37,7 +39,7 @@ from .dto import dto_index_updater, dto_index_updater_response
 ns_indexer.models[dto_index_updater.name] = dto_index_updater
 ns_indexer.models[dto_index_updater_response.name] = dto_index_updater_response
 
-@ns_indexer.route("/updater", endpoint="l3s_search_indexer_updater")
+@ns_indexer.route("/updater", endpoint="l3s_search_indexer_updater", doc=False)
 class IndexUpdater(Resource):
     @ns_indexer.marshal_with(dto_index_updater_response)
     def get(self):
@@ -77,7 +79,7 @@ class IndexUpdater(Resource):
 
 
 
-@ns_indexer.route("/index-mls-update", endpoint="index_mls_update", doc=flag_show_private_endpoints)
+@ns_indexer.route("/index-mls-update", endpoint="index_mls_update", doc=False)
 class MlsIndexUpdate(Resource):
     @ns_indexer.expect(dto_mls_index_update_request)
     def post(self):
@@ -91,7 +93,7 @@ class MlsIndexUpdate(Resource):
 
 
 
-@ns_indexer.route("/traditional/bm25", endpoint="traditional_bm25_indexer", doc=flag_show_private_endpoints)
+@ns_indexer.route("/traditional/bm25", endpoint="traditional_bm25_indexer", doc=False)
 class PyseriniIndexer(Resource):
     @ns_indexer.expect(dto_bm25_indexer_request)
     @ns_indexer.response(int(HTTPStatus.CREATED), "index file was successfully created.")
@@ -146,7 +148,7 @@ class PQIndexer(Resource):
     
 
 
-@ns_indexer.route("/dense/flat", endpoint="indexer_dense_flat", doc=flag_show_private_endpoints)
+@ns_indexer.route("/dense/flat", endpoint="indexer_dense_flat", doc=False)
 class FlatL2Indexer(Resource):
     @ns_indexer.response(int(HTTPStatus.CREATED), "Index file was successfully created.")
     # @ns_indexer.response(int(HTTPStatus.CONFLICT), "Email address is already registered.")

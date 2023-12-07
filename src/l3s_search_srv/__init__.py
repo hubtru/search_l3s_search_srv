@@ -25,9 +25,9 @@ def create_app(config_name):
     
     # set envs
     os.environ["BASE_PATH"] = os.getcwd()
-    os.environ["BASE_DATASETS_PATH"] = os.path.join(os.getcwd(), "datasets")
-    os.environ["BASE_ENCODES_PATH"] = os.path.join(os.getcwd(), "encodes")
-    os.environ["BASE_INDEXES_PATH"] = os.path.join(os.getcwd(), "indexes")
+    os.environ["BASE_DATASETS_DIR"] = os.path.join(os.getcwd(), "datasets")
+    os.environ["BASE_ENCODES_DIR"] = os.path.join(os.getcwd(), "encodes")
+    os.environ["BASE_INDEXES_DIR"] = os.path.join(os.getcwd(), "indexes")
     
     path_checker = SearchSrvMeta().check_dirs()
     pprint(path_checker)

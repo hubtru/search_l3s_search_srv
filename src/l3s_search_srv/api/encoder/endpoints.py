@@ -10,15 +10,13 @@ ns_encoder = Namespace("Encoder", validate=True)
 from .dto import dto_dense_encoder
 ns_encoder.models[dto_dense_encoder.name] = dto_dense_encoder
 
-flag_show_private_endpoints = False
 
-## --------------------- Test ---------------------------- ##
-@ns_encoder.route("/test", endpoint="encoder_test", doc=flag_show_private_endpoints)
+@ns_encoder.route("/encodings", endpoint="l3s_search_encodings", doc=False)
 class EncoderTest(Resource):
     def get(self):
-        encodes_path = os.getenv("BASE_ENCODES_PATH")
-        return {"getenv": f"{encodes_path}",
-                "correct": "/home/peng_luh/__github/search_l3s/search_l3s_search_srv/encodes"}, HTTPStatus.OK
+        '''get existing encodings'''
+        dense_encodings = SearchSrvMeta().get_existing_dense_encodings()
+        return {"Encodings": dense_encodings}, HTTPStatus.OK
 
 # @ns_encoder.route("/sparse-encoder", endpoint="sparse_encoder")
 # class SparseEncodeGenerator(Resource):
@@ -31,7 +29,7 @@ from .dto import dto_dense_encode_updater, dto_dense_encode_updater_list
 ns_encoder.models[dto_dense_encode_updater.name] = dto_dense_encode_updater
 ns_encoder.models[dto_dense_encode_updater_list.name] = dto_dense_encode_updater_list
 
-@ns_encoder.route('/updater', endpoint='l3s_search_encoder_updater')
+@ns_encoder.route('/updater', endpoint='l3s_search_encoder_updater', doc=False)
 class EncodeUpdater(Resource):
     @ns_encoder.marshal_with(dto_dense_encode_updater_list)
     def get(self):
@@ -78,12 +76,13 @@ class EncodeUpdater(Resource):
             
         return {"results": results}, HTTPStatus.OK
 
+
 ## -------------------- Encode Query -------------------- ##
 from .dto import dto_dense_encode_query_input, dto_dense_encode_query_output
 ns_encoder.models[dto_dense_encode_query_input.name] = dto_dense_encode_query_input
 ns_encoder.models[dto_dense_encode_query_output.name] = dto_dense_encode_query_output
 
-@ns_encoder.route("/dense-query", endpoint="dense_encoder_query", doc=flag_show_private_endpoints)
+@ns_encoder.route("/dense-query", endpoint="dense_encoder_query", doc=False)
 class DenseEncodeQuery(Resource):
     @ns_encoder.response(int(HTTPStatus.CREATED), "Dense encode for the input was successfully created.")
     @ns_encoder.response(int(HTTPStatus.INTERNAL_SERVER_ERROR), "Error in Input Value")

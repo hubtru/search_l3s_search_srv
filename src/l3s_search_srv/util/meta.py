@@ -26,44 +26,44 @@ class SearchSrvMeta(object):
 
 
     def get_datasets(self):
-        datasets_dir = os.getenv("BASE_DATASETS_PATH")
+        datasets_dir = os.getenv("BASE_DATASETS_DIR")
         subdirs = self.__get_subdirs(datasets_dir)
         return subdirs
     
     def get_encodes(self):
-        encodes_dir = os.getenv("BASE_ENCODES_PATH")
+        encodes_dir = os.getenv("BASE_ENCODES_DIR")
         subdirs = self.__get_subdirs(encodes_dir)
         return subdirs
     
     def check_dirs(self):
-        base_datasets_dir = os.getenv("BASE_DATASETS_PATH")
-        base_encodes_dir = os.getenv("BASE_ENCODES_PATH")
-        base_indexes_dir = os.getenv("BASE_INDEXES_PATH")
+        base_datasets_dir = os.getenv("BASE_DATASETS_DIR")
+        base_encodes_dir = os.getenv("BASE_ENCODES_DIR")
+        base_indexes_dir = os.getenv("BASE_INDEXES_DIR")
         
         response = {}
         if not os.path.isdir(base_datasets_dir):
             os.mkdir(base_datasets_dir)
-            response["BASE_DATASETS_PATH"] = "created"
+            response["BASE_DATASETS_DIR"] = "created"
         else:
-            response["BASE_DATASETS_PATH"] = "exists"
+            response["BASE_DATASETS_DIR"] = "exists"
         
         if not os.path.isdir(base_encodes_dir):
             os.mkdir(base_encodes_dir)
-            response["BASE_ENCODES_PATH"] = "created"
+            response["BASE_ENCODES_DIR"] = "created"
         else:
-            response["BASE_ENCODES_PATH"] = "exists"
+            response["BASE_ENCODES_DIR"] = "exists"
             
         if not os.path.isdir(base_indexes_dir):
             os.mkdir(base_indexes_dir)
-            response["BASE_INDEXES_PATH"] = "created"
+            response["BASE_INDEXES_DIR"] = "created"
         else:
-            response["BASE_INDEXES_PATH"] = "exists"
+            response["BASE_INDEXES_DIR"] = "exists"
 
         return response
     
     def get_existing_dense_encodings(self):
         datasets = self.get_datasets()
-        dense_encodes_dir = os.path.join(os.getenv("BASE_ENCODES_PATH"), "dense")
+        dense_encodes_dir = os.path.join(os.getenv("BASE_ENCODES_DIR"), "dense")
         existing_encodings = []
         
         for l in self.LANGUAGE_MODELS:
@@ -76,7 +76,7 @@ class SearchSrvMeta(object):
     def get_not_dense_encoded_dataset(self):
         
         datasets = self.get_datasets()
-        dense_encodes_dir = os.path.join(os.getenv("BASE_ENCODES_PATH"), "dense")
+        dense_encodes_dir = os.path.join(os.getenv("BASE_ENCODES_DIR"), "dense")
         
         not_encoded_dataset = []
         for l in self.LANGUAGE_MODELS:
@@ -93,22 +93,22 @@ class SearchSrvMeta(object):
     
     def get_existing_indexes(self):
         # datasets = self.get_datasets()
-        base_indexes_path = os.getenv("BASE_INDEXES_PATH")
+        BASE_INDEXES_DIR = os.getenv("BASE_INDEXES_DIR")
         
         existing_indexes = []
         for i in self.INDEX_METHODS:
-            indexed_datasets = self.__get_subdirs(os.path.join(base_indexes_path, i))
+            indexed_datasets = self.__get_subdirs(os.path.join(BASE_INDEXES_DIR, i))
             existing_indexes.append({"index_method": i, "datasets": indexed_datasets})
             
         return existing_indexes
                     
     def get_not_indexed_datasets(self):
         datasets = self.get_datasets()
-        base_indexes_path = os.getenv("BASE_INDEXES_PATH")
+        BASE_INDEXES_DIR = os.getenv("BASE_INDEXES_DIR")
         
         not_indexed_datasets = []
         for i in self.INDEX_METHODS:
-            indexed_datasets = self.__get_subdirs(os.path.join(base_indexes_path, i))
+            indexed_datasets = self.__get_subdirs(os.path.join(BASE_INDEXES_DIR, i))
             not_encoded = []
             for d in datasets:
                 if d not in indexed_datasets:
@@ -119,7 +119,7 @@ class SearchSrvMeta(object):
         return not_indexed_datasets
 
     def get_latest_dataset(self):
-        directory_path = os.getenv("BASE_DATASETS_PATH")
+        directory_path = os.getenv("BASE_DATASETS_DIR")
         
         if os.listdir(directory_path) == []:
             latest_folder = ""

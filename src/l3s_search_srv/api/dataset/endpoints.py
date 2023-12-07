@@ -12,8 +12,6 @@ from l3s_search_srv.util.meta import SearchSrvMeta
 
 ns_dataset_processor = Namespace("Dataset Processor", validate=True)
 
-flag_show_private_endpoints = False
-
 from .dto import dto_parameter, dto_dataset_request, dto_mls_dataset, dto_mls_object
 
 ns_dataset_processor.models[dto_parameter.name] = dto_parameter
@@ -31,7 +29,7 @@ class MlsContentType(Resource):
         return content_type, HTTPStatus.OK
 
 
-@ns_dataset_processor.route("/mls-response-dataset", endpoint="mls_response_dataset", doc=flag_show_private_endpoints)
+@ns_dataset_processor.route("/mls-response-dataset", endpoint="mls_response_dataset")
 class MlsResponseDataset(Resource):
     @ns_dataset_processor.expect(dto_mls_dataset)
     def post(self):
@@ -44,7 +42,7 @@ class MlsResponseDataset(Resource):
         return mls_response_json, HTTPStatus.CREATED
 
 
-@ns_dataset_processor.route("/mls-response-object", endpoint="mls_response_object", doc=flag_show_private_endpoints)
+@ns_dataset_processor.route("/mls-response-object", endpoint="mls_response_object")
 class MlsResponseObject(Resource):
     @ns_dataset_processor.expect(dto_mls_object)
     def post(self):
@@ -56,7 +54,7 @@ class MlsResponseObject(Resource):
         return mls_response_json, HTTPStatus.CREATED
     
 
-@ns_dataset_processor.route("/mls-corpus", endpoint="dataset_generator_mls", doc=flag_show_private_endpoints)
+@ns_dataset_processor.route("/mls-corpus", endpoint="dataset_generator_mls")
 class GenerateMlsDataset(Resource):
     @ns_dataset_processor.expect(dto_mls_dataset)
     @ns_dataset_processor.response(int(HTTPStatus.CREATED), description="Successfully created json file")
@@ -83,9 +81,7 @@ class GenerateMlsDataset(Resource):
         return mls_response_json, HTTPStatus.CREATED
 
 
-@ns_dataset_processor.route("/json-to-jsonl-converter", 
-                            endpoint="json_to_jsonl_converter",
-                            doc=flag_show_private_endpoints)
+@ns_dataset_processor.route("/json-to-jsonl-converter", endpoint="json_to_jsonl_converter")
 class JsonToJsonl(Resource):
     @ns_dataset_processor.expect(dto_dataset_request)
     def post(self):
@@ -111,7 +107,7 @@ from .dto import dto_dataset_modifier_request, dto_dataset_modifier_response
 ns_dataset_processor.models[dto_dataset_modifier_request.name] = dto_dataset_modifier_request
 ns_dataset_processor.models[dto_dataset_modifier_response.name] = dto_dataset_modifier_response
 
-@ns_dataset_processor.route("/dataset-modifier", endpoint="dataset_modifier", doc=flag_show_private_endpoints)
+@ns_dataset_processor.route("/dataset-modifier", endpoint="dataset_modifier")
 @ns_dataset_processor.doc("methods to modify the datasets")
 class UpdateToDataset(Resource):
     @ns_dataset_processor.expect(dto_dataset_modifier_request)

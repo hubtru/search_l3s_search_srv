@@ -19,10 +19,10 @@ class Searcher(object):
     punctuation_marks = string.punctuation.replace("-", "")
     
     def __init__(self):
-        self.base_indexes_path = os.getenv("BASE_INDEXES_PATH")
+        self.BASE_INDEXES_DIR = os.getenv("BASE_INDEXES_DIR")
     
     # def traditional_retrieval(self, query, index_name, dataset_name):
-    #     index_path = os.path.join(self.base_indexes_path, f"{index_name}/{dataset_name}")
+    #     index_path = os.path.join(self.BASE_INDEXES_DIR, f"{index_name}/{dataset_name}")
     #     searcher = LuceneSearcher(index_path)
     #     hits = searcher.search(query)
     #     results=[]
@@ -44,8 +44,8 @@ class Searcher(object):
         # query = re.sub(r"\p{P}(?<!-)", "", query)
         query = query.translate(str.maketrans('', '', self.punctuation_marks))
         print(query)
-        encodes_file_path = os.path.join(os.getenv("BASE_ENCODES_PATH"), f"dense/{language_model}/{dataset_name}/data_encoded.json")
-        prebuilt_index_path = os.path.join(os.getenv("BASE_INDEXES_PATH"), f"{index_method}/{dataset_name}/dense/{language_model}/")
+        encodes_file_path = os.path.join(os.getenv("BASE_ENCODES_DIR"), f"dense/{language_model}/{dataset_name}/data_encoded.json")
+        prebuilt_index_path = os.path.join(os.getenv("BASE_INDEXES_DIR"), f"{index_method}/{dataset_name}/dense/{language_model}/")
         
         print(encodes_file_path)
         print(prebuilt_index_path)
