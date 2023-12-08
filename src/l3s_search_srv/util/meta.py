@@ -64,6 +64,9 @@ class SearchSrvMeta(object):
     def get_existing_dense_encodings(self):
         datasets = self.get_datasets()
         dense_encodes_dir = os.path.join(os.getenv("BASE_ENCODES_DIR"), "dense")
+        if not os.path.isdir(dense_encodes_dir):
+            raise ValueError(f'Directory not found: {dense_encodes_dir}')
+        
         existing_encodings = []
         
         for l in self.LANGUAGE_MODELS:
@@ -94,6 +97,8 @@ class SearchSrvMeta(object):
     def get_existing_indexes(self):
         # datasets = self.get_datasets()
         BASE_INDEXES_DIR = os.getenv("BASE_INDEXES_DIR")
+        if not os.path.isdir(BASE_INDEXES_DIR):
+            raise ValueError(f"Directory not found: {BASE_INDEXES_DIR}")
         
         existing_indexes = []
         for i in self.INDEX_METHODS:

@@ -13,7 +13,7 @@ dto_encode_type = Model("DtoEncodeType", {
 })
 
 dto_encode_type_list = Model("DtoEncodeTypeList", {
-    "results": fields.List(fields.Nested(dto_encode_type))
+    "results": fields.List(fields.String())
 })
 
 dto_language_model = Model("DtoLanguageModel", {
@@ -21,7 +21,7 @@ dto_language_model = Model("DtoLanguageModel", {
 })
 
 dto_language_model_list = Model("DtoLanguageModelList", {
-    "results": fields.List(fields.Nested(dto_language_model))
+    "results": fields.List(fields.String())
 })
 
 dto_index_method = Model("DtoIndexMethod", {
@@ -29,7 +29,7 @@ dto_index_method = Model("DtoIndexMethod", {
 })
 
 dto_index_method_list = Model("DtoIndexMethodList", {
-    "results": fields.List(fields.Nested(dto_index_method))
+    "results": fields.List(fields.String())
 })
 
 dto_host = Model("DtoHost", {

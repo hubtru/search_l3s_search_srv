@@ -21,7 +21,7 @@ from l3s_search_srv.api.test.endpoints import ns_test
 api.add_namespace(ns_test, path="/search-test")
 
 from l3s_search_srv.api.metadata.endpoints import ns_metadata
-api.add_namespace(ns_metadata, path="/search-metadata")
+api.add_namespace(ns_metadata, path="/metadata")
 
 # from l3s_search_srv.api.dataset.endpoints import ns_dataset_processor
 # api.add_namespace(ns_dataset_processor, path="/dataset-processor")

@@ -33,7 +33,8 @@ app = create_app(os.getenv("FLASK_ENV", "development"))
 
 # Run the app
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.test_client().get('/')
+    app.run(debug=True, host="0.0.0.0", port="9043")
     # with app.test_client() as client:
     #     ## encode update
     #     encoder_request_url = get_request_url(endpoint="api.l3s_search_encoder_updater")

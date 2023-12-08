@@ -2,11 +2,13 @@ services:
   search-l3s-search-service:
     # image: ghcr.io/e-learning-by-sse/search-l3s_search-service:latest
     build: .
-    restart: unless-stopped
+    restart: always
     # networks:
     #   - search
     ports:
       - "9043:9043"
+    volumes:
+      - .:/code
   # dev-db-l3s:
   #   image: postgres:13
   #   # ports:

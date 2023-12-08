@@ -40,7 +40,7 @@ class SearcherUpdate(Resource):
         ## Get the data from payload
         request_data = request.json
         secret = request_data["secret"]
-        if secret != os.getenv('MLS_CLIENT_SECRET'):
+        if secret != os.getenv('CLIENT_SECRET'):
             return {"message": "secret does not match!"}, HTTPStatus.BAD_REQUEST
         list_documents = request_data["documents"]
         

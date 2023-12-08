@@ -26,12 +26,27 @@ ns_indexer.models[dto_corpus.name] = dto_corpus
 ns_indexer.models[dto_document.name] = dto_document
 ns_indexer.models[dto_bm25_indexer_request.name] = dto_bm25_indexer_request
 
-@ns_indexer.route("/indexes", endpoint="l3s_search_indexes", doc=False)
+@ns_indexer.route("/indexes", endpoint="l3s_search_indexes")
 class IndexerTest(Resource):
+    @ns_indexer.response(int(HTTPStatus.INTERNAL_SERVER_ERROR), description="Directory not found")
     def get(self):
         '''get existing indexes'''
-        indexes = SearchSrvMeta().get_existing_indexes()
-        return {"Indexes": indexes}, HTTPStatus.OK
+        try:
+            indexes = SearchSrvMeta().get_existing_indexes()
+            return {"message": "success", "indexes": indexes}, HTTPStatus.OK
+        except ValueError as e:
+            return {"message": e.args[0], "indexes": []}, HTTPStatus.INTERNAL_SERVER_ERROR
+
+# from .dto import dto_indexed_datasets, dto_indexed_datasets_list
+# ns_indexer.models[dto_indexed_datasets.name] = dto_indexed_datasets
+# ns_indexer.models[dto_indexed_datasets_list.name] = dto_indexed_datasets_list
+# @ns_indexer.route('/indexes', endpoint='l3s_search_metadata_indexes')
+# class MetadataIndexes(Resource):
+#     @ns_indexer.marshal_with(dto_indexed_datasets_list)
+#     def get(self):
+#         '''get the list of existing indexes'''
+#         results = SearchSrvMeta().get_existing_indexes()
+#         return {"results": results}, HTTPStatus.OK
 
 
 ## ----------------------- Index Updater ---------------------------- ##

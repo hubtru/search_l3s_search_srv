@@ -11,17 +11,28 @@ from .dto import dto_dense_encoder
 ns_encoder.models[dto_dense_encoder.name] = dto_dense_encoder
 
 
-@ns_encoder.route("/encodings", endpoint="l3s_search_encodings", doc=False)
+@ns_encoder.route("/encodings", endpoint="l3s_search_encodings")
 class EncoderTest(Resource):
     def get(self):
         '''get existing encodings'''
-        dense_encodings = SearchSrvMeta().get_existing_dense_encodings()
-        return {"Encodings": dense_encodings}, HTTPStatus.OK
+        try:
+            dense_encodings = SearchSrvMeta().get_existing_dense_encodings()
+            return {"message": "success", "encodings": dense_encodings}, HTTPStatus.OK
+        except ValueError as e:
+            return {"message": e.args[0], "encodings": []}, HTTPStatus.INTERNAL_SERVER_ERROR
+        
 
-# @ns_encoder.route("/sparse-encoder", endpoint="sparse_encoder")
-# class SparseEncodeGenerator(Resource):
-#     def post(self):
-#         return {"message": "Success: Sparse Encoder"}
+# from .dto import dto_encoded_datasets, dto_encoded_datasets_list
+# ns_metadata.models[dto_encoded_datasets.name] = dto_encoded_datasets
+# ns_metadata.models[dto_encoded_datasets_list.name] = dto_encoded_datasets_list
+
+# @ns_metadata.route('/encodings', endpoint='l3s_search_metadata_encodings')
+# class Encodings(Resource):
+#     @ns_metadata.marshal_with(dto_encoded_datasets_list)
+#     def get(self):
+#         '''get list of existing encodings'''
+#         results = SearchSrvMeta().get_existing_dense_encodings()
+#         return {"results": results}, HTTPStatus.OK
 
 
 ## ---------------------- Encode Updater ----------------------- ##

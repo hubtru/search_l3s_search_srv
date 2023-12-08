@@ -28,9 +28,3 @@
 **/.mypy_cache
 **/.pytest_cache
 **/.hypothesis
-
-/datasets/*/
-/encodes/dense/bert-base-german-cased/*/
-/encodes/dense/xlm-roberta-base/*/
-/indexes/flat-ip/*/
-/indexes/flat-l2/*/
