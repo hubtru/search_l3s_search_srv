@@ -7,5 +7,3 @@
 .python-version
 .dockercmd
 .archiv
-**/encodes/*
-**/indexes/*
