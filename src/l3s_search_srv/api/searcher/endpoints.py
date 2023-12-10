@@ -156,7 +156,6 @@ class DenseRetrieval(Resource):
                     dataset_name=dataset_name,
                     index_method=index_method
                 )
-                pprint(results[0])
                     
                 if entity_type != "all":
                     if entity_type in ["task", "skill", "path"]:
@@ -168,9 +167,7 @@ class DenseRetrieval(Resource):
                 if nr_result != 0:
                     results = results[:nr_result]
                     
-                # print("results")
-                response = {"results": results}
-                # response = results
+                response = {"message": "success", "results": results}
                     
                 return response, HTTPStatus.CREATED
         
