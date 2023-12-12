@@ -3,7 +3,7 @@ from http import HTTPStatus
 import json
 from flask import jsonify, request
 from flask import current_app as app
-from flask_restx import Namespace, Resource
+from flask_restx import Namespace, Resource, reqparse
 from pprint import pprint
 from .dto import (
     dto_simple_search_request, dto_simple_search_response
@@ -23,6 +23,18 @@ ns_searcher.models[dto_simple_search_response.name] = dto_simple_search_response
 #     def get(self):
 #         return {"message": "Test message of sercher-service"}, HTTPStatus.OK
 
+## ------------------------- Secret Checker ------------------------ ##
+parser_secret = reqparse.RequestParser()
+parser_secret.add_argument('secret_key', type=str, location='args')
+@ns_searcher.route('/check_secret')
+class CheckSecretKey(Resource):
+    @ns_searcher.expect(parser_secret)
+    def get(self):
+        request_data = parser_secret.parse_args()
+        if request_data["secret_key"] == os.getenv('MLS_CLIENT_SECRET'):
+            return {"message": "valid secret key"}, HTTPStatus.OK
+        else:
+            return {"message": "invalid secret key"}, HTTPStatus.BAD_REQUEST
 
 ## ------------------------- Searcher Updater ------------------------ ##
 from datetime import datetime
@@ -40,7 +52,7 @@ class SearcherUpdate(Resource):
         ## Get the data from payload
         request_data = request.json
         secret = request_data["secret"]
-        if secret != os.getenv('CLIENT_SECRET'):
+        if secret != os.getenv('MLS_CLIENT_SECRET'):
             return {"message": "secret does not match!"}, HTTPStatus.BAD_REQUEST
         list_documents = request_data["documents"]
         
