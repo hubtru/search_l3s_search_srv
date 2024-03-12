@@ -1,23 +1,12 @@
 from flask_restx import Model, fields
 
-dto_dataset = Model("DtoDataset", {
-    "name": fields.String(description="name of dataset", default=None),
-})
 
 dto_dataset_list = Model("DtoDatasetList", {
-    "results": fields.List(fields.Nested(dto_dataset))
-})
-
-dto_encode_type = Model("DtoEncodeType", {
-    "name": fields.String(description="name of encode type", default=None)
+    "results": fields.List(fields.String())
 })
 
 dto_encode_type_list = Model("DtoEncodeTypeList", {
     "results": fields.List(fields.String())
-})
-
-dto_language_model = Model("DtoLanguageModel", {
-    "name": fields.String(description="name of language model", default=None)
 })
 
 dto_language_model_list = Model("DtoLanguageModelList", {

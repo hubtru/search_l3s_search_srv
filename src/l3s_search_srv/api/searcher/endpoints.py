@@ -49,68 +49,102 @@ class SearcherUpdate(Resource):
     @ns_searcher.marshal_with(dto_searcher_update_response)
     def post(self):
         '''update the serch service'''
-        ## Get the data from payload
-        request_data = request.json
-        secret = request_data["secret"]
-        if secret != os.getenv('MLS_CLIENT_SECRET'):
-            return {"message": "secret does not match!"}, HTTPStatus.BAD_REQUEST
-        list_documents = request_data["documents"]
-        
-        ## if empty list -> return ok
-        if list_documents == []:
-            return {"message": "empty list of documents."}, HTTPStatus.OK
-        
-        ## save the file to ./datasets
-        ## create the file and directory
-        file_name = "data.json"
-        formatted_time = datetime.now().strftime("%Y%m%d%H%M%S")
-        save_to = os.path.join(os.getenv("BASE_DATASETS_DIR"), f"documents_{formatted_time}")
-        
-        ## check whether the directory already exists
-        if not os.path.exists(save_to):
-            # If it doesn't exist, create the directory
-            os.makedirs(save_to)
-            print(f"Directory '{save_to}' created.")
-        else:
-            ## if exists, raise error
-            print(f"Directory '{save_to}' already exists.")
-            raise 
-        
-        file_dir = os.path.join(save_to, file_name)
-        
-        with open(file_dir, 'w') as file:
-            json.dump(list_documents, file, indent=4)
-        
-        ## remove old datesets
-        dirs_pruning(os.getenv("BASE_DATASETS_DIR"))
-        
-        
-        
-        ## Encoding: encode the new dataset
-        encoder_request_url = get_request_url(endpoint="api.l3s_search_encoder_updater")
-        print(encoder_request_url)
-        encoder_response = requests.get(encoder_request_url)
-        print(encoder_response.json())
-        
-        ## remove old encodings
-        for l in SearchSrvMeta().LANGUAGE_MODELS:
-            target_dir = os.path.join(os.getenv("BASE_ENCODES_DIR"), f'dense/{l}')
-            dirs_pruning(target_dir)
-        
-        
-        ## Indexing: index the new dataset
-        indexer_request_url = get_request_url(endpoint="api.l3s_search_indexer_updater")
-        print(f"indexer url: {indexer_request_url}")
-        indexer_response = requests.get(indexer_request_url)
-        print(f"indexer response: {indexer_response.json()}")
-        
-        ## remove old indexes
-        for i in SearchSrvMeta().INDEX_METHODS:
-            target_dir = os.path.join(os.getenv("BASE_INDEXES_DIR"), i)
-            dirs_pruning(target_dir)
-        
-        
-        return {"message": "data received"}, HTTPStatus.CREATED
+        try:
+            ## Get the data from payload
+            request_data = request.json
+            pprint(request_data)
+            ns_searcher.logger.info("Starting: Checking client secret...")
+            print(request_data["secret"])
+            if request_data["secret"] != os.getenv('MLS_CLIENT_SECRET'):
+                raise ValueError("Invalid secret key!")
+
+            ns_searcher.logger.info("Success: client secret valid.")
+            list_documents = request_data["documents"]
+            
+            ## if empty list -> return ok
+            if list_documents == []:
+                raise ValueError("Empty list of documents")
+                
+
+            ## save the file to ./datasets
+            ## create the file and directory
+            ns_searcher.logger.info("Creating file name and directory...")
+            file_name = "data.json"
+            dataset_name = f"documents_{datetime.now().strftime('%Y%m%d%H%M%S')}"
+            save_to = os.path.join(os.getenv("BASE_DATASETS_DIR"), dataset_name)
+            
+            ## check whether the directory already exists
+            if not os.path.exists(save_to):
+                # If it doesn't exist, create the directory
+                os.makedirs(save_to)
+                ns_searcher.logger.info(f"Directory '{save_to}' created.")
+            else:
+                ## if exists, raise error
+                print(f"Directory '{save_to}' already exists.")
+                raise FileExistsError("Confilict: Directory already exists.")
+            
+            ns_searcher.logger.info("Success: file name and directory created.")
+            
+            ns_searcher.logger.info("Starting: Save the new dataset to the directory...")
+            file_dir = os.path.join(save_to, file_name)
+            with open(file_dir, 'w') as file:
+                json.dump(list_documents, file, indent=4)
+            ns_searcher.logger.info("Success: New dataset saved...")
+            
+            ## Encoding: encode the new dataset
+            ns_searcher.logger.info("Starting: Encoding dataset...")
+            encoder_request_url = get_request_url(endpoint="api.l3s_search_encoder_updater")
+            encoder_response = requests.get(encoder_request_url)
+            print(f"encoder response: {encoder_response.json()}")
+            ns_searcher.logger.info("Success: dataset encoded.")
+            
+            ## Indexing: index the new dataset
+            ns_searcher.logger.info("Starting: Indexing the new dataset...")
+            indexer_request_url = get_request_url(endpoint="api.l3s_search_indexer_updater")
+            indexer_response = requests.get(indexer_request_url)
+            print(f"indexer response: {indexer_response.json()}")
+            ns_searcher.logger.info("Success: Dataset indexed.")
+            
+            
+            ## remove old files
+            ### check if new dataset is ready
+            check_new_dataset = SearchSrvMeta().check_new_dataset(dataset_name)
+            ns_searcher.logger.info(f"Check Dataset: {check_new_dataset}")
+            
+            flags = list(check_new_dataset.values())
+            new_dataset_is_ready = all(element == 1 for element in flags)
+            
+            if new_dataset_is_ready:
+                ### remove old datesets
+                ns_searcher.logger.info("Starting: Removing old dataset...")
+                dirs_pruning(os.getenv("BASE_DATASETS_DIR"))
+                ns_searcher.logger.info("Success: Old dataset removed.")
+                
+                ### remove old encodings
+                ns_searcher.logger.info("Starting: Removing old encoding data...")
+                for l in SearchSrvMeta().LANGUAGE_MODELS:
+                    target_dir = os.path.join(os.getenv("BASE_ENCODES_DIR"), f'dense/{l}')
+                    dirs_pruning(target_dir)
+                ns_searcher.logger.info("Success: Old encoding data removed.")
+                
+                ### remove old indexes
+                ns_searcher.logger.info("Starting: Removing old index files...")
+                for i in SearchSrvMeta().INDEX_METHODS:
+                    target_dir = os.path.join(os.getenv("BASE_INDEXES_DIR"), i)
+                    dirs_pruning(target_dir)
+                ns_searcher.logger.info("Success: Old index files removed.")
+                
+                return {"message": "New Dataset is ready"}, HTTPStatus.CREATED
+            else:
+                raise ImportError("Failed to update dataset")
+        except KeyError as e:
+            return {"message": e.args[0]}, HTTPStatus.BAD_REQUEST
+        except ValueError as e:
+            return {"message": "Empty list of documents."}, HTTPStatus.BAD_REQUEST
+        except FileExistsError as e:
+            return {"message": e.args[0]}, HTTPStatus.INTERNAL_SERVER_ERROR
+        except ImportError as e:
+            return {"message": e.args[0]}, HTTPStatus.CONFLICT
         ## ---------------------------------------------------------------------------------
 
         # return {"message": "data received"}, HTTPStatus.CREATED

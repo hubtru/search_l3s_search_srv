@@ -43,49 +43,53 @@ ns_encoder.models[dto_dense_encode_updater_list.name] = dto_dense_encode_updater
 @ns_encoder.route('/updater', endpoint='l3s_search_encoder_updater', doc=False)
 class EncodeUpdater(Resource):
     @ns_encoder.marshal_with(dto_dense_encode_updater_list)
+    @ns_encoder.response(int(HTTPStatus.OK), description="Success")
+    @ns_encoder.response(int(HTTPStatus.NOT_FOUND), description="No datasets found.")
     def get(self):
         '''update the encodings'''
         ## ----------- init encodes ----------- ##
         # get the list of not encoded datasets for different language models
         # e.g. [{'bert-base-german-cased': []}, {'xlm-roberta-base': []}]
-        
-        existing_datasets = SearchSrvMeta().get_datasets()
-        if existing_datasets == []:
-            return {"results": []}, HTTPStatus.OK
-        
-        not_encoded_datasets = SearchSrvMeta().get_not_dense_encoded_dataset()
-        # print(f"not_encoded_datasets: {not_encoded_datasets}")
-        
-        results = []
-        for dictionary in not_encoded_datasets:
-            r = {}
-            language_model, datasets = list(dictionary.items())[0]
-            r["language_model"] = language_model
-            # r["datasets"] = datasets
+        try:
+            existing_datasets = SearchSrvMeta().get_datasets()
+            if existing_datasets == []:
+                raise FileNotFoundError('No Datasets found.')
+
+            # get not encoded datasets
+            not_encoded_datasets = SearchSrvMeta().get_not_dense_encoded_datasets()
             
-            if datasets == []:
-                r["dataset"] = "Everything is up to date."
-                r["state"] = 2
-                # r["message"] = ""
-                results.append(r)
-                continue
-            
-            # r["states"] = []
-            for d in datasets:
-                r["dataset"] = d
-                if language_model == "bert-base-german-cased":
-                    enc = BertGermanCasedDenseEncoder()
-                    p = enc.dataset_encoder(d)
-                    r["state"] = p
-                elif language_model == "xlm-roberta-base":
-                    enc = XlmRobertaDenseEncoder()
-                    p = enc.dataset_encoder(d)
-                    r["state"] = p
+            results = []
+            for dictionary in not_encoded_datasets:
+                r = {}
+                language_model, datasets = list(dictionary.items())[0]
+                r["language_model"] = language_model
+                # r["datasets"] = datasets
                 
-            # r["message"] = f"Number of encoded datasets: {len(datasets)}"
-                results.append(r)
-            
-        return {"results": results}, HTTPStatus.OK
+                if datasets == []:
+                    r["dataset"] = "Everything is up to date."
+                    r["state"] = 2
+                    # r["message"] = ""
+                    results.append(r)
+                    continue
+                
+                for d in datasets:
+                    r["dataset"] = d
+                    if language_model == "bert-base-german-cased":
+                        enc = BertGermanCasedDenseEncoder()
+                        p = enc.dataset_encoder(d)
+                        r["state"] = p
+                    elif language_model == "xlm-roberta-base":
+                        enc = XlmRobertaDenseEncoder()
+                        p = enc.dataset_encoder(d)
+                        r["state"] = p
+                    
+                    results.append(r)
+                
+            return {"results": results}, HTTPStatus.OK
+        except FileNotFoundError as e:
+            results = {"language_model": "N.A.", "dataset": e.args[0], "state": -1}
+            return {"results": results}, HTTPStatus.NOT_FOUND
+        
 
 
 ## -------------------- Encode Query -------------------- ##

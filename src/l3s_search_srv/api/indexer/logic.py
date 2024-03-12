@@ -123,7 +123,7 @@ class Indexer(object):
             print(len(data_json))
             for d in data_json:
                 temp.append(d["vector"])
-                docid.append(d["id"])
+                docid.append(d["entity_id"])
 
         embeddings = np.float32(np.array(temp))
         dim = embeddings.shape[1]   # dimension of input

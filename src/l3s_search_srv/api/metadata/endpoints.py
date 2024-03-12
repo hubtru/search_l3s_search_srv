@@ -11,8 +11,6 @@ ns_metadata = Namespace(name="Metadata",
                         validate=True, 
                         description="Get functions for Meta-information for using search services")
 
-
-
 def get_subdirs(dir):
     try:
         subdirs = [d for d in os.listdir(dir) if os.path.isdir(os.path.join(dir, d))]
@@ -32,94 +30,84 @@ class Host(Resource):
 
 
 ## ------------ Datasets ------------- ##
-from .dto import dto_dataset, dto_dataset_list
-ns_metadata.models[dto_dataset.name] = dto_dataset
+from .dto import dto_dataset_list
 ns_metadata.models[dto_dataset_list.name] = dto_dataset_list
-
-# @ns_metadata.route("/test")
-# class DatasetTest(Resource):
-#     def get(self):
-#         print(url_for('api.reranker_test'))
-#         return {"results": f"{url_for('api.reranker_test')}"}
 
 @ns_metadata.route("/datasets", endpoint="get_datasets")
 class GetDatasets(Resource):
     @ns_metadata.marshal_with(dto_dataset_list)
+    @ns_metadata.response(int(HTTPStatus.INTERNAL_SERVER_ERROR), description="Internal value error")
+    @ns_metadata.response(int(HTTPStatus.NOT_FOUND), description="Path not found")
     def get(self):
         """Get the datasets"""
         try:
-            dataset_dir = os.getenv("BASE_DATASETS_DIR")
-            subdirs = get_subdirs(dataset_dir)
-            
-            datasets = []
-            for s in subdirs:
-                dataset = {"name": s}
-                datasets.append(dataset)
-            
-            print(datasets)
+            datasets = SearchSrvMeta().get_datasets()
             response = {"results": datasets}
             return response, HTTPStatus.OK
         except ValueError as e:
-            print("Internal Value Error-> %s\n" % e)
+            print("Value Error-> %s\n" % e)
             response = {"results": None}
             return response, HTTPStatus.INTERNAL_SERVER_ERROR
-
-
-# @ns_metadata.route("/datasets/latest", endpoint="l3s_search_metadata_datasets_latest")
-# class DatasetsLatest(Resource):
-#     def get(self):
-#         print(SearchSrvMeta().get_latest_dataset())
-#         return {"result": SearchSrvMeta().get_latest_dataset()}
+        except FileNotFoundError as e:
+            print(e.args[0])
+            response = {"results": None}
+            return response, HTTPStatus.NOT_FOUND
 
 ## -------------------- Encoding Types -------------------- ##
-from .dto import dto_encode_type, dto_encode_type_list
-ns_metadata.models[dto_encode_type.name] = dto_encode_type
+from .dto import dto_encode_type_list
 ns_metadata.models[dto_encode_type_list.name] = dto_encode_type_list
 @ns_metadata.route("/encoding-types", endpoint="encoding_types")
 class GetEncodingType(Resource):
     @ns_metadata.marshal_with(dto_encode_type_list)
+    @ns_metadata.response(int(HTTPStatus.OK), description="Success")
+    @ns_metadata.response(int(HTTPStatus.BAD_REQUEST), description="Value error")
+    @ns_metadata.response(int(HTTPStatus.NOT_FOUND), description="Path not found")
+    @ns_metadata.response(int(HTTPStatus.INTERNAL_SERVER_ERROR), description="Unknown internal error")
     def get(self):
         """Get the list of available encoding types"""
-        ###
-        # encodes_dir = os.getenv("BASE_ENCODES_DIR")
-        # subdirs = get_subdirs(encodes_dir)
-        
-        # encode_types = []
-        # for s in subdirs:
-        #     encode_type = {"name": s}
-        #     encode_types.append(encode_type)
-        ###
-        encode_methods = SearchSrvMeta().ENCODE_METHODS
-        response = {"results": encode_methods}
-        return response, HTTPStatus.OK 
+        try:
+            encode_methods = SearchSrvMeta().get_encode_methods()
+            response = {"results": encode_methods}
+            return response, HTTPStatus.OK
+        except ValueError as e:
+            print("Value Error-> %s\n" % e)
+            response = {"results": None}
+            return response, HTTPStatus.BAD_REQUEST
+        except FileNotFoundError as e:
+            print(e.args[0])
+            response = {"results": None}
+            return response, HTTPStatus.NOT_FOUND
+        except Exception as e:
+            print("Internal Server Error-> %s\n" % e)
+            response = {"results": None}
+            return response, HTTPStatus.INTERNAL_SERVER_ERROR
 
 
-## ------- language models ------- ##
+## ------------------------ language models --------------------------- ##
 
-from .dto import dto_language_model, dto_language_model_list
-
-ns_metadata.models[dto_language_model.name] = dto_language_model
+from .dto import dto_language_model_list
 ns_metadata.models[dto_language_model_list.name] = dto_language_model_list
 
 @ns_metadata.route("/language-models")
 class GetLanguageModels(Resource):
     @ns_metadata.marshal_with(dto_language_model_list)
+    @ns_metadata.response(int(HTTPStatus.OK), description="Success")
+    @ns_metadata.response(int(HTTPStatus.BAD_REQUEST), description="Value error")
+    @ns_metadata.response(int(HTTPStatus.INTERNAL_SERVER_ERROR), description="Unknown internal error")
     def get(self):
         """Get the list of available language models"""
-        ###
-        # encodes_dense_dir = os.path.join(os.getenv("BASE_ENCODES_DIR"), 'dense')
-        # subdirs = get_subdirs(encodes_dense_dir)
-        
-        # if subdirs == []:
-        #     response = {"message": ""}
-        
-        # for s in subdirs:
-        #     language_model = {"name": s}
-        #     language_models.append(language_model)
-        ###
-        language_models = SearchSrvMeta().LANGUAGE_MODELS
-        response = {"results": language_models}
-        return response, HTTPStatus.OK
+        try:
+            language_models = SearchSrvMeta().LANGUAGE_MODELS
+            response = {"results": language_models}
+            return response, HTTPStatus.OK
+        except ValueError as e:
+            print("Value Error-> %s\n" % e)
+            response = {"results": None}
+            return response, HTTPStatus.BAD_REQUEST
+        except Exception as e:
+            print("Internal Server Error-> %s\n" % e)
+            response = {"results": None}
+            return response, HTTPStatus.INTERNAL_SERVER_ERROR
 
 
 ## --------- index methods --------- ##
@@ -130,27 +118,19 @@ ns_metadata.models[dto_index_method_list.name] = dto_index_method_list
 @ns_metadata.route("/index-methods", endpoint="l3s_search_metadata_index_methods")
 class GetIndexMethod(Resource):
     @ns_metadata.marshal_with(dto_index_method_list)
+    @ns_metadata.response(int(HTTPStatus.OK), description="Success")
+    @ns_metadata.response(int(HTTPStatus.BAD_REQUEST), description="Value error")
+    @ns_metadata.response(int(HTTPStatus.INTERNAL_SERVER_ERROR), description="Unknown internal error")
     def get(self):
         """Get the list of available index methods"""
-        # index_method_dir = os.getenv("BASE_INDEXES_DIR")
-        # print(f'Get indexes base directory: {index_method_dir}')
-            
-        # try:
-        #     subdirs = get_subdirs(index_method_dir)
-    
-        #     index_methods = []
-        #     for s in subdirs:
-        #         index_method = {"name": s}
-        #         index_methods.append(index_method)
-            
-        #     response = {"results": index_methods}
-            
-        #     return response, HTTPStatus.OK
-        # except FileNotFoundError as e:
-        #     print("Directory not found-> %s\n" % e)
-        #     response = {"results": [{"name": None}]}
-        #     return response, HTTPStatus.INTERNAL_SERVER_ERROR
-        ###
-        
-        index_methods = SearchSrvMeta().INDEX_METHODS
-        return {"results": index_methods}
+        try:
+            index_methods = SearchSrvMeta().INDEX_METHODS
+            return {"results": index_methods}
+        except ValueError as e:
+            print("Value Error-> %s\n" % e)
+            response = {"results": None}
+            return response, HTTPStatus.BAD_REQUEST
+        except Exception as e:
+            print("Internal Server Error-> %s\n" % e)
+            response = {"results": None}
+            return response, HTTPStatus.INTERNAL_SERVER_ERROR

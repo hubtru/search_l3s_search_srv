@@ -7,3 +7,4 @@
 .python-version
 .dockercmd
 .archiv
+**/docker-compose.yml
