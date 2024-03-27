@@ -8,3 +8,4 @@
 .dockercmd
 .archiv
 **/docker-compose.yml
+.idea
