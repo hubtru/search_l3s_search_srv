@@ -223,131 +223,131 @@ class DenseRetrieval(Resource):
                 print("*** case 2: not using skill profile but using learning profile ***")
 
                 # retrieve user specific data
-                user = sse_search_user_api.user_mgmt_controller_get_user_profiles(user_id)
-                print(user)
+                user = sse_search_user_api.user_mgmt_controller_get_user_profiles(user_id).to_dict()
 
-                learning_profile_id = user["learningProfile"]
+                learning_profile_id = user["learning_profile"]
                 if learning_profile_id is '':
                     raise ValueError("User has no learningProfile")
 
-                learning_profile = sse_search_learning_profile_api.learning_profile_controller_get_learning_profile_by_id(learning_profile_id)
+                learning_profile = sse_search_learning_profile_api.learning_profile_controller_get_learning_profile_by_id(learning_profile_id).to_dict()
 
-                learning_history_id = learning_profile["learningHistoryId"]
+                learning_history_id = learning_profile["learning_history_id"]
                 if learning_history_id is '':
                     raise ValueError("Learning profile of user has no learning history")
 
-                learning_history = sse_search_learning_history_api.learning_history_controller_get_learning_history(learning_history_id)
-                started_learning_units = learning_history["startedLearningUnits"]
-                learned_skills = learning_history["learnedSkills"]
+                learning_history = sse_search_learning_history_api.learning_history_controller_get_learning_history(learning_history_id).to_dict()
+                started_learning_units = learning_history["started_learning_units"]
+                learned_skills = learning_history["learned_skills"]
 
                 # retrieve skills relevant to query
                 relevant_skills = []
                 for started_unit_id in started_learning_units:
-                    learning_unit = sse_search_learning_unit_api.search_learning_unit_controller_get_learning_unit(started_unit_id)
+                    learning_unit = sse_search_learning_unit_api.search_learning_unit_controller_get_learning_unit(started_unit_id).to_dict()
 
-                    teachingGoals = learning_unit["teachingGoals"]   # Are these ids for skills? Include. Should skills be excluded have already been learned?
-                    requiredSkills = learning_unit["requiredSkills"]  # User should have already learned these skills? exclude? Include those that have not been learned yet?
-
-                    check_already_learned = lambda x: x in learned_skills
-                    teachingGoals = filter(check_already_learned, teachingGoals) # filter already learned skills
-                    requiredSkills = filter(check_already_learned, requiredSkills)
-                    all_skills = teachingGoals + requiredSkills
-
-                    relevant_skills += [sse_search_skill_api.skill_mgmt_controller_get_resolved_skill(skill_to_learn) for skill_to_learn in all_skills]
-
-                # get seperator token. Is it needed?
-                sep_token = AutoTokenizer.from_pretrained(searcher.language_models[language_model]).sep_token
-
-                # add skill names to query
-                print(f"Original Query: {query}")
-                for skill in relevant_skills:
-                    query += f"{sep_token}{skill['name']}"
-                print(f"Final Query: {query}")
-
-            elif use_skill_profile and not use_learning_profile:
-                ## case 3: using skill profile but not learning profile
-                # get the skill profile of the user
-                print("*** case 3: using skill profile but not learning profile ***")
-                user = sse_search_user_api.user_mgmt_controller_get_user_profiles(user_id)
-
-                print(user)
-                learning_profile_id = user["learningProfile"]
-                if learning_profile_id is '':
-                    raise ValueError("User has no learningProfile")
-
-                learning_profile = sse_search_learning_profile_api.learning_profile_controller_get_learning_profile_by_id(
-                    learning_profile_id)
-
-                learning_history_id = learning_profile["learningHistoryId"]
-                if learning_history_id is '':
-                    raise ValueError("Learning profile of user has no learning history")
-
-                learning_history = sse_search_learning_history_api.learning_history_controller_get_learning_history(
-                    learning_history_id)
-                learned_skills = learning_history["learnedSkills"]
-
-                # retrieve skills relevant to query
-                relevant_skills = [sse_search_skill_api.skill_mgmt_controller_get_resolved_skill(skill) for skill in learned_skills]
-
-                # get seperator token. Is it needed?
-                sep_token = AutoTokenizer.from_pretrained(searcher.language_models[language_model]).sep_token
-
-                # add skill names to query
-                print(f"Original Query: {query}")
-                for skill in relevant_skills:
-                    query += f"{sep_token}{skill['name']}"
-                print(f"Final Query: {query}")
-
-            else:
-                ## case 4: using both skill profile and learning profile
-                # get the skill and learning profile of the user
-                print("*** case 4: using both skill profile and learning profile ***")
-                user = sse_search_user_api.user_mgmt_controller_get_user_profiles(user_id)
-                print(user)
-
-                learning_profile_id = user["learningProfile"]
-                if learning_profile_id is '':
-                    raise ValueError("User has no learningProfile")
-
-                learning_profile = sse_search_learning_profile_api.learning_profile_controller_get_learning_profile_by_id(
-                    learning_profile_id)
-
-                learning_history_id = learning_profile["learningHistoryId"]
-                if learning_history_id is '':
-                    raise ValueError("Learning profile of user has no learning history")
-
-                learning_history = sse_search_learning_history_api.learning_history_controller_get_learning_history(
-                    learning_history_id)
-                started_learning_units = learning_history["startedLearningUnits"]
-                learned_skills = learning_history["learnedSkills"]
-
-                # retrieve skills relevant to query
-                relevant_skills = [sse_search_skill_api.skill_mgmt_controller_get_resolved_skill(skill) for skill in learned_skills]
-                for started_unit_id in started_learning_units:
-                    learning_unit = sse_search_learning_unit_api.search_learning_unit_controller_get_learning_unit(
-                        started_unit_id)
-
-                    teachingGoals = learning_unit[
-                        "teachingGoals"]  # Are these ids for skills? Include. Should skills be excluded have already been learned?
-                    requiredSkills = learning_unit[
-                        "requiredSkills"]  # User should have already learned these skills? exclude? Include those that have not been learned yet?
+                    teachingGoals = learning_unit["teaching_goals"]   # Are these ids for skills? Include. Should skills be excluded have already been learned?
+                    requiredSkills = learning_unit["required_skills"]  # User should have already learned these skills? exclude? Include those that have not been learned yet?
 
                     check_already_learned = lambda x: x in learned_skills
                     teachingGoals = filter(check_already_learned, teachingGoals)  # filter already learned skills
                     requiredSkills = filter(check_already_learned, requiredSkills)
                     all_skills = teachingGoals + requiredSkills
+                    learned_skills += all_skills
 
-                    relevant_skills += [sse_search_skill_api.skill_mgmt_controller_get_resolved_skill(skill_to_learn)
+                    relevant_skills += [sse_search_skill_api.skill_mgmt_controller_get_skill(skill_to_learn).to_dict() for skill_to_learn in all_skills]
+
+                # get seperator token. Is it needed?
+                sep_token = AutoTokenizer.from_pretrained(searcher.language_models[language_model]).sep_token
+
+                # add skill names to query
+                print(f"Original Query: {query}", flush=True)
+                for skill in relevant_skills:
+                    query += f"{sep_token}{skill['name']}"
+                print(f"Final Query: {query}", flush=True)
+
+            elif use_skill_profile and not use_learning_profile:
+                ## case 3: using skill profile but not learning profile
+                # get the skill profile of the user
+                print("*** case 3: using skill profile but not learning profile ***")
+                user = sse_search_user_api.user_mgmt_controller_get_user_profiles(user_id).to_dict()
+
+                learning_profile_id = user["learning_profile"]
+                if learning_profile_id is '':
+                    raise ValueError("User has no learningProfile")
+
+                learning_profile = sse_search_learning_profile_api.learning_profile_controller_get_learning_profile_by_id(
+                    learning_profile_id).to_dict()
+
+                learning_history_id = learning_profile["learning_history_id"]
+                if learning_history_id is '':
+                    raise ValueError("Learning profile of user has no learning history")
+
+                learning_history = sse_search_learning_history_api.learning_history_controller_get_learning_history(
+                    learning_history_id).to_dict()
+                learned_skills = learning_history["learned_skills"]
+
+                # retrieve skills relevant to query
+                relevant_skills = [sse_search_skill_api.skill_mgmt_controller_get_skill(skill).to_dict() for skill in learned_skills]
+
+                # get seperator token. Is it needed?
+                sep_token = AutoTokenizer.from_pretrained(searcher.language_models[language_model]).sep_token
+
+                # add skill names to query
+                print(f"Original Query: {query}", flush=True)
+                for skill in relevant_skills:
+                    query += f"{sep_token}{skill['name']}"
+                print(f"Final Query: {query}", flush=True)
+
+            else:
+                ## case 4: using both skill profile and learning profile
+                # get the skill and learning profile of the user
+                print("*** case 4: using both skill profile and learning profile ***")
+                user = sse_search_user_api.user_mgmt_controller_get_user_profiles(user_id).to_dict()
+                print(user)
+
+                learning_profile_id = user["learning_profile"]
+                if learning_profile_id is '':
+                    raise ValueError("User has no learningProfile")
+
+                learning_profile = sse_search_learning_profile_api.learning_profile_controller_get_learning_profile_by_id(
+                    learning_profile_id).to_dict()
+
+                learning_history_id = learning_profile["learning_history_id"]
+                if learning_history_id is '':
+                    raise ValueError("Learning profile of user has no learning history")
+
+                learning_history = sse_search_learning_history_api.learning_history_controller_get_learning_history(
+                    learning_history_id).to_dict()
+                started_learning_units = learning_history["started_learning_units"]
+                learned_skills = learning_history["learned_skills"]
+
+                # retrieve skills relevant to query
+                relevant_skills = [sse_search_skill_api.skill_mgmt_controller_get_skill(skill).to_dict() for skill in learned_skills]
+                for started_unit_id in started_learning_units:
+                    learning_unit = sse_search_learning_unit_api.search_learning_unit_controller_get_learning_unit(
+                        started_unit_id).to_dict()
+
+                    teachingGoals = learning_unit[
+                        "teaching_goals"]  # Are these ids for skills? Include. Should skills be excluded have already been learned?
+                    requiredSkills = learning_unit[
+                        "required_skills"]  # User should have already learned these skills? exclude? Include those that have not been learned yet?
+
+                    check_already_learned = lambda x: x in learned_skills
+                    teachingGoals = filter(check_already_learned, teachingGoals)  # filter already learned skills
+                    requiredSkills = filter(check_already_learned, requiredSkills)
+                    all_skills = teachingGoals + requiredSkills
+                    learned_skills += all_skills
+
+                    relevant_skills += [sse_search_skill_api.skill_mgmt_controller_get_skill(skill_to_learn).to_dict()
                                         for skill_to_learn in all_skills]
 
                 # get seperator token. Is it needed?
                 sep_token = AutoTokenizer.from_pretrained(searcher.language_models[language_model]).sep_token
 
                 # add skill names to query
-                print(f"Original Query: {query}")
+                print(f"Original Query: {query}", flush=True)
                 for skill in relevant_skills:
                     query += f"{sep_token}{skill['name']}"
-                print(f"Final Query: {query}")
+                print(f"Final Query: {query}", flush=True)
 
             results = searcher.dense_retrieval(
                 query=query,
