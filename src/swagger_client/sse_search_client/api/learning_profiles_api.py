@@ -259,7 +259,6 @@ class LearningProfilesApi(object):
         all_params.append('_request_timeout')
 
         params = locals()
-        print(params, flush=True)
         for key, val in six.iteritems(params['kwargs']):
             if key not in all_params:
                 raise TypeError(
