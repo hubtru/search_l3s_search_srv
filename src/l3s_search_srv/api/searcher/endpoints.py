@@ -203,33 +203,36 @@ class DenseRetrieval(Resource):
 
         try:
             dataset_name = SearchSrvMeta().get_latest_dataset()
-            print(dataset_name)
             if dataset_name == "" or dataset_name == None:
                 raise FileExistsError("No dataset")
-            # print(request_data)
+
             searcher = Searcher()
 
             relevant_skills = []
             if not use_skill_profile and not use_learning_profile:
                 ## case 1: not using skill profile and learning profile
 
-                # relevant_skills = []
                 pass
 
             elif not use_skill_profile and use_learning_profile:
                 ## case 2: not using skill profile but using learning profile
                 # get the learning profile of the user
-                print("*** case 2: not using skill profile but using learning profile ***")
+                ns_searcher.logger.info("*** case 2: not using skill profile but using learning profile ***")
+
 
                 # retrieve user specific data
                 user = sse_search_user_api.user_mgmt_controller_get_user_profiles(user_id).to_dict()
+                ns_searcher.logger.info(f"User Info:\n{user}")
 
                 learning_profile_id = user["learning_profile"]
                 if learning_profile_id is '':
                     raise ValueError("User has no learningProfile")
 
+
+
                 learning_profile = sse_search_learning_profile_api.learning_profile_controller_get_learning_profile_by_id(
                     learning_profile_id).to_dict()
+                ns_searcher.logger.info(f"Learning Profile Info:\n{learning_profile}")
 
                 learning_history_id = learning_profile["learning_history_id"]
                 if learning_history_id is '':
@@ -237,8 +240,10 @@ class DenseRetrieval(Resource):
 
                 learning_history = sse_search_learning_history_api.learning_history_controller_get_learning_history(
                     learning_history_id).to_dict()
+                ns_searcher.logger.info(f"Learning History Info:\n{learning_history}")
+
                 started_learning_units = learning_history["started_learning_units"]
-                # learned_skills = learning_history["learned_skills"]
+
 
                 # retrieve skills relevant to query
                 relevant_skills = []
@@ -258,17 +263,22 @@ class DenseRetrieval(Resource):
 
                     relevant_skills += all_skills
 
+                ns_searcher.logger.info(f"Relevant Skills:\n{relevant_skills}")
+
             elif use_skill_profile and not use_learning_profile:
                 ## case 3: using skill profile but not learning profile
                 # get the skill profile of the user
-                print("*** case 3: using skill profile but not learning profile ***")
+                ns_searcher.logger.info("*** case 3: using skill profile but not learning profile ***")
+
                 user = sse_search_user_api.user_mgmt_controller_get_user_profiles(user_id).to_dict()
+                ns_searcher.logger.info(f"User Info:\n{user}")
 
                 learning_profile_id = user["learning_profile"]
                 if learning_profile_id is '':
                     raise ValueError("User has no learningProfile")
 
                 learning_profile = sse_search_learning_profile_api.learning_profile_controller_get_learning_profile_by_id(learning_profile_id=learning_profile_id).to_dict()
+                ns_searcher.logger.info(f"Learning Profile Info:\n{learning_profile}")
 
                 learning_history_id = learning_profile["learning_history_id"]
                 if learning_history_id is '':
@@ -276,22 +286,28 @@ class DenseRetrieval(Resource):
 
                 learning_history = sse_search_learning_history_api.learning_history_controller_get_learning_history(
                     learning_history_id).to_dict()
+                ns_searcher.logger.info(f"Learning History Info:\n{learning_history}")
+
                 learned_skills = learning_history["learned_skills"]
 
                 # retrieve skills relevant to query
                 relevant_skills = learned_skills
+                ns_searcher.logger.info(f"Relevant Skills:\n{relevant_skills}")
 
             else:
                 ## case 4: using both skill profile and learning profile
                 # get the skill and learning profile of the user
-                print("*** case 4: using both skill profile and learning profile ***")
+                ns_searcher.logger.info("*** case 4: using both skill profile and learning profile ***")
+
                 user = sse_search_user_api.user_mgmt_controller_get_user_profiles(user_id).to_dict()
+                ns_searcher.logger.info(f"User Info:\n{user}")
 
                 learning_profile_id = user["learning_profile"]
                 if learning_profile_id is '':
                     raise ValueError("User has no learningProfile")
 
                 learning_profile = sse_search_learning_profile_api.learning_profile_controller_get_learning_profile_by_id(learning_profile_id).to_dict()
+                ns_searcher.logger.info(f"Learning Profile Info:\n{learning_profile}")
 
                 learning_history_id = learning_profile["learning_history_id"]
                 if learning_history_id is '':
@@ -299,6 +315,8 @@ class DenseRetrieval(Resource):
 
                 learning_history = sse_search_learning_history_api.learning_history_controller_get_learning_history(
                     learning_history_id).to_dict()
+                ns_searcher.logger.info(f"Learning History Info:\n{learning_history}")
+
                 started_learning_units = learning_history["started_learning_units"]
                 learned_skills = learning_history["learned_skills"]
 
@@ -319,6 +337,7 @@ class DenseRetrieval(Resource):
                     all_skills = teachingGoals + requiredSkills
 
                     relevant_skills += all_skills
+                ns_searcher.logger.info(f"Relevant Skills:\n{relevant_skills}")
 
             results = searcher.dense_retrieval(
                 query=query,
@@ -335,8 +354,6 @@ class DenseRetrieval(Resource):
                 else:
                     raise ValueError('Invalid entity type.')
 
-            print(results, flush=True)
-            print(relevant_skills, flush=True)
             top_priority = []
             low_priority = []
             for result in results:
@@ -346,10 +363,11 @@ class DenseRetrieval(Resource):
                     low_priority.append(result)
 
             results = top_priority + low_priority
-            print(results, flush=True)
 
             if nr_result != 0:
                 results = results[:nr_result]
+
+            ns_searcher.logger.info(f"Results:\n{results}")
 
             response = {"message": "success", "results": results}
             return response, HTTPStatus.CREATED
