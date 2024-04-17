@@ -202,40 +202,39 @@ class DenseRetrieval(Resource):
 
         try:
             dataset_name = SearchSrvMeta().get_latest_dataset()
-            print(dataset_name)
             if dataset_name == "" or dataset_name == None:
                 raise FileExistsError("No dataset")
-            # print(request_data)
             searcher = Searcher()
 
-            # should this if statement be remodeled??
+
             if not use_skill_profile and not use_learning_profile:
                 ## case 1: not using skill profile and learning profile
-
-                # print(os.getenv("BASE_INDEXES_DIR"))
-
+                ns_searcher.logger.info("*** case 1: not using skill profile and learning profile ***")
                 # !!No need to change anything in the query!!
                 pass
 
             elif not use_skill_profile and use_learning_profile:
                 ## case 2: not using skill profile but using learning profile
-                # get the learning profile of the user
-                print("*** case 2: not using skill profile but using learning profile ***")
+                ns_searcher.logger.info("*** case 2: not using skill profile but using learning profile ***")
 
                 # retrieve user specific data
                 user = sse_search_user_api.user_mgmt_controller_get_user_profiles(user_id).to_dict()
+                ns_searcher.logger.info(f"User Info: {user}")
 
                 learning_profile_id = user["learning_profile"]
                 if learning_profile_id is '':
                     raise ValueError("User has no learningProfile")
 
                 learning_profile = sse_search_learning_profile_api.learning_profile_controller_get_learning_profile_by_id(learning_profile_id).to_dict()
+                ns_searcher.logger.info(f"Learning Profile Info: {learning_profile}")
 
                 learning_history_id = learning_profile["learning_history_id"]
                 if learning_history_id is '':
                     raise ValueError("Learning profile of user has no learning history")
 
                 learning_history = sse_search_learning_history_api.learning_history_controller_get_learning_history(learning_history_id).to_dict()
+                ns_searcher.logger.info(f"Learning History Info: {learning_history}")
+
                 started_learning_units = learning_history["started_learning_units"]
                 learned_skills = learning_history["learned_skills"]
 
@@ -254,21 +253,24 @@ class DenseRetrieval(Resource):
                     learned_skills += all_skills
 
                     relevant_skills += [sse_search_skill_api.skill_mgmt_controller_get_skill(skill_to_learn).to_dict() for skill_to_learn in all_skills]
+                ns_searcher.logger.info(f"Relevant Skills: {relevant_skills}")
 
                 # get seperator token. Is it needed?
                 sep_token = AutoTokenizer.from_pretrained(searcher.language_models[language_model]).sep_token
 
                 # add skill names to query
-                print(f"Original Query: {query}", flush=True)
+                ns_searcher.logger.info(f"Original Query: {query}")
                 for skill in relevant_skills:
                     query += f"{sep_token}{skill['name']}"
-                print(f"Final Query: {query}", flush=True)
+                ns_searcher.logger.info(f"Final Query: {query}")
 
             elif use_skill_profile and not use_learning_profile:
                 ## case 3: using skill profile but not learning profile
-                # get the skill profile of the user
-                print("*** case 3: using skill profile but not learning profile ***")
+                ns_searcher.logger.info("*** case 3: using skill profile but not learning profile ***")
+
+                # retrieve user specific data
                 user = sse_search_user_api.user_mgmt_controller_get_user_profiles(user_id).to_dict()
+                ns_searcher.logger.info(f"User Info: {user}")
 
                 learning_profile_id = user["learning_profile"]
                 if learning_profile_id is '':
@@ -276,6 +278,7 @@ class DenseRetrieval(Resource):
 
                 learning_profile = sse_search_learning_profile_api.learning_profile_controller_get_learning_profile_by_id(
                     learning_profile_id).to_dict()
+                ns_searcher.logger.info(f"Learning Profile Info: {learning_profile}")
 
                 learning_history_id = learning_profile["learning_history_id"]
                 if learning_history_id is '':
@@ -283,26 +286,30 @@ class DenseRetrieval(Resource):
 
                 learning_history = sse_search_learning_history_api.learning_history_controller_get_learning_history(
                     learning_history_id).to_dict()
+                ns_searcher.logger.info(f"Learning History Info: {learning_history}")
+
                 learned_skills = learning_history["learned_skills"]
 
                 # retrieve skills relevant to query
                 relevant_skills = [sse_search_skill_api.skill_mgmt_controller_get_skill(skill).to_dict() for skill in learned_skills]
+                ns_searcher.logger.info(f"Relevant Skills: {relevant_skills}")
 
                 # get seperator token. Is it needed?
                 sep_token = AutoTokenizer.from_pretrained(searcher.language_models[language_model]).sep_token
 
                 # add skill names to query
-                print(f"Original Query: {query}", flush=True)
+                ns_searcher.logger.info(f"Original Query: {query}")
                 for skill in relevant_skills:
                     query += f"{sep_token}{skill['name']}"
-                print(f"Final Query: {query}", flush=True)
+                ns_searcher.logger.info(f"Final Query: {query}")
 
             else:
                 ## case 4: using both skill profile and learning profile
-                # get the skill and learning profile of the user
-                print("*** case 4: using both skill profile and learning profile ***")
+                ns_searcher.logger.info("*** case 4: using both skill profile and learning profile ***")
+
+                # retrieve user specific data
                 user = sse_search_user_api.user_mgmt_controller_get_user_profiles(user_id).to_dict()
-                print(user)
+                ns_searcher.logger.info(f"User Info: {user}")
 
                 learning_profile_id = user["learning_profile"]
                 if learning_profile_id is '':
@@ -310,6 +317,7 @@ class DenseRetrieval(Resource):
 
                 learning_profile = sse_search_learning_profile_api.learning_profile_controller_get_learning_profile_by_id(
                     learning_profile_id).to_dict()
+                ns_searcher.logger.info(f"Learning Profile Info: {learning_profile}")
 
                 learning_history_id = learning_profile["learning_history_id"]
                 if learning_history_id is '':
@@ -317,6 +325,8 @@ class DenseRetrieval(Resource):
 
                 learning_history = sse_search_learning_history_api.learning_history_controller_get_learning_history(
                     learning_history_id).to_dict()
+                ns_searcher.logger.info(f"Learning History Info: {learning_history}")
+
                 started_learning_units = learning_history["started_learning_units"]
                 learned_skills = learning_history["learned_skills"]
 
@@ -339,15 +349,16 @@ class DenseRetrieval(Resource):
 
                     relevant_skills += [sse_search_skill_api.skill_mgmt_controller_get_skill(skill_to_learn).to_dict()
                                         for skill_to_learn in all_skills]
+                ns_searcher.logger.info(f"Relevant Skills: {relevant_skills}")
 
                 # get seperator token. Is it needed?
                 sep_token = AutoTokenizer.from_pretrained(searcher.language_models[language_model]).sep_token
 
                 # add skill names to query
-                print(f"Original Query: {query}", flush=True)
+                ns_searcher.logger.info(f"Original Query: {query}")
                 for skill in relevant_skills:
                     query += f"{sep_token}{skill['name']}"
-                print(f"Final Query: {query}", flush=True)
+                ns_searcher.logger.info(f"Final Query: {query}")
 
             results = searcher.dense_retrieval(
                 query=query,
@@ -366,6 +377,7 @@ class DenseRetrieval(Resource):
 
             if nr_result != 0:
                 results = results[:nr_result]
+            ns_searcher.logger.info(f"Results: {results}")
 
             response = {"message": "success", "results": results}
             return response, HTTPStatus.CREATED
