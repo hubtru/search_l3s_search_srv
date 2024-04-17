@@ -211,8 +211,7 @@ class DenseRetrieval(Resource):
             relevant_skills = []
             if not use_skill_profile and not use_learning_profile:
                 ## case 1: not using skill profile and learning profile
-
-                pass
+                ns_searcher.logger.info("*** case 1: not using skill profile and learning profile ***")
 
             elif not use_skill_profile and use_learning_profile:
                 ## case 2: not using skill profile but using learning profile
