@@ -32,6 +32,7 @@ sse_search_learning_profile_api = sse_search_client.LearningProfilesApi(client_s
 sse_search_learning_history_api = sse_search_client.LearningHistoryApi(client_sse_search)
 sse_search_learning_unit_api = sse_search_client.LearningUnitsApi(client_sse_search)
 sse_search_skill_api = sse_search_client.SkillApi(client_sse_search)
+sse_search_learning_path_api = sse_search_client.LearningPathApi(client_sse_search)
 
 # @ns_searcher.route("/test", endpoint="searcher-test")
 # class SearcherTest(Resource):
@@ -236,6 +237,7 @@ class DenseRetrieval(Resource):
                 ns_searcher.logger.info(f"Learning History Info: {learning_history}")
 
                 started_learning_units = learning_history["started_learning_units"]
+                started_learning_paths = learning_history["personal_paths"]
                 learned_skills = learning_history["learned_skills"]
 
                 # retrieve skills relevant to query
@@ -243,16 +245,33 @@ class DenseRetrieval(Resource):
                 for started_unit_id in started_learning_units:
                     learning_unit = sse_search_learning_unit_api.search_learning_unit_controller_get_learning_unit(started_unit_id).to_dict()
 
-                    teachingGoals = learning_unit["teaching_goals"]   # Are these ids for skills? Include. Should skills be excluded have already been learned?
-                    requiredSkills = learning_unit["required_skills"]  # User should have already learned these skills? exclude? Include those that have not been learned yet?
+                    teachingGoals = learning_unit["teaching_goals"]
+                    requiredSkills = learning_unit["required_skills"]
 
                     check_already_learned = lambda x: x in learned_skills
-                    teachingGoals = filter(check_already_learned, teachingGoals)  # filter already learned skills
-                    requiredSkills = filter(check_already_learned, requiredSkills)
+                    teachingGoals = list(filter(check_already_learned, teachingGoals))
+                    requiredSkills = list(filter(check_already_learned, requiredSkills))
                     all_skills = teachingGoals + requiredSkills
                     learned_skills += all_skills
 
                     relevant_skills += [sse_search_skill_api.skill_mgmt_controller_get_skill(skill_to_learn).to_dict() for skill_to_learn in all_skills]
+
+                for started_path_id in started_learning_paths:
+                    learning_path = sse_search_learning_path_api.learning_path_mgmt_controller_get_learning_path(
+                        started_path_id).to_dict()
+
+                    check_already_learned = lambda x: x in relevant_skills
+                    path_goals = learning_path["path_goals"]
+                    path_goals = list(filter(check_already_learned, path_goals))
+
+                    requirements = learning_path["requirements"]
+                    requirements = list(filter(check_already_learned, requirements))
+
+                    all_skills = path_goals + requirements
+
+                    learned_skills += all_skills
+                    relevant_skills += [sse_search_skill_api.skill_mgmt_controller_get_skill(skill_to_learn).to_dict()
+                                        for skill_to_learn in all_skills]
                 ns_searcher.logger.info(f"Relevant Skills: {relevant_skills}")
 
                 # get seperator token. Is it needed?
@@ -328,6 +347,7 @@ class DenseRetrieval(Resource):
                 ns_searcher.logger.info(f"Learning History Info: {learning_history}")
 
                 started_learning_units = learning_history["started_learning_units"]
+                started_learning_paths = learning_history["personal_paths"]
                 learned_skills = learning_history["learned_skills"]
 
                 # retrieve skills relevant to query
@@ -337,16 +357,33 @@ class DenseRetrieval(Resource):
                         started_unit_id).to_dict()
 
                     teachingGoals = learning_unit[
-                        "teaching_goals"]  # Are these ids for skills? Include. Should skills be excluded have already been learned?
+                        "teaching_goals"]
                     requiredSkills = learning_unit[
-                        "required_skills"]  # User should have already learned these skills? exclude? Include those that have not been learned yet?
+                        "required_skills"]
 
                     check_already_learned = lambda x: x in learned_skills
-                    teachingGoals = filter(check_already_learned, teachingGoals)  # filter already learned skills
-                    requiredSkills = filter(check_already_learned, requiredSkills)
+                    teachingGoals = list(filter(check_already_learned, teachingGoals))
+                    requiredSkills = list(filter(check_already_learned, requiredSkills))
                     all_skills = teachingGoals + requiredSkills
                     learned_skills += all_skills
 
+                    relevant_skills += [sse_search_skill_api.skill_mgmt_controller_get_skill(skill_to_learn).to_dict()
+                                        for skill_to_learn in all_skills]
+
+                for started_path_id in started_learning_paths:
+                    learning_path = sse_search_learning_path_api.learning_path_mgmt_controller_get_learning_path(
+                        started_path_id).to_dict()
+
+                    check_already_learned = lambda x: x in relevant_skills
+                    path_goals = learning_path["path_goals"]
+                    path_goals = list(filter(check_already_learned, path_goals))
+
+                    requirements = learning_path["requirements"]
+                    requirements = list(filter(check_already_learned, requirements))
+
+                    all_skills = path_goals + requirements
+
+                    learned_skills += all_skills
                     relevant_skills += [sse_search_skill_api.skill_mgmt_controller_get_skill(skill_to_learn).to_dict()
                                         for skill_to_learn in all_skills]
                 ns_searcher.logger.info(f"Relevant Skills: {relevant_skills}")
