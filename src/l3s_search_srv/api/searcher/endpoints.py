@@ -1,4 +1,5 @@
 import os, requests
+import sys
 from http import HTTPStatus
 import json
 from flask import jsonify, request
@@ -219,7 +220,6 @@ class DenseRetrieval(Resource):
                 # get the learning profile of the user
                 ns_searcher.logger.info("*** case 2: not using skill profile but using learning profile ***")
 
-
                 # retrieve user specific data
                 user = sse_search_user_api.user_mgmt_controller_get_user_profiles(user_id).to_dict()
                 ns_searcher.logger.info(f"User Info:\n{user}")
@@ -227,8 +227,6 @@ class DenseRetrieval(Resource):
                 learning_profile_id = user["learning_profile"]
                 if learning_profile_id is '':
                     raise ValueError("User has no learningProfile")
-
-
 
                 learning_profile = sse_search_learning_profile_api.learning_profile_controller_get_learning_profile_by_id(
                     learning_profile_id).to_dict()
@@ -245,10 +243,8 @@ class DenseRetrieval(Resource):
                 started_learning_units = learning_history["started_learning_units"]
                 started_learning_paths = learning_history["personal_paths"]
 
-
                 # retrieve learning unit skills relevant to query
                 relevant_skills = []
-
 
                 for started_unit_id in started_learning_units:
                     learning_unit = sse_search_learning_unit_api.search_learning_unit_controller_get_learning_unit(
@@ -256,10 +252,10 @@ class DenseRetrieval(Resource):
 
                     check_already_learned = lambda x: x in relevant_skills
                     teachingGoals = learning_unit["teaching_goals"]
-                    teachingGoals = filter(check_already_learned, teachingGoals)
+                    teachingGoals = list(filter(check_already_learned, teachingGoals))
 
                     requiredSkills = learning_unit["required_skills"]
-                    requiredSkills = filter(check_already_learned, requiredSkills)
+                    requiredSkills = list(filter(check_already_learned, requiredSkills))
 
                     all_skills = teachingGoals + requiredSkills
 
@@ -271,10 +267,10 @@ class DenseRetrieval(Resource):
 
                     check_already_learned = lambda x: x in relevant_skills
                     path_goals = learning_path["path_goals"]
-                    path_goals = filter(check_already_learned, path_goals)
+                    path_goals = list(filter(check_already_learned, path_goals))
 
                     requirements = learning_path["requirements"]
-                    requirements = filter(check_already_learned, requirements)
+                    requirements = list(filter(check_already_learned, requirements))
 
                     all_skills = path_goals + requirements
 
@@ -294,7 +290,8 @@ class DenseRetrieval(Resource):
                 if learning_profile_id is '':
                     raise ValueError("User has no learningProfile")
 
-                learning_profile = sse_search_learning_profile_api.learning_profile_controller_get_learning_profile_by_id(learning_profile_id=learning_profile_id).to_dict()
+                learning_profile = sse_search_learning_profile_api.learning_profile_controller_get_learning_profile_by_id(
+                    learning_profile_id=learning_profile_id).to_dict()
                 ns_searcher.logger.info(f"Learning Profile Info:\n{learning_profile}")
 
                 learning_history_id = learning_profile["learning_history_id"]
@@ -323,7 +320,8 @@ class DenseRetrieval(Resource):
                 if learning_profile_id is '':
                     raise ValueError("User has no learningProfile")
 
-                learning_profile = sse_search_learning_profile_api.learning_profile_controller_get_learning_profile_by_id(learning_profile_id).to_dict()
+                learning_profile = sse_search_learning_profile_api.learning_profile_controller_get_learning_profile_by_id(
+                    learning_profile_id).to_dict()
                 ns_searcher.logger.info(f"Learning Profile Info:\n{learning_profile}")
 
                 learning_history_id = learning_profile["learning_history_id"]
@@ -347,10 +345,10 @@ class DenseRetrieval(Resource):
 
                     check_already_learned = lambda x: x in relevant_skills
                     teachingGoals = learning_unit["teaching_goals"]
-                    teachingGoals = filter(check_already_learned, teachingGoals)
+                    teachingGoals = list(filter(check_already_learned, teachingGoals))
 
                     requiredSkills = learning_unit["required_skills"]
-                    requiredSkills = filter(check_already_learned, requiredSkills)
+                    requiredSkills = list(filter(check_already_learned, requiredSkills))
 
                     all_skills = teachingGoals + requiredSkills
 
@@ -362,10 +360,10 @@ class DenseRetrieval(Resource):
 
                     check_already_learned = lambda x: x in relevant_skills
                     path_goals = learning_path["path_goals"]
-                    path_goals = filter(check_already_learned, path_goals)
+                    path_goals = list(filter(check_already_learned, path_goals))
 
                     requirements = learning_path["requirements"]
-                    requirements = filter(check_already_learned, requirements)
+                    requirements = list(filter(check_already_learned, requirements))
 
                     all_skills = path_goals + requirements
 
@@ -409,7 +407,7 @@ class DenseRetrieval(Resource):
             return {"results": [], "message": e.args[0]}, HTTPStatus.INTERNAL_SERVER_ERROR
         except FileExistsError as e:
             return {"results": [], "message": e.args[0]}, HTTPStatus.NOT_FOUND
-            
+
 
 # @ns_searcher.route("/traditional-retrieval", endpoint="traditional_retrieval")
 class SimpleSearch(Resource):
