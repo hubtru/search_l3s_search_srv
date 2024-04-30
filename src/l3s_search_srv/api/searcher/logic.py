@@ -42,7 +42,7 @@ class Searcher(object):
     def dense_retrieval(self, query, language_model, index_method, dataset_name):
         # remove the punctuations from the query
         # query = re.sub(r"\p{P}(?<!-)", "", query)
-        # query = query.translate(str.maketrans('', '', self.punctuation_marks))
+        query = query.translate(str.maketrans('', '', self.punctuation_marks))
         print(query)
         encodes_file_path = os.path.join(os.getenv("BASE_ENCODES_DIR"), f"dense/{language_model}/{dataset_name}/data_encoded.json")
         prebuilt_index_path = os.path.join(os.getenv("BASE_INDEXES_DIR"), f"{index_method}/{dataset_name}/dense/{language_model}/")
@@ -96,6 +96,15 @@ class Searcher(object):
             # results[i]["ranking"] = i+1
             results[i]["jaccard"] = self.__jaccard(query, results[i]["contents"])
             results[i]["cosine_similarity"] = self.__cosine_sim(query_enc, results[i]["vector"])
+
+            if i == 0:
+                print(query)
+                print(results[i]["contents"])
+                print(len(query_enc), flush=True)
+                print(len(results[i]["vector"]), flush=True)
+                print(query_enc, flush=True)
+                print(results[i]["vector"], flush=True)
+                print(results[i]["cosine_similarity"], flush=True)
             
                     
         # reranking the result
