@@ -225,7 +225,7 @@ class DenseRetrieval(Resource):
                 ns_searcher.logger.info(f"User Info:\n{user}")
 
                 learning_profile_id = user["learning_profile"]
-                if learning_profile_id is '':
+                if learning_profile_id == '':
                     raise ValueError("User has no learningProfile")
 
                 learning_profile = sse_search_learning_profile_api.learning_profile_controller_get_learning_profile_by_id(
@@ -233,7 +233,7 @@ class DenseRetrieval(Resource):
                 ns_searcher.logger.info(f"Learning Profile Info:\n{learning_profile}")
 
                 learning_history_id = learning_profile["learning_history_id"]
-                if learning_history_id is '':
+                if learning_history_id == '':
                     raise ValueError("Learning profile of user has no learning history")
 
                 learning_history = sse_search_learning_history_api.learning_history_controller_get_learning_history(
@@ -287,7 +287,7 @@ class DenseRetrieval(Resource):
                 ns_searcher.logger.info(f"User Info:\n{user}")
 
                 learning_profile_id = user["learning_profile"]
-                if learning_profile_id is '':
+                if learning_profile_id == '':
                     raise ValueError("User has no learningProfile")
 
                 learning_profile = sse_search_learning_profile_api.learning_profile_controller_get_learning_profile_by_id(
@@ -295,7 +295,7 @@ class DenseRetrieval(Resource):
                 ns_searcher.logger.info(f"Learning Profile Info:\n{learning_profile}")
 
                 learning_history_id = learning_profile["learning_history_id"]
-                if learning_history_id is '':
+                if learning_history_id == '':
                     raise ValueError("Learning profile of user has no learning history")
 
                 learning_history = sse_search_learning_history_api.learning_history_controller_get_learning_history(
@@ -317,7 +317,7 @@ class DenseRetrieval(Resource):
                 ns_searcher.logger.info(f"User Info:\n{user}")
 
                 learning_profile_id = user["learning_profile"]
-                if learning_profile_id is '':
+                if learning_profile_id == '':
                     raise ValueError("User has no learningProfile")
 
                 learning_profile = sse_search_learning_profile_api.learning_profile_controller_get_learning_profile_by_id(
@@ -325,7 +325,7 @@ class DenseRetrieval(Resource):
                 ns_searcher.logger.info(f"Learning Profile Info:\n{learning_profile}")
 
                 learning_history_id = learning_profile["learning_history_id"]
-                if learning_history_id is '':
+                if learning_history_id == '':
                     raise ValueError("Learning profile of user has no learning history")
 
                 learning_history = sse_search_learning_history_api.learning_history_controller_get_learning_history(
