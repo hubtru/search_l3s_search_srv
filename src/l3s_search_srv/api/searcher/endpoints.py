@@ -245,12 +245,11 @@ class DenseRetrieval(Resource):
 
                 # retrieve learning unit skills relevant to query
                 relevant_skills = []
-
+                check_already_learned = lambda x: x not in relevant_skills
                 for started_unit_id in started_learning_units:
                     learning_unit = sse_search_learning_unit_api.search_learning_unit_controller_get_learning_unit(
                         started_unit_id).to_dict()
 
-                    check_already_learned = lambda x: x in relevant_skills
                     teachingGoals = learning_unit["teaching_goals"]
                     teachingGoals = list(filter(check_already_learned, teachingGoals))
 
@@ -265,7 +264,6 @@ class DenseRetrieval(Resource):
                     learning_path = sse_search_learning_path_api.learning_path_mgmt_controller_get_learning_path(
                         started_path_id).to_dict()
 
-                    check_already_learned = lambda x: x in relevant_skills
                     path_goals = learning_path["path_goals"]
                     path_goals = list(filter(check_already_learned, path_goals))
 
@@ -338,12 +336,11 @@ class DenseRetrieval(Resource):
 
                 # retrieve skills relevant to query
                 relevant_skills = learned_skills
-
+                check_already_learned = lambda x: x not in relevant_skills
                 for started_unit_id in started_learning_units:
                     learning_unit = sse_search_learning_unit_api.search_learning_unit_controller_get_learning_unit(
                         started_unit_id).to_dict()
 
-                    check_already_learned = lambda x: x in relevant_skills
                     teachingGoals = learning_unit["teaching_goals"]
                     teachingGoals = list(filter(check_already_learned, teachingGoals))
 
@@ -358,7 +355,6 @@ class DenseRetrieval(Resource):
                     learning_path = sse_search_learning_path_api.learning_path_mgmt_controller_get_learning_path(
                         started_path_id).to_dict()
 
-                    check_already_learned = lambda x: x in relevant_skills
                     path_goals = learning_path["path_goals"]
                     path_goals = list(filter(check_already_learned, path_goals))
 
