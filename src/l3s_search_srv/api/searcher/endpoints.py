@@ -31,7 +31,7 @@ class CheckSecretKey(Resource):
     @ns_searcher.expect(parser_secret)
     def get(self):
         request_data = parser_secret.parse_args()
-        if request_data["secret_key"] == os.getenv('L3S_SEARCH_SRV_KEY'):
+        if request_data["secret_key"] == os.getenv('L3S_API_KEY'):
             return {"message": "valid secret key"}, HTTPStatus.OK
         else:
             return {"message": "invalid secret key"}, HTTPStatus.BAD_REQUEST
@@ -55,7 +55,7 @@ class SearcherUpdate(Resource):
             pprint(request_data)
             ns_searcher.logger.info("Starting: Checking client secret...")
             print(request_data["secret"])
-            if request_data["secret"] != os.getenv('MLS_CLIENT_SECRET'):
+            if request_data["secret"] != os.getenv('L3S_API_KEY'):
                 raise ValueError("Invalid secret key!")
 
             ns_searcher.logger.info("Success: client secret valid.")
