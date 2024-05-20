@@ -9,13 +9,13 @@ import regex as re
 import faiss
 
 
-from l3s_search_srv.api.encoder.logic import BertGermanCasedDenseEncoder, XlmRobertaDenseEncoder, GermanRobertaSentenceTransformerV2Encoder
+from l3s_search_srv.api.encoder.logic import BertGermanCasedDenseEncoder, CrossRobertaSentenceTransformerEncoder
 
 class Searcher(object):
     language_models = {
         "bert-base-german-cased": "dbmdz/bert-base-german-cased",
-        "xlm-roberta-base": "xlm-roberta-base",
-        "german-roberta-sentence-transformer-v2": "T-Systems-onsite/german-roberta-sentence-transformer-v2"
+        # "xlm-roberta-base": "xlm-roberta-base",
+        "cross-en-de-roberta-sentence-transformer": "T-Systems-onsite/cross-en-de-roberta-sentence-transformer"
     }
     punctuation_marks = string.punctuation.replace("-", "")
     
@@ -51,7 +51,7 @@ class Searcher(object):
         print(encodes_file_path)
         print(prebuilt_index_path)
         
-        if language_model not in ["bert-base-german-cased", "xlm-roberta-base", "german-roberta-sentence-transformer-v2"]:
+        if language_model not in ["bert-base-german-cased", "cross-en-de-roberta-sentence-transformer"]:
             raise ValueError("language model not defined")
         
         if index_method not in ["flat-l2", "flat-ip", "hnsw", "pq"]:
@@ -65,10 +65,10 @@ class Searcher(object):
         index = faiss.read_index(os.path.join(prebuilt_index_path, "index.faiss"))
         if language_model == "bert-base-german-cased":
             encoder = BertGermanCasedDenseEncoder()
-        elif language_model == "xlm-roberta-base":
-            encoder = XlmRobertaDenseEncoder()
-        elif language_model == "german-roberta-sentence-transformer-v2":
-            encoder = GermanRobertaSentenceTransformerV2Encoder()
+        # elif language_model == "xlm-roberta-base":
+        #     encoder = XlmRobertaDenseEncoder()
+        elif language_model == "cross-en-de-roberta-sentence-transformer":
+            encoder = CrossRobertaSentenceTransformerEncoder()
         else:
             raise ValueError("search with the given language model is not implemented") 
 
@@ -130,7 +130,8 @@ class Searcher(object):
 
         n_shared = len(x.intersection(y))
         n_total = len(x.union(y))
-        return float("{:.2f}".format(n_shared/len(x)))
+        # return float("{:.2f}".format(n_shared/len(x)))
+        return float("{:.2f}".format(n_shared/n_total))
 
 
 

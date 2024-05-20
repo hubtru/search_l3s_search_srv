@@ -93,7 +93,6 @@ class IndexUpdater(Resource):
 
 
 
-
 @ns_indexer.route("/index-mls-update", endpoint="index_mls_update", doc=False)
 class MlsIndexUpdate(Resource):
     @ns_indexer.expect(dto_mls_index_update_request)

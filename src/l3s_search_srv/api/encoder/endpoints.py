@@ -2,7 +2,7 @@ from http import HTTPStatus
 import os
 from flask_restx import Namespace, Resource
 
-from .logic import XlmRobertaDenseEncoder, BertGermanCasedDenseEncoder
+from .logic import CrossRobertaSentenceTransformerEncoder, BertGermanCasedDenseEncoder
 from l3s_search_srv.util.meta import SearchSrvMeta
 
 ns_encoder = Namespace("Encoder", validate=True)
@@ -79,7 +79,7 @@ class EncodeUpdater(Resource):
                         p = enc.dataset_encoder(d)
                         r["state"] = p
                     elif language_model == "xlm-roberta-base":
-                        enc = XlmRobertaDenseEncoder()
+                        enc = CrossRobertaSentenceTransformerEncoder()
                         p = enc.dataset_encoder(d)
                         r["state"] = p
                     
@@ -146,7 +146,7 @@ class DenseEncodeDataset(Resource):
             enc = BertGermanCasedDenseEncoder()
             p = enc.dataset_encoder(dataset_name)
         elif model_name == "xlm-roberta-base":
-            enc = XlmRobertaDenseEncoder()
+            enc = CrossRobertaSentenceTransformerEncoder()
             p = enc.dataset_encoder(dataset_name)
             
             

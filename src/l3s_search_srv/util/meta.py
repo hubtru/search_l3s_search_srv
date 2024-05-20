@@ -14,7 +14,7 @@ def get_subdirs(dir):
 class SearchSrvMeta(object):
     INDEX_METHODS = ['flat-ip', 'flat-l2']
     ENCODE_METHODS = ['bm25', 'dense', 'sparse']
-    LANGUAGE_MODELS = ['bert-base-german-cased', 'xlm-roberta-base', 'german-roberta-sentence-transformer-v2']
+    LANGUAGE_MODELS = ['bert-base-german-cased', 'cross-en-de-roberta-sentence-transformer']
     
     
     def __get_subdirs(self, dir):
@@ -77,17 +77,22 @@ class SearchSrvMeta(object):
     def get_existing_dense_encodings(self):
         datasets = self.get_datasets()
         dense_encodes_dir = os.path.join(os.getenv("BASE_ENCODES_DIR"), "dense")
+        
         if not os.path.isdir(dense_encodes_dir):
             raise ValueError(f'Directory not found: {dense_encodes_dir}')
         
-        existing_encodings = []
         
-        for l in self.LANGUAGE_MODELS:
-            encode_dir = os.path.join(dense_encodes_dir, l)
-            encode_subdirs = self.__get_subdirs(encode_dir)
-            existing_encodings.append({"language_model": l, "datasets": encode_subdirs})
-            
-        return existing_encodings
+        existing_encodings = []
+
+        if self.__get_subdirs(dense_encodes_dir) == []:
+            return existing_encodings
+        else:
+            for l in self.LANGUAGE_MODELS:
+                encode_dir = os.path.join(dense_encodes_dir, l)
+                encode_subdirs = self.__get_subdirs(encode_dir)
+                existing_encodings.append({"language_model": l, "datasets": encode_subdirs})
+                
+            return existing_encodings
     
     def check_if_dataset_dense_encoded(self, dataset_name):
         existing_dense_encodings = self.get_existing_dense_encodings()
