@@ -205,7 +205,7 @@ class DenseRetrieval(Resource):
 
         try:
             dataset_name = SearchSrvMeta().get_latest_dataset()
-            if dataset_name == "" or dataset_name == None:
+            if dataset_name == "" or dataset_name is None:
                 raise FileExistsError("No dataset")
 
             searcher = Searcher()

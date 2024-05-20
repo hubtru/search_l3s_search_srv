@@ -179,6 +179,39 @@ class BertGermanCasedDenseEncoder(DenseEncoer):
         self.model_name = "bert-base-german-cased"
 
 
+class BertGermanUncasedDenseEncoder(DenseEncoer):
+    def __init__(self) -> None:
+        super().__init__()
+        self.tokenizer = AutoTokenizer.from_pretrained("dbmdz/bert-base-german-uncased")
+        self.model = AutoModel.from_pretrained("dbmdz/bert-base-german-uncased")
+        self.model_name = "bert-base-german-uncased"
+
+    def query_encoder(self, input_text):
+        # tokens = self.tokenizer.encode(input_text, add_special_tokens=True, max_length=512, truncation=True)
+        input_text = input_text.lower()
+        tokens = self.tokenizer(input_text,
+                                #  add_special_tokens=True,
+                                #  padding='max_length',
+                                padding=False,
+                                max_length=512,
+                                truncation=True,
+                                return_tensors='pt'
+                                )
+
+        input_ids = tokens.get('input_ids')
+        outputs = self.model(input_ids)
+        embeddings = outputs.last_hidden_state
+        masks = tokens.get('attention_mask').unsqueeze(-1).expand(embeddings.size()).float()
+        masked_embeddings = embeddings * masks
+        summed = torch.sum(masked_embeddings, 1)
+        counted = torch.clamp(masks.sum(1), min=1e-9)
+        mean_pooled = summed / counted
+        # Convert the dense vector to a numpy array
+        dense_vector_list = mean_pooled.tolist()[0]
+        # print(len(dense_vector_list))
+        return dense_vector_list
+
+
 class XlmRobertaDenseEncoder(DenseEncoer):
     def __init__(self) -> None:
         super().__init__()
@@ -186,42 +219,51 @@ class XlmRobertaDenseEncoder(DenseEncoer):
         self.model = XLMRobertaModel.from_pretrained("xlm-roberta-base")
         self.model_name = "xlm-roberta-base"
 
-    # def xlm_roberta_query_encoder(self, input_text):
-    #         tokens = self.tokenizer.encode(input_text,
-    #                                        add_special_tokens=True,
-    #                                        max_length=512,
-    #                                        truncation=True
-    #                                 )
-    #         input_ids = torch.tensor([tokens])
-    #         with torch.no_grad():
-    #                 outputs = self.model(input_ids)
-    #                 dense_vector = outputs[0][0][0]  # Extract the dense vector from the model output
 
-    #         # Convert the dense vector to a numpy array
-    #         dense_vector_list = dense_vector.numpy().tolist()
-    #         return dense_vector_list
+class DeBERTaDenseEncoder(DenseEncoer):
+    def __init__(self) -> None:
+        super().__init__()
+        self.tokenizer = AutoTokenizer.from_pretrained("ikim-uk-essen/geberta-xlarge")
+        self.model = AutoModel.from_pretrained("ikim-uk-essen/geberta-xlarge")
+        self.model_name = "geberta-xlarge"
 
-    # def xlm_roberta_dataset_encoder(self, dataset_name):
-    #         input_file_path = os.path.join(os.getenv("BASE_DATASETS_DIR"), f"{dataset_name}/jsonl/data.jsonl")
 
-    #         output_dir_path = os.path.join(os.getenv("BASE_ENCODES_DIR"), f"dense/xlm-roberta-base/{dataset_name}")
+class BertMultiLingualUncasedDenseEncoder(DenseEncoer):
+    def __init__(self) -> None:
+        super().__init__()
+        self.tokenizer = AutoTokenizer.from_pretrained("google-bert/bert-base-multilingual-uncased")
+        self.model = AutoModel.from_pretrained("google-bert/bert-base-multilingual-uncased")
+        self.model_name = "bert-base-multilingual-uncased"
 
-    #         if not os.path.exists(output_dir_path):
-    #                 os.makedirs(output_dir_path)
+    def query_encoder(self, input_text):
+        # tokens = self.tokenizer.encode(input_text, add_special_tokens=True, max_length=512, truncation=True)
+        input_text = input_text.lower()
+        tokens = self.tokenizer(input_text,
+                                #  add_special_tokens=True,
+                                #  padding='max_length',
+                                padding=False,
+                                max_length=512,
+                                truncation=True,
+                                return_tensors='pt'
+                                )
 
-    #         output_file_path = os.path.join(output_dir_path, "data_encoded.jsonl")
+        input_ids = tokens.get('input_ids')
+        outputs = self.model(input_ids)
+        embeddings = outputs.last_hidden_state
+        masks = tokens.get('attention_mask').unsqueeze(-1).expand(embeddings.size()).float()
+        masked_embeddings = embeddings * masks
+        summed = torch.sum(masked_embeddings, 1)
+        counted = torch.clamp(masks.sum(1), min=1e-9)
+        mean_pooled = summed / counted
+        # Convert the dense vector to a numpy array
+        dense_vector_list = mean_pooled.tolist()[0]
+        # print(len(dense_vector_list))
+        return dense_vector_list
 
-    #         try:
-    #                 with open(input_file_path) as input_file:
-    #                         for line in input_file:
-    #                                 json_obj = json.loads(line)
-    #                                 json_obj["vector"] = self.xlm_roberta_query_encoder(json_obj["contents"])
-    #                                 # print(json_obj)
 
-    #                                 with open(output_file_path, "a") as jsonl_file:
-    #                                         json.dump(json_obj, jsonl_file)
-    #                                         jsonl_file.write('\n')
-    #         except FileNotFoundError:
-    #                 return HTTPStatus.NOT_FOUND
-
-    #         return 1
+class BertMultiLingualCasedDenseEncoder(DenseEncoer):
+    def __init__(self) -> None:
+        super().__init__()
+        self.tokenizer = AutoTokenizer.from_pretrained("google-bert/bert-base-multilingual-cased")
+        self.model = AutoModel.from_pretrained("google-bert/bert-base-multilingual-cased")
+        self.model_name = "bert-base-multilingual-cased"
