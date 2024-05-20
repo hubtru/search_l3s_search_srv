@@ -9,12 +9,13 @@ import regex as re
 import faiss
 
 
-from l3s_search_srv.api.encoder.logic import BertGermanCasedDenseEncoder, XlmRobertaDenseEncoder
+from l3s_search_srv.api.encoder.logic import BertGermanCasedDenseEncoder, XlmRobertaDenseEncoder, GermanRobertaSentenceTransformerV2Encoder
 
 class Searcher(object):
     language_models = {
         "bert-base-german-cased": "dbmdz/bert-base-german-cased",
-        "bert-base-german-uncased": "dbmdz/bert-base-german-cased"
+        "xlm-roberta-base": "xlm-roberta-base",
+        "german-roberta-sentence-transformer-v2": "T-Systems-onsite/german-roberta-sentence-transformer-v2"
     }
     punctuation_marks = string.punctuation.replace("-", "")
     
@@ -50,7 +51,7 @@ class Searcher(object):
         print(encodes_file_path)
         print(prebuilt_index_path)
         
-        if language_model not in ["bert-base-german-cased", "xlm-roberta-base"]:
+        if language_model not in ["bert-base-german-cased", "xlm-roberta-base", "german-roberta-sentence-transformer-v2"]:
             raise ValueError("language model not defined")
         
         if index_method not in ["flat-l2", "flat-ip", "hnsw", "pq"]:
@@ -66,6 +67,8 @@ class Searcher(object):
             encoder = BertGermanCasedDenseEncoder()
         elif language_model == "xlm-roberta-base":
             encoder = XlmRobertaDenseEncoder()
+        elif language_model == "german-roberta-sentence-transformer-v2":
+            encoder = GermanRobertaSentenceTransformerV2Encoder()
         else:
             raise ValueError("search with the given language model is not implemented") 
 

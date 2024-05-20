@@ -164,12 +164,12 @@ class DenseEncoer(object):
 	def __sbert_embedding():
 		pass
 
-class GermanGPT2DenseEncoder(DenseEncoer):
+class GermanRobertaSentenceTransformerV2Encoder(DenseEncoer):
     def __init__(self) -> None:
         super().__init__()
-        self.tokenizer = AutoTokenizer.from_pretrained("dbmdz/german-gpt2-faust")
-        self.model = AutoModelWithLMHead.from_pretrained("dbmdz/german-gpt2-faust")
-        self.model_name = "german-gpt2-faust"
+        self.tokenizer = AutoTokenizer.from_pretrained("T-Systems-onsite/german-roberta-sentence-transformer-v2")
+        self.model = AutoModelWithLMHead.from_pretrained("T-Systems-onsite/german-roberta-sentence-transformer-v2")
+        self.model_name = "german-roberta-sentence-transformer-v2"
 
 
 class BertGermanCasedDenseEncoder(DenseEncoer):

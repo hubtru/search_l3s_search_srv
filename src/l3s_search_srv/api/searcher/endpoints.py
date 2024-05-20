@@ -240,7 +240,7 @@ class DenseRetrieval(Resource):
             
 
 
-# @ns_searcher.route("/traditional-retrieval", endpoint="traditional_retrieval")
+@ns_searcher.route("/traditional-retrieval", endpoint="traditional_retrieval", doc=False)
 class SimpleSearch(Resource):
     @ns_searcher.expect(dto_simple_search_request)
     @ns_searcher.response(int(HTTPStatus.CREATED), "New user was successfully created.")
