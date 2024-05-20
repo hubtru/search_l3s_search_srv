@@ -78,7 +78,7 @@ class EncodeUpdater(Resource):
                         enc = BertGermanCasedDenseEncoder()
                         p = enc.dataset_encoder(d)
                         r["state"] = p
-                    elif language_model == "xlm-roberta-base":
+                    elif language_model == "cross-en-de-roberta-sentence-transformer":
                         enc = CrossRobertaSentenceTransformerEncoder()
                         p = enc.dataset_encoder(d)
                         r["state"] = p
@@ -113,6 +113,9 @@ class DenseEncodeQuery(Resource):
                 if model_name == "bert-base-german-cased":
                     enc = BertGermanCasedDenseEncoder()
                     dense_vector_list = enc.query_encoder(input_data)
+                elif model_name == "cross-en-de-roberta-sentence-transformer":
+                    enc = CrossRobertaSentenceTransformerEncoder()
+                    dense_vector_list = enc.query_encoder(input_data) 
                 else:
                     raise ValueError("********* Error: Invalid Language Model *********")
             
@@ -145,7 +148,7 @@ class DenseEncodeDataset(Resource):
         if model_name == "bert-base-german-cased":
             enc = BertGermanCasedDenseEncoder()
             p = enc.dataset_encoder(dataset_name)
-        elif model_name == "xlm-roberta-base":
+        elif model_name == "cross-en-de-roberta-sentence-transformer":
             enc = CrossRobertaSentenceTransformerEncoder()
             p = enc.dataset_encoder(dataset_name)
             

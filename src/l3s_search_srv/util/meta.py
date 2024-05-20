@@ -154,12 +154,16 @@ class SearchSrvMeta(object):
         not_indexed_datasets = []
         for i in self.INDEX_METHODS:
             indexed_datasets = self.__get_subdirs(os.path.join(BASE_INDEXES_DIR, i))
-            not_encoded = []
-            for d in datasets:
-                if d not in indexed_datasets:
-                    not_encoded.append(d)
             
-            not_indexed_datasets.append({i: not_encoded})
+            if indexed_datasets == []:
+                not_indexed_datasets.append({i: 'None'})
+            else:
+                not_encoded = []
+                for d in datasets:
+                    if d not in indexed_datasets:
+                        not_encoded.append(d)
+                
+                not_indexed_datasets.append({i: not_encoded})
         
         return not_indexed_datasets
 
