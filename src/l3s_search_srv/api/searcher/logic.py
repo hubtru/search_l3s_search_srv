@@ -44,12 +44,12 @@ class Searcher(object):
         # remove the punctuations from the query
         # query = re.sub(r"\p{P}(?<!-)", "", query)
         query = query.translate(str.maketrans('', '', self.punctuation_marks))
-        print(query)
+        # print(query)
         encodes_file_path = os.path.join(os.getenv("BASE_ENCODES_DIR"), f"dense/{language_model}/{dataset_name}/data_encoded.json")
         prebuilt_index_path = os.path.join(os.getenv("BASE_INDEXES_DIR"), f"{index_method}/{dataset_name}/dense/{language_model}/")
         
-        print(encodes_file_path)
-        print(prebuilt_index_path)
+        # print(encodes_file_path)
+        # print(prebuilt_index_path)
         
         if language_model not in ["bert-base-german-cased", "cross-en-de-roberta-sentence-transformer"]:
             raise ValueError("language model not defined")
@@ -59,7 +59,7 @@ class Searcher(object):
 
         # load index
         if not os.path.exists(prebuilt_index_path):
-            print(prebuilt_index_path)
+            # print(prebuilt_index_path)
             raise ValueError("index path not exists")
         
         index = faiss.read_index(os.path.join(prebuilt_index_path, "index.faiss"))

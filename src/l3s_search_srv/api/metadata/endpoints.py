@@ -25,7 +25,7 @@ ns_metadata.models[dto_host.name] = dto_host
 class Host(Resource):
     def get(self):
         [host, port] = request.host.split(":")
-        print(host, port)
+        # print(host, port)
         return {"Host URL": request.host_url}, HTTPStatus.OK
 
 

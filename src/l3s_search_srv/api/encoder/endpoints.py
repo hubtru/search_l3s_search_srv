@@ -143,7 +143,7 @@ class DenseEncodeDataset(Resource):
         dataset_name = ns_encoder.payload.get("dataset_name")
         
         search_serv_meta = SearchSrvMeta()
-        print(search_serv_meta.get_datasets())
+        # print(search_serv_meta.get_datasets())
         
         if model_name == "bert-base-german-cased":
             enc = BertGermanCasedDenseEncoder()
