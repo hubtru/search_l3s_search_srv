@@ -52,9 +52,9 @@ class SearcherUpdate(Resource):
         try:
             ## Get the data from payload
             request_data = request.json
-            pprint(request_data)
+            # pprint(request_data)
             ns_searcher.logger.info("Starting: Checking client secret...")
-            print(request_data["secret"])
+            # print(request_data["secret"])
             if request_data["secret"] != os.getenv('L3S_API_KEY'):
                 raise ValueError("Invalid secret key!")
 
@@ -187,7 +187,7 @@ class DenseRetrieval(Resource):
         
         try:
             dataset_name = SearchSrvMeta().get_latest_dataset()
-            print(dataset_name)
+            # print(dataset_name)
             if dataset_name == "" or dataset_name == None:
                 raise FileExistsError("No dataset")
             # print(request_data)

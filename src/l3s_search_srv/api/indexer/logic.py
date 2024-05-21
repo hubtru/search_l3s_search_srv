@@ -112,15 +112,15 @@ class Indexer(object):
         if not os.path.exists(output_index_path):
             os.makedirs(output_index_path)
         
-        print(input_encode_path)
-        print(output_index_path)
+        # print(input_encode_path)
+        # print(output_index_path)
         docid = []
         temp = []
         
         # load file and fetch the encodings
         with open(input_encode_path) as file:
             data_json = json.load(file)
-            print(len(data_json))
+            # print(len(data_json))
             for d in data_json:
                 temp.append(d["vector"])
                 docid.append(d["entity_id"])
