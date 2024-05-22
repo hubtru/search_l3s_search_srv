@@ -13,7 +13,6 @@ api = Api(api_bp,
           title="L3S Search Service for SEARCH",
           description="Welcome to the Swagger UI documentation site test!",
           #   doc="/ui",
-          #   authorizations=authorizations,
           )
 
 
