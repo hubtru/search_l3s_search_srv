@@ -9,7 +9,7 @@ from pprint import pprint
 from .dto import (
     dto_simple_search_request, dto_simple_search_response
 )
-from .logic import Searcher
+from .logic import Searcher, EmbeddingCustomizer
 from l3s_search_srv.util.util import get_request_url, dirs_pruning
 from l3s_search_srv.util.meta import SearchSrvMeta
 from transformers import AutoTokenizer
@@ -203,193 +203,46 @@ class DenseRetrieval(Resource):
         entity_type = request_data.get("entity_type")
         nr_result = request_data.get("nr_result")
 
+        embedding_customization = request_data.get("embedding_customization")
+
         try:
             dataset_name = SearchSrvMeta().get_latest_dataset()
             if dataset_name == "" or dataset_name is None:
                 raise FileExistsError("No dataset")
 
-            searcher = Searcher()
+            customizer = EmbeddingCustomizer()
 
-            relevant_skills = []
-            if not use_skill_profile and not use_learning_profile:
-                ## case 1: not using skill profile and learning profile
-                ns_searcher.logger.info("*** case 1: not using skill profile and learning profile ***")
-
-            elif not use_skill_profile and use_learning_profile:
-                ## case 2: not using skill profile but using learning profile
-                # get the learning profile of the user
-                ns_searcher.logger.info("*** case 2: not using skill profile but using learning profile ***")
-
-                # retrieve user specific data
-                user = sse_search_user_api.user_mgmt_controller_get_user_profiles(user_id).to_dict()
-                ns_searcher.logger.info(f"User Info:\n{user}")
-
-                learning_profile_id = user["learning_profile"]
-                if learning_profile_id == '':
-                    raise ValueError("User has no learningProfile")
-
-                learning_profile = sse_search_learning_profile_api.learning_profile_controller_get_learning_profile_by_id(
-                    learning_profile_id).to_dict()
-                ns_searcher.logger.info(f"Learning Profile Info:\n{learning_profile}")
-
-                learning_history_id = learning_profile["learning_history_id"]
-                if learning_history_id == '':
-                    raise ValueError("Learning profile of user has no learning history")
-
-                learning_history = sse_search_learning_history_api.learning_history_controller_get_learning_history(
-                    learning_history_id).to_dict()
-                ns_searcher.logger.info(f"Learning History Info:\n{learning_history}")
-
-                started_learning_units = learning_history["started_learning_units"]
-                started_learning_paths = learning_history["personal_paths"]
-
-                # retrieve learning unit skills relevant to query
-                relevant_skills = []
-                check_already_learned = lambda x: x not in relevant_skills
-                for started_unit_id in started_learning_units:
-                    learning_unit = sse_search_learning_unit_api.search_learning_unit_controller_get_learning_unit(
-                        started_unit_id).to_dict()
-
-                    teachingGoals = learning_unit["teaching_goals"]
-                    teachingGoals = list(filter(check_already_learned, teachingGoals))
-
-                    requiredSkills = learning_unit["required_skills"]
-                    requiredSkills = list(filter(check_already_learned, requiredSkills))
-
-                    all_skills = teachingGoals + requiredSkills
-
-                    relevant_skills += all_skills
-
-                for started_path_id in started_learning_paths:
-                    learning_path = sse_search_learning_path_api.learning_path_mgmt_controller_get_learning_path(
-                        started_path_id).to_dict()
-
-                    path_goals = learning_path["path_goals"]
-                    path_goals = list(filter(check_already_learned, path_goals))
-
-                    requirements = learning_path["requirements"]
-                    requirements = list(filter(check_already_learned, requirements))
-
-                    all_skills = path_goals + requirements
-
-                    relevant_skills += all_skills
-
-                ns_searcher.logger.info(f"Relevant Skills:\n{relevant_skills}")
-
-            elif use_skill_profile and not use_learning_profile:
-                ## case 3: using skill profile but not learning profile
-                # get the skill profile of the user
-                ns_searcher.logger.info("*** case 3: using skill profile but not learning profile ***")
-
-                user = sse_search_user_api.user_mgmt_controller_get_user_profiles(user_id).to_dict()
-                ns_searcher.logger.info(f"User Info:\n{user}")
-
-                learning_profile_id = user["learning_profile"]
-                if learning_profile_id == '':
-                    raise ValueError("User has no learningProfile")
-
-                learning_profile = sse_search_learning_profile_api.learning_profile_controller_get_learning_profile_by_id(
-                    learning_profile_id=learning_profile_id).to_dict()
-                ns_searcher.logger.info(f"Learning Profile Info:\n{learning_profile}")
-
-                learning_history_id = learning_profile["learning_history_id"]
-                if learning_history_id == '':
-                    raise ValueError("Learning profile of user has no learning history")
-
-                learning_history = sse_search_learning_history_api.learning_history_controller_get_learning_history(
-                    learning_history_id).to_dict()
-                ns_searcher.logger.info(f"Learning History Info:\n{learning_history}")
-
-                learned_skills = learning_history["learned_skills"]
-
-                # retrieve skills relevant to query
-                relevant_skills = learned_skills
-                ns_searcher.logger.info(f"Relevant Skills:\n{relevant_skills}")
-
+            if embedding_customization is None:
+                results = customizer.add_after(query,
+                                               use_skill_profile,
+                                               use_learning_profile,
+                                               user_id,
+                                               language_model,
+                                               dataset_name,
+                                               index_method)
+            elif embedding_customization == "before":
+                results = customizer.add_before(query,
+                                                use_skill_profile,
+                                                use_learning_profile,
+                                                user_id,
+                                                language_model,
+                                                dataset_name,
+                                                index_method)
             else:
-                ## case 4: using both skill profile and learning profile
-                # get the skill and learning profile of the user
-                ns_searcher.logger.info("*** case 4: using both skill profile and learning profile ***")
+                results = customizer.add_after(query,
+                                               use_skill_profile,
+                                               use_learning_profile,
+                                               user_id,
+                                               language_model,
+                                               dataset_name,
+                                               index_method)
 
-                user = sse_search_user_api.user_mgmt_controller_get_user_profiles(user_id).to_dict()
-                ns_searcher.logger.info(f"User Info:\n{user}")
-
-                learning_profile_id = user["learning_profile"]
-                if learning_profile_id == '':
-                    raise ValueError("User has no learningProfile")
-
-                learning_profile = sse_search_learning_profile_api.learning_profile_controller_get_learning_profile_by_id(
-                    learning_profile_id).to_dict()
-                ns_searcher.logger.info(f"Learning Profile Info:\n{learning_profile}")
-
-                learning_history_id = learning_profile["learning_history_id"]
-                if learning_history_id == '':
-                    raise ValueError("Learning profile of user has no learning history")
-
-                learning_history = sse_search_learning_history_api.learning_history_controller_get_learning_history(
-                    learning_history_id).to_dict()
-                ns_searcher.logger.info(f"Learning History Info:\n{learning_history}")
-
-                started_learning_units = learning_history["started_learning_units"]
-                started_learning_paths = learning_history["personal_paths"]
-                learned_skills = learning_history["learned_skills"]
-
-                # retrieve skills relevant to query
-                relevant_skills = learned_skills
-                check_already_learned = lambda x: x not in relevant_skills
-                for started_unit_id in started_learning_units:
-                    learning_unit = sse_search_learning_unit_api.search_learning_unit_controller_get_learning_unit(
-                        started_unit_id).to_dict()
-
-                    teachingGoals = learning_unit["teaching_goals"]
-                    teachingGoals = list(filter(check_already_learned, teachingGoals))
-
-                    requiredSkills = learning_unit["required_skills"]
-                    requiredSkills = list(filter(check_already_learned, requiredSkills))
-
-                    all_skills = teachingGoals + requiredSkills
-
-                    relevant_skills += all_skills
-
-                for started_path_id in started_learning_paths:
-                    learning_path = sse_search_learning_path_api.learning_path_mgmt_controller_get_learning_path(
-                        started_path_id).to_dict()
-
-                    path_goals = learning_path["path_goals"]
-                    path_goals = list(filter(check_already_learned, path_goals))
-
-                    requirements = learning_path["requirements"]
-                    requirements = list(filter(check_already_learned, requirements))
-
-                    all_skills = path_goals + requirements
-
-                    relevant_skills += all_skills
-                ns_searcher.logger.info(f"Relevant Skills:\n{relevant_skills}")
-
-            results = searcher.dense_retrieval(
-                query=query,
-                language_model=language_model,
-                dataset_name=dataset_name,
-                index_method=index_method
-            )
-
-            # filter result type
             if entity_type != "all":
                 if entity_type in ["task", "skill", "path"]:
                     key_to_check = "entity_type"
                     results = [d for d in results if d.get(key_to_check) == entity_type]
                 else:
                     raise ValueError('Invalid entity type.')
-
-            top_priority = []
-            low_priority = []
-            for result in results:
-                if result["entity_id"] in relevant_skills:
-                    top_priority.append(result)
-                else:
-                    low_priority.append(result)
-
-            results = top_priority + low_priority
 
             if nr_result != 0:
                 results = results[:nr_result]
