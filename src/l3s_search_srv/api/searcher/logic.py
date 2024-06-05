@@ -9,12 +9,13 @@ import regex as re
 import faiss
 
 
-from l3s_search_srv.api.encoder.logic import BertGermanCasedDenseEncoder, XlmRobertaDenseEncoder
+from l3s_search_srv.api.encoder.logic import BertGermanCasedDenseEncoder, CrossRobertaSentenceTransformerEncoder
 
 class Searcher(object):
     language_models = {
         "bert-base-german-cased": "dbmdz/bert-base-german-cased",
-        "bert-base-german-uncased": "dbmdz/bert-base-german-cased"
+        # "xlm-roberta-base": "xlm-roberta-base",
+        "cross-en-de-roberta-sentence-transformer": "T-Systems-onsite/cross-en-de-roberta-sentence-transformer"
     }
     punctuation_marks = string.punctuation.replace("-", "")
     
@@ -43,14 +44,14 @@ class Searcher(object):
         # remove the punctuations from the query
         # query = re.sub(r"\p{P}(?<!-)", "", query)
         query = query.translate(str.maketrans('', '', self.punctuation_marks))
-        print(query)
+        # print(query)
         encodes_file_path = os.path.join(os.getenv("BASE_ENCODES_DIR"), f"dense/{language_model}/{dataset_name}/data_encoded.json")
         prebuilt_index_path = os.path.join(os.getenv("BASE_INDEXES_DIR"), f"{index_method}/{dataset_name}/dense/{language_model}/")
         
-        print(encodes_file_path)
-        print(prebuilt_index_path)
+        # print(encodes_file_path)
+        # print(prebuilt_index_path)
         
-        if language_model not in ["bert-base-german-cased", "xlm-roberta-base"]:
+        if language_model not in ["bert-base-german-cased", "cross-en-de-roberta-sentence-transformer"]:
             raise ValueError("language model not defined")
         
         if index_method not in ["flat-l2", "flat-ip", "hnsw", "pq"]:
@@ -58,14 +59,16 @@ class Searcher(object):
 
         # load index
         if not os.path.exists(prebuilt_index_path):
-            print(prebuilt_index_path)
+            # print(prebuilt_index_path)
             raise ValueError("index path not exists")
         
         index = faiss.read_index(os.path.join(prebuilt_index_path, "index.faiss"))
         if language_model == "bert-base-german-cased":
             encoder = BertGermanCasedDenseEncoder()
-        elif language_model == "xlm-roberta-base":
-            encoder = XlmRobertaDenseEncoder()
+        # elif language_model == "xlm-roberta-base":
+        #     encoder = XlmRobertaDenseEncoder()
+        elif language_model == "cross-en-de-roberta-sentence-transformer":
+            encoder = CrossRobertaSentenceTransformerEncoder()
         else:
             raise ValueError("search with the given language model is not implemented") 
 
@@ -127,7 +130,8 @@ class Searcher(object):
 
         n_shared = len(x.intersection(y))
         n_total = len(x.union(y))
-        return float("{:.2f}".format(n_shared/len(x)))
+        # return float("{:.2f}".format(n_shared/len(x)))
+        return float("{:.2f}".format(n_shared/n_total))
 
 
 
