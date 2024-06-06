@@ -8,7 +8,8 @@ models = ["dbmdz/bert-base-german-cased",
           "ikim-uk-essen/geberta-xlarge",
           "dbmdz/bert-base-german-uncased",
           "google-bert/bert-base-multilingual-uncased",
-          "google-bert/bert-base-multilingual-cased"]
+          "google-bert/bert-base-multilingual-cased", 
+          "T-Systems-onsite/cross-en-de-roberta-sentence-transformer"]
 
 for model in models:
     tokenizer = AutoTokenizer.from_pretrained(model)

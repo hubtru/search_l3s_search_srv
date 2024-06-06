@@ -125,7 +125,7 @@ class UpdateToDataset(Resource):
         new_doc = {}
         new_doc["id"] = doc_id
         # get the content of doc
-        print(new_doc)
+        # print(new_doc)
         
         
         status = "failed"

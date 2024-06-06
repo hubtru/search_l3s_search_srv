@@ -85,12 +85,11 @@ class IndexUpdater(Resource):
                     idxer = Indexer()
                     state = idxer.flat(encode_type, model_name, index_method, dataset_name)
                     result["state"] = state
-                    pprint(result)
+                    # pprint(result)
                     results.append(result)
         
         
         return {"results": results}, HTTPStatus.OK
-
 
 
 
@@ -142,7 +141,7 @@ class HNSWIndexer(Resource):
         encode_cat = request_data.get("encode_cat")
         model_name = request_data.get("model_name")
         dataset_name = request_data.get("dataset_name")
-        print(request_data)
+        # print(request_data)
         idxer = Indexer()
         idxer.hnsw_indexer(encode_cat, model_name, dataset_name)
         return {"message": "success"}, HTTPStatus.CREATED
@@ -156,7 +155,7 @@ class PQIndexer(Resource):
         encode_cat = request_data.get("encode_cat")
         model_name = request_data.get("model_name")
         dataset_name = request_data.get("dataset_name")
-        print(request_data)
+        # print(request_data)
         idxer = Indexer()
         idxer.pq_indexer(encode_cat, model_name, dataset_name)
         return {"message": "success"}, HTTPStatus.CREATED

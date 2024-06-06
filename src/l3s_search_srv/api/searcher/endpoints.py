@@ -51,7 +51,7 @@ class CheckSecretKey(Resource):
     @ns_searcher.expect(parser_secret)
     def get(self):
         request_data = parser_secret.parse_args()
-        if request_data["secret_key"] == os.getenv('MLS_CLIENT_SECRET'):
+        if request_data["secret_key"] == os.getenv('L3S_API_KEY'):
             return {"message": "valid secret key"}, HTTPStatus.OK
         else:
             return {"message": "invalid secret key"}, HTTPStatus.BAD_REQUEST
@@ -76,10 +76,10 @@ class SearcherUpdate(Resource):
         try:
             ## Get the data from payload
             request_data = request.json
-            pprint(request_data)
+            # pprint(request_data)
             ns_searcher.logger.info("Starting: Checking client secret...")
-            print(request_data["secret"])
-            if request_data["secret"] != os.getenv('MLS_CLIENT_SECRET'):
+            # print(request_data["secret"])
+            if request_data["secret"] != os.getenv('L3S_API_KEY'):
                 raise ValueError("Invalid secret key!")
 
             ns_searcher.logger.info("Success: client secret valid.")
@@ -207,6 +207,7 @@ class DenseRetrieval(Resource):
 
         try:
             dataset_name = SearchSrvMeta().get_latest_dataset()
+
             if dataset_name == "" or dataset_name is None:
                 raise FileExistsError("No dataset")
 
@@ -258,7 +259,7 @@ class DenseRetrieval(Resource):
             return {"results": [], "message": e.args[0]}, HTTPStatus.NOT_FOUND
 
 
-# @ns_searcher.route("/traditional-retrieval", endpoint="traditional_retrieval")
+@ns_searcher.route("/traditional-retrieval", endpoint="traditional_retrieval", doc=False)
 class SimpleSearch(Resource):
     @ns_searcher.expect(dto_simple_search_request)
     @ns_searcher.response(int(HTTPStatus.CREATED), "New user was successfully created.")

@@ -14,7 +14,8 @@ def get_subdirs(dir):
 class SearchSrvMeta(object):
     INDEX_METHODS = ['flat-ip', 'flat-l2']
     ENCODE_METHODS = ['bm25', 'dense', 'sparse']
-    LANGUAGE_MODELS = ['bert-base-german-cased', 'xlm-roberta-base', 'geberta-xlarge', 'bert-base-german-uncased', 'bert-base-multilingual-uncased', 'bert-base-multilingual-cased']
+
+    LANGUAGE_MODELS = ['cross-en-de-roberta-sentence-transformer', 'bert-base-german-cased', 'xlm-roberta-base', 'geberta-xlarge', 'bert-base-german-uncased', 'bert-base-multilingual-uncased', 'bert-base-multilingual-cased']
     
     
     def __get_subdirs(self, dir):
@@ -77,17 +78,22 @@ class SearchSrvMeta(object):
     def get_existing_dense_encodings(self):
         datasets = self.get_datasets()
         dense_encodes_dir = os.path.join(os.getenv("BASE_ENCODES_DIR"), "dense")
+        
         if not os.path.isdir(dense_encodes_dir):
             raise ValueError(f'Directory not found: {dense_encodes_dir}')
         
-        existing_encodings = []
         
-        for l in self.LANGUAGE_MODELS:
-            encode_dir = os.path.join(dense_encodes_dir, l)
-            encode_subdirs = self.__get_subdirs(encode_dir)
-            existing_encodings.append({"language_model": l, "datasets": encode_subdirs})
-            
-        return existing_encodings
+        existing_encodings = []
+
+        if self.__get_subdirs(dense_encodes_dir) == []:
+            return existing_encodings
+        else:
+            for l in self.LANGUAGE_MODELS:
+                encode_dir = os.path.join(dense_encodes_dir, l)
+                encode_subdirs = self.__get_subdirs(encode_dir)
+                existing_encodings.append({"language_model": l, "datasets": encode_subdirs})
+                
+            return existing_encodings
     
     def check_if_dataset_dense_encoded(self, dataset_name):
         existing_dense_encodings = self.get_existing_dense_encodings()
@@ -149,12 +155,16 @@ class SearchSrvMeta(object):
         not_indexed_datasets = []
         for i in self.INDEX_METHODS:
             indexed_datasets = self.__get_subdirs(os.path.join(BASE_INDEXES_DIR, i))
-            not_encoded = []
-            for d in datasets:
-                if d not in indexed_datasets:
-                    not_encoded.append(d)
             
-            not_indexed_datasets.append({i: not_encoded})
+            if indexed_datasets == []:
+                not_indexed_datasets.append({i: 'None'})
+            else:
+                not_encoded = []
+                for d in datasets:
+                    if d not in indexed_datasets:
+                        not_encoded.append(d)
+                
+                not_indexed_datasets.append({i: not_encoded})
         
         return not_indexed_datasets
 

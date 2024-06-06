@@ -12,8 +12,7 @@ from swagger_client import sse_search_client
 from transformers import AutoTokenizer
 
 from l3s_search_srv.api.encoder.logic import BertGermanCasedDenseEncoder, XlmRobertaDenseEncoder, DeBERTaDenseEncoder, \
-    BertGermanUncasedDenseEncoder, BertMultiLingualUncasedDenseEncoder, BertMultiLingualCasedDenseEncoder
-
+    BertGermanUncasedDenseEncoder, BertMultiLingualUncasedDenseEncoder, BertMultiLingualCasedDenseEncoder, CrossRobertaSentenceTransformerEncoder
 
 class EmbeddingCustomizer:
     ns_customizer = Namespace("CustomizedEmbedding", validate=True)
@@ -288,7 +287,7 @@ class EmbeddingCustomizer:
             self.ns_customizer.logger.info(f"Relevant Skills: {relevant_skills}")
 
             # get seperator token. Is it needed?
-            sep_token = AutoTokenizer.from_pretrained(language_model).sep_token
+            sep_token = AutoTokenizer.from_pretrained(searcher.language_models[language_model]).sep_token
 
             # add skill names to query
             self.ns_customizer.logger.info(f"Original Query: {query}")
@@ -328,7 +327,7 @@ class EmbeddingCustomizer:
             self.ns_customizer.logger.info(f"Relevant Skills: {relevant_skills}")
 
             # get seperator token. Is it needed?
-            sep_token = AutoTokenizer.from_pretrained(language_model).sep_token
+            sep_token = AutoTokenizer.from_pretrained(searcher.language_models[language_model]).sep_token
 
             # add skill names to query
             self.ns_customizer.logger.info(f"Original Query: {query}")
@@ -404,7 +403,7 @@ class EmbeddingCustomizer:
             self.ns_customizer.logger.info(f"Relevant Skills: {relevant_skills}")
 
             # get seperator token. Is it needed?
-            sep_token = AutoTokenizer.from_pretrained(language_model).sep_token
+            sep_token = AutoTokenizer.from_pretrained(searcher.language_models[language_model]).sep_token
 
             # add skill names to query
             self.ns_customizer.logger.info(f"Original Query: {query}")
@@ -421,15 +420,17 @@ class EmbeddingCustomizer:
 
         return results
 
-
 class Searcher(object):
-    language_models = ["bert-base-german-cased",
-                       "xlm-roberta-base",
-                       "geberta-xlarge",
-                       "bert-base-german-uncased",
-                       "bert-base-multilingual-uncased",
-                       "bert-base-multilingual-cased"
-                       ]
+
+    language_models = {
+        "bert-base-german-cased": "dbmdz/bert-base-german-cased",
+        "xlm-roberta-base": "xlm-roberta-base",
+        "cross-en-de-roberta-sentence-transformer": "T-Systems-onsite/cross-en-de-roberta-sentence-transformer",
+        "geberta-xlarge": "ikim-uk-essen/geberta-xlarge",
+        "bert-base-german-uncased": "dbmdz/bert-base-german-uncased",
+        "bert-base-multilingual-uncased": "google-bert/bert-base-multilingual-uncased",
+        "bert-base-multilingual-cased": "google-bert/bert-base-multilingual-cased"
+    }
     punctuation_marks = string.punctuation.replace("-", "")
 
     def __init__(self):
@@ -455,6 +456,7 @@ class Searcher(object):
         # remove the punctuations from the query
         # query = re.sub(r"\p{P}(?<!-)", "", query)
         query = query.translate(str.maketrans('', '', self.punctuation_marks))
+
         print(query)
         encodes_file_path = os.path.join(os.getenv("BASE_ENCODES_DIR"),
                                          f"dense/{language_model}/{dataset_name}/data_encoded.json")
@@ -464,7 +466,7 @@ class Searcher(object):
         print(encodes_file_path)
         print(prebuilt_index_path)
 
-        if language_model not in self.language_models:
+        if language_model not in self.language_models.keys():
             raise ValueError("language model not defined")
 
         if index_method not in ["flat-l2", "flat-ip", "hnsw", "pq"]:
@@ -472,12 +474,14 @@ class Searcher(object):
 
         # load index
         if not os.path.exists(prebuilt_index_path):
-            print(prebuilt_index_path)
+            # print(prebuilt_index_path)
             raise ValueError("index path not exists")
 
         index = faiss.read_index(os.path.join(prebuilt_index_path, "index.faiss"))
         if language_model == "bert-base-german-cased":
             encoder = BertGermanCasedDenseEncoder()
+        elif language_model == "cross-en-de-roberta-sentence-transformer":
+            encoder = CrossRobertaSentenceTransformerEncoder()
         elif language_model == "xlm-roberta-base":
             encoder = XlmRobertaDenseEncoder()
         elif language_model == "geberta-xlarge":
@@ -547,4 +551,6 @@ class Searcher(object):
 
         n_shared = len(x.intersection(y))
         n_total = len(x.union(y))
-        return float("{:.2f}".format(n_shared / len(x)))
+
+        # return float("{:.2f}".format(n_shared/len(x)))
+        return float("{:.2f}".format(n_shared/n_total))
