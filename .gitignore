@@ -8,3 +8,5 @@
 .dockercmd
 .archiv
 **/docker-compose.yml
+**/docker-compose_vanilla.yml
+.idea

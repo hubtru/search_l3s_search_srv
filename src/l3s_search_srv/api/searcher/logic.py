@@ -99,6 +99,15 @@ class Searcher(object):
             # results[i]["ranking"] = i+1
             results[i]["jaccard"] = self.__jaccard(query, results[i]["contents"])
             results[i]["cosine_similarity"] = self.__cosine_sim(query_enc, results[i]["vector"])
+
+            if i == 0:
+                print(query)
+                print(results[i]["contents"])
+                print(len(query_enc), flush=True)
+                print(len(results[i]["vector"]), flush=True)
+                print(query_enc, flush=True)
+                print(results[i]["vector"], flush=True)
+                print(results[i]["cosine_similarity"], flush=True)
             
                     
         # reranking the result
