@@ -1,7 +1,8 @@
-import os, subprocess, json
+import os, json
+# import subprocess
 # from http import HTTPStatus
-from transformers import XLMRobertaTokenizer, XLMRobertaModel
-from transformers import AutoModel, AutoTokenizer, AutoModelWithLMHead
+# from transformers import XLMRobertaTokenizer, XLMRobertaModel
+from transformers import AutoModel, AutoTokenizer
 import torch
 import string
 
@@ -163,12 +164,12 @@ class DenseEncoer(object):
         pass
 
 
-class GermanGPT2DenseEncoder(DenseEncoer):
+class CrossRobertaSentenceTransformerEncoder(DenseEncoer):
     def __init__(self) -> None:
         super().__init__()
-        self.tokenizer = AutoTokenizer.from_pretrained("dbmdz/german-gpt2-faust")
-        self.model = AutoModelWithLMHead.from_pretrained("dbmdz/german-gpt2-faust")
-        self.model_name = "german-gpt2-faust"
+        self.tokenizer = AutoTokenizer.from_pretrained("T-Systems-onsite/cross-en-de-roberta-sentence-transformer")
+        self.model = AutoModel.from_pretrained("T-Systems-onsite/cross-en-de-roberta-sentence-transformer")
+        self.model_name = "cross-en-de-roberta-sentence-transformer"
 
 
 class BertGermanCasedDenseEncoder(DenseEncoer):
@@ -178,13 +179,12 @@ class BertGermanCasedDenseEncoder(DenseEncoer):
         self.model = AutoModel.from_pretrained("dbmdz/bert-base-german-cased")
         self.model_name = "bert-base-german-cased"
 
-
-class XlmRobertaDenseEncoder(DenseEncoer):
-    def __init__(self) -> None:
-        super().__init__()
-        self.tokenizer = XLMRobertaTokenizer.from_pretrained("xlm-roberta-base")
-        self.model = XLMRobertaModel.from_pretrained("xlm-roberta-base")
-        self.model_name = "xlm-roberta-base"
+# class XlmRobertaDenseEncoder(DenseEncoer):
+#     def __init__(self) -> None:
+#        super().__init__()
+#        self.tokenizer = XLMRobertaTokenizer.from_pretrained("xlm-roberta-base")
+#        self.model = XLMRobertaModel.from_pretrained("xlm-roberta-base")
+#        self.model_name = "xlm-roberta-base"
 
     # def xlm_roberta_query_encoder(self, input_text):
     #         tokens = self.tokenizer.encode(input_text,
