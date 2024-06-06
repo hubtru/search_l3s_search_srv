@@ -2,7 +2,8 @@ from http import HTTPStatus
 import os
 from flask_restx import Namespace, Resource
 
-from .logic import CrossRobertaSentenceTransformerEncoder, BertGermanCasedDenseEncoder
+
+from .logic import CrossRobertaSentenceTransformerEncoder, XlmRobertaDenseEncoder, BertGermanCasedDenseEncoder, DeBERTaDenseEncoder, BertGermanUncasedDenseEncoder, BertMultiLingualUncasedDenseEncoder, BertMultiLingualCasedDenseEncoder
 from l3s_search_srv.util.meta import SearchSrvMeta
 
 ns_encoder = Namespace("Encoder", validate=True)
@@ -82,6 +83,22 @@ class EncodeUpdater(Resource):
                         enc = CrossRobertaSentenceTransformerEncoder()
                         p = enc.dataset_encoder(d)
                         r["state"] = p
+                    elif language_model == "geberta-xlarge":
+                        enc = DeBERTaDenseEncoder()
+                        p = enc.dataset_encoder(d)
+                        r["state"] = p
+                    elif language_model == "bert-base-german-uncased":
+                        enc = BertGermanUncasedDenseEncoder()
+                        p = enc.dataset_encoder(d)
+                        r["state"] = p
+                    elif language_model == "bert-base-multilingual-uncased":
+                        enc = BertMultiLingualUncasedDenseEncoder()
+                        p = enc.dataset_encoder(d)
+                        r["state"] = p
+                    elif language_model == "bert-base-multilingual-cased":
+                        enc = BertMultiLingualCasedDenseEncoder()
+                        p = enc.dataset_encoder(d)
+                        r["state"] = p
                     
                     results.append(r)
                 
@@ -151,8 +168,19 @@ class DenseEncodeDataset(Resource):
         elif model_name == "cross-en-de-roberta-sentence-transformer":
             enc = CrossRobertaSentenceTransformerEncoder()
             p = enc.dataset_encoder(dataset_name)
-            
-            
+        elif model_name == "geberta-xlarge":
+            enc = DeBERTaDenseEncoder()
+            p = enc.dataset_encoder(dataset_name)
+        elif model_name == "bert-base-german-uncased":
+            enc = BertGermanUncasedDenseEncoder()
+            p = enc.dataset_encoder(dataset_name)
+        elif model_name == "bert-base-multilingual-uncased":
+            enc = BertMultiLingualUncasedDenseEncoder()
+            p = enc.dataset_encoder(dataset_name)
+        elif model_name == "bert-base-multilingual-cased":
+            enc = BertMultiLingualCasedDenseEncoder()
+            p = enc.dataset_encoder(dataset_name)
+
         if p == HTTPStatus.NOT_FOUND:
             return {"message": "file not found"}, p
         

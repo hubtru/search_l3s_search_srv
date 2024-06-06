@@ -14,7 +14,8 @@ def get_subdirs(dir):
 class SearchSrvMeta(object):
     INDEX_METHODS = ['flat-ip', 'flat-l2']
     ENCODE_METHODS = ['bm25', 'dense', 'sparse']
-    LANGUAGE_MODELS = ['bert-base-german-cased', 'cross-en-de-roberta-sentence-transformer']
+
+    LANGUAGE_MODELS = ['cross-en-de-roberta-sentence-transformer', 'bert-base-german-cased', 'xlm-roberta-base', 'geberta-xlarge', 'bert-base-german-uncased', 'bert-base-multilingual-uncased', 'bert-base-multilingual-cased']
     
     
     def __get_subdirs(self, dir):
