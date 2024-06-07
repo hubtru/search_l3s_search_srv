@@ -11,6 +11,8 @@ import faiss
 
 from l3s_search_srv.api.encoder.logic import BertGermanCasedDenseEncoder, CrossRobertaSentenceTransformerEncoder
 
+
+
 class Searcher(object):
     language_models = {
         "bert-base-german-cased": "dbmdz/bert-base-german-cased",

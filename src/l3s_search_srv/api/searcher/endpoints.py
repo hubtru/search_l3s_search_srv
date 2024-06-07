@@ -207,7 +207,7 @@ class DenseRetrieval(Resource):
             dataset_name = SearchSrvMeta().get_latest_dataset()
 
             # print(dataset_name)
-            if dataset_name == "" or dataset_name == None:
+            if dataset_name == "" or dataset_name is None:
                 raise FileExistsError("No dataset")
 
             searcher = Searcher()
@@ -226,56 +226,29 @@ class DenseRetrieval(Resource):
                 user = sse_search_user_api.user_mgmt_controller_get_user_profiles(user_id).to_dict()
                 ns_searcher.logger.info(f"User Info:\n{user}")
 
-                learning_profile_id = user["learning_profile"]
-                if learning_profile_id == '':
-                    raise ValueError("User has no learningProfile")
-
-                learning_profile = sse_search_learning_profile_api.learning_profile_controller_get_learning_profile_by_id(
-                    learning_profile_id).to_dict()
-                ns_searcher.logger.info(f"Learning Profile Info:\n{learning_profile}")
-
-                learning_history_id = learning_profile["learning_history_id"]
+                learning_history_id = user["learning_history_id"]
                 if learning_history_id == '':
-                    raise ValueError("Learning profile of user has no learning history")
+                    raise ValueError("User profile no learning history")
+                ns_searcher.logger.info(f"Learning History Info: {learning_history_id}")
 
-                learning_history = sse_search_learning_history_api.learning_history_controller_get_learning_history(
+                personalized_paths = sse_search_learning_history_api.learning_history_controller_get_personalized_paths(
                     learning_history_id).to_dict()
-                ns_searcher.logger.info(f"Learning History Info:\n{learning_history}")
 
-                started_learning_units = learning_history["started_learning_units"]
-                started_learning_paths = learning_history["personal_paths"]
-
-                # retrieve learning unit skills relevant to query
                 relevant_skills = []
-                check_already_learned = lambda x: x not in relevant_skills
-                for started_unit_id in started_learning_units:
-                    learning_unit = sse_search_learning_unit_api.search_learning_unit_controller_get_learning_unit(
-                        started_unit_id).to_dict()
+                for personalized_path in personalized_paths["paths"]:
+                    personalized_path_id = personalized_path["personalized_path_id"]
 
-                    teachingGoals = learning_unit["teaching_goals"]
-                    teachingGoals = list(filter(check_already_learned, teachingGoals))
+                    verbose_personalized_path = sse_search_learning_history_api.learning_history_controller_get_personalized_path(personalized_path_id).to_dict()
 
-                    requiredSkills = learning_unit["required_skills"]
-                    requiredSkills = list(filter(check_already_learned, requiredSkills))
+                    relevant_skills += verbose_personalized_path["goals"]
+                    learning_path_id = verbose_personalized_path.get["learning_path_id"]
+                    if learning_path_id is not None:
+                        learning_path = sse_search_learning_path_api.learning_path_mgmt_controller_get_learning_path(
+                            learning_path_id).to_dict()
 
-                    all_skills = teachingGoals + requiredSkills
+                        relevant_skills += learning_path["path_goals"]
 
-                    relevant_skills += all_skills
-
-                for started_path_id in started_learning_paths:
-                    learning_path = sse_search_learning_path_api.learning_path_mgmt_controller_get_learning_path(
-                        started_path_id).to_dict()
-
-                    path_goals = learning_path["path_goals"]
-                    path_goals = list(filter(check_already_learned, path_goals))
-
-                    requirements = learning_path["requirements"]
-                    requirements = list(filter(check_already_learned, requirements))
-
-                    all_skills = path_goals + requirements
-
-                    relevant_skills += all_skills
-
+                relevant_skills = list(set(relevant_skills))  # filter out duplicates
                 ns_searcher.logger.info(f"Relevant Skills:\n{relevant_skills}")
 
             elif use_skill_profile and not use_learning_profile:
@@ -286,23 +259,13 @@ class DenseRetrieval(Resource):
                 user = sse_search_user_api.user_mgmt_controller_get_user_profiles(user_id).to_dict()
                 ns_searcher.logger.info(f"User Info:\n{user}")
 
-                learning_profile_id = user["learning_profile"]
-                if learning_profile_id == '':
-                    raise ValueError("User has no learningProfile")
-
-                learning_profile = sse_search_learning_profile_api.learning_profile_controller_get_learning_profile_by_id(
-                    learning_profile_id=learning_profile_id).to_dict()
-                ns_searcher.logger.info(f"Learning Profile Info:\n{learning_profile}")
-
-                learning_history_id = learning_profile["learning_history_id"]
+                learning_history_id = user["learning_history_id"]
                 if learning_history_id == '':
-                    raise ValueError("Learning profile of user has no learning history")
+                    raise ValueError("User profile no learning history")
+                ns_searcher.logger.info(f"Learning History Info: {learning_history_id}")
 
-                learning_history = sse_search_learning_history_api.learning_history_controller_get_learning_history(
+                learned_skills = sse_search_learning_history_api.learning_history_controller_get_learned_skills(
                     learning_history_id).to_dict()
-                ns_searcher.logger.info(f"Learning History Info:\n{learning_history}")
-
-                learned_skills = learning_history["learned_skills"]
 
                 # retrieve skills relevant to query
                 relevant_skills = learned_skills
@@ -316,56 +279,35 @@ class DenseRetrieval(Resource):
                 user = sse_search_user_api.user_mgmt_controller_get_user_profiles(user_id).to_dict()
                 ns_searcher.logger.info(f"User Info:\n{user}")
 
-                learning_profile_id = user["learning_profile"]
-                if learning_profile_id == '':
-                    raise ValueError("User has no learningProfile")
-
-                learning_profile = sse_search_learning_profile_api.learning_profile_controller_get_learning_profile_by_id(
-                    learning_profile_id).to_dict()
-                ns_searcher.logger.info(f"Learning Profile Info:\n{learning_profile}")
-
-                learning_history_id = learning_profile["learning_history_id"]
+                learning_history_id = user["learning_history_id"]
                 if learning_history_id == '':
-                    raise ValueError("Learning profile of user has no learning history")
+                    raise ValueError("User profile no learning history")
+                ns_searcher.logger.info(f"Learning History Info: {learning_history_id}")
 
-                learning_history = sse_search_learning_history_api.learning_history_controller_get_learning_history(
+                # skill profile
+                relevant_skills = sse_search_learning_history_api.learning_history_controller_get_learned_skills(
                     learning_history_id).to_dict()
-                ns_searcher.logger.info(f"Learning History Info:\n{learning_history}")
 
-                started_learning_units = learning_history["started_learning_units"]
-                started_learning_paths = learning_history["personal_paths"]
-                learned_skills = learning_history["learned_skills"]
+                # learning profile
+                personalized_paths = sse_search_learning_history_api.learning_history_controller_get_personalized_paths(
+                    learning_history_id).to_dict()
 
-                # retrieve skills relevant to query
-                relevant_skills = learned_skills
-                check_already_learned = lambda x: x not in relevant_skills
-                for started_unit_id in started_learning_units:
-                    learning_unit = sse_search_learning_unit_api.search_learning_unit_controller_get_learning_unit(
-                        started_unit_id).to_dict()
+                for personalized_path in personalized_paths["paths"]:
+                    personalized_path_id = personalized_path["personalized_path_id"]
 
-                    teachingGoals = learning_unit["teaching_goals"]
-                    teachingGoals = list(filter(check_already_learned, teachingGoals))
+                    verbose_personalized_path = sse_search_learning_history_api.learning_history_controller_get_personalized_path(
+                        personalized_path_id).to_dict()
 
-                    requiredSkills = learning_unit["required_skills"]
-                    requiredSkills = list(filter(check_already_learned, requiredSkills))
+                    relevant_skills += verbose_personalized_path["goals"]
+                    learning_path_id = verbose_personalized_path.get["learning_path_id"]
+                    if learning_path_id is not None:
+                        learning_path = sse_search_learning_path_api.learning_path_mgmt_controller_get_learning_path(
+                            learning_path_id).to_dict()
 
-                    all_skills = teachingGoals + requiredSkills
+                        relevant_skills += learning_path["path_goals"]
 
-                    relevant_skills += all_skills
+                relevant_skills = list(set(relevant_skills))  # filter out duplicates
 
-                for started_path_id in started_learning_paths:
-                    learning_path = sse_search_learning_path_api.learning_path_mgmt_controller_get_learning_path(
-                        started_path_id).to_dict()
-
-                    path_goals = learning_path["path_goals"]
-                    path_goals = list(filter(check_already_learned, path_goals))
-
-                    requirements = learning_path["requirements"]
-                    requirements = list(filter(check_already_learned, requirements))
-
-                    all_skills = path_goals + requirements
-
-                    relevant_skills += all_skills
                 ns_searcher.logger.info(f"Relevant Skills:\n{relevant_skills}")
 
             results = searcher.dense_retrieval(
