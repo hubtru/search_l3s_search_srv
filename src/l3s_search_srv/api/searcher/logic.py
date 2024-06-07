@@ -31,6 +31,32 @@ class EmbeddingCustomizer:
     def __init__(self):
         pass
 
+    def _get_skill_profile(self, learning_history_id):
+        learned_skills = self.sse_search_learning_history_api.learning_history_controller_get_learned_skills(
+            learning_history_id).to_dict()
+        return learned_skills
+
+    def _get_learning_profile(self, learning_history_id):
+        personalized_paths = self.sse_search_learning_history_api.learning_history_controller_get_personalized_paths(
+            learning_history_id).to_dict()
+
+        relevant_skills = []
+        for personalized_path in personalized_paths["paths"]:
+            personalized_path_id = personalized_path["personalized_path_id"]
+
+            verbose_personalized_path = self.sse_search_learning_history_api.learning_history_controller_get_personalized_path(
+                personalized_path_id).to_dict()
+
+            relevant_skills += verbose_personalized_path["goals"]
+            learning_path_id = verbose_personalized_path.get["learning_path_id"]
+            if learning_path_id is not None:
+                learning_path = self.sse_search_learning_path_api.learning_path_mgmt_controller_get_learning_path(
+                    learning_path_id).to_dict()
+
+                relevant_skills += learning_path["path_goals"]
+
+        return relevant_skills
+
     def _get_relevant_skills(self, use_skill_profile, use_learning_profile, user_id):
         relevant_skills = []
         if not use_skill_profile and not use_learning_profile:
@@ -51,26 +77,7 @@ class EmbeddingCustomizer:
                 raise ValueError("User profile no learning history")
             self.ns_customizer.logger.info(f"Learning History Info: {learning_history_id}")
 
-            personalized_paths = self.sse_search_learning_history_api.learning_history_controller_get_personalized_paths(
-                learning_history_id).to_dict()
-
-            relevant_skills = []
-            for personalized_path in personalized_paths["paths"]:
-                personalized_path_id = personalized_path["personalized_path_id"]
-
-                verbose_personalized_path = self.sse_search_learning_history_api.learning_history_controller_get_personalized_path(
-                    personalized_path_id).to_dict()
-
-                relevant_skills += verbose_personalized_path["goals"]
-                learning_path_id = verbose_personalized_path.get["learning_path_id"]
-                if learning_path_id is not None:
-                    learning_path = self.sse_search_learning_path_api.learning_path_mgmt_controller_get_learning_path(
-                        learning_path_id).to_dict()
-
-                    relevant_skills += learning_path["path_goals"]
-
-            relevant_skills = list(set(relevant_skills))  # filter out duplicates
-            self.ns_customizer.logger.info(f"Relevant Skills:\n{relevant_skills}")
+            relevant_skills = self._get_learning_profile(learning_history_id)
 
         elif use_skill_profile and not use_learning_profile:
             ## case 3: using skill profile but not learning profile
@@ -85,12 +92,8 @@ class EmbeddingCustomizer:
                 raise ValueError("User profile no learning history")
             self.ns_customizer.logger.info(f"Learning History Info: {learning_history_id}")
 
-            learned_skills = self.sse_search_learning_history_api.learning_history_controller_get_learned_skills(
-                learning_history_id).to_dict()
-
             # retrieve skills relevant to query
-            relevant_skills = learned_skills
-            self.ns_customizer.logger.info(f"Relevant Skills:\n{relevant_skills}")
+            relevant_skills = self._get_skill_profile(learning_history_id)
 
         else:
             ## case 4: using both skill profile and learning profile
@@ -105,31 +108,14 @@ class EmbeddingCustomizer:
                 raise ValueError("User profile no learning history")
             self.ns_customizer.logger.info(f"Learning History Info: {learning_history_id}")
 
-            # skill profile
-            relevant_skills = self.sse_search_learning_history_api.learning_history_controller_get_learned_skills(
-                learning_history_id).to_dict()
+            skill_profile = self._get_skill_profile(learning_history_id)
+            learning_profile = self._get_learning_profile(learning_history_id)
 
-            # learning profile
-            personalized_paths = self.sse_search_learning_history_api.learning_history_controller_get_personalized_paths(
-                learning_history_id).to_dict()
+            relevant_skills = skill_profile + learning_profile
 
-            for personalized_path in personalized_paths["paths"]:
-                personalized_path_id = personalized_path["personalized_path_id"]
+        relevant_skills = list(set(relevant_skills))  # filter out duplicates
+        self.ns_customizer.logger.info(f"Relevant Skills:\n{relevant_skills}")
 
-                verbose_personalized_path = self.sse_search_learning_history_api.learning_history_controller_get_personalized_path(
-                    personalized_path_id).to_dict()
-
-                relevant_skills += verbose_personalized_path["goals"]
-                learning_path_id = verbose_personalized_path.get["learning_path_id"]
-                if learning_path_id is not None:
-                    learning_path = self.sse_search_learning_path_api.learning_path_mgmt_controller_get_learning_path(
-                        learning_path_id).to_dict()
-
-                    relevant_skills += learning_path["path_goals"]
-
-            relevant_skills = list(set(relevant_skills))  # filter out duplicates
-
-            self.ns_customizer.logger.info(f"Relevant Skills:\n{relevant_skills}")
         return relevant_skills
 
     def add_after(self, query, use_skill_profile, use_learning_profile, user_id, language_model, dataset_name,
