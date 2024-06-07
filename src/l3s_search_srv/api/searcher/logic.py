@@ -48,7 +48,7 @@ class EmbeddingCustomizer:
                 personalized_path_id).to_dict()
 
             relevant_skills += verbose_personalized_path["goals"]
-            learning_path_id = verbose_personalized_path.get["learning_path_id"]
+            learning_path_id = verbose_personalized_path.get("learning_path_id")
             if learning_path_id is not None:
                 learning_path = self.sse_search_learning_path_api.learning_path_mgmt_controller_get_learning_path(
                     learning_path_id).to_dict()
