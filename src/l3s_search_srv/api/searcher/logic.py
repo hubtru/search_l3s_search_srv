@@ -12,7 +12,9 @@ from swagger_client import sse_search_client
 from transformers import AutoTokenizer
 
 from l3s_search_srv.api.encoder.logic import BertGermanCasedDenseEncoder, XlmRobertaDenseEncoder, DeBERTaDenseEncoder, \
-    BertGermanUncasedDenseEncoder, BertMultiLingualUncasedDenseEncoder, BertMultiLingualCasedDenseEncoder, CrossRobertaSentenceTransformerEncoder
+    BertGermanUncasedDenseEncoder, BertMultiLingualUncasedDenseEncoder, BertMultiLingualCasedDenseEncoder, \
+    CrossRobertaSentenceTransformerEncoder
+
 
 class EmbeddingCustomizer:
     ns_customizer = Namespace("CustomizedEmbedding", validate=True)
@@ -29,10 +31,7 @@ class EmbeddingCustomizer:
     def __init__(self):
         pass
 
-    def add_after(self, query, use_skill_profile, use_learning_profile, user_id, language_model, dataset_name,
-                  index_method):
-        searcher = Searcher()
-
+    def _get_relevant_skills(self, use_skill_profile, use_learning_profile, user_id):
         relevant_skills = []
         if not use_skill_profile and not use_learning_profile:
             ## case 1: not using skill profile and learning profile
@@ -47,58 +46,30 @@ class EmbeddingCustomizer:
             user = self.sse_search_user_api.user_mgmt_controller_get_user_profiles(user_id).to_dict()
             self.ns_customizer.logger.info(f"User Info:\n{user}")
 
-            learning_profile_id = user["learning_profile"]
-            if learning_profile_id == '':
-                raise ValueError("User has no learningProfile")
-
-            learning_profile = self.sse_search_learning_profile_api.learning_profile_controller_get_learning_profile_by_id(
-                learning_profile_id).to_dict()
-            self.ns_customizer.logger.info(f"Learning Profile Info:\n{learning_profile}")
-
-            learning_history_id = learning_profile["learning_history_id"]
+            learning_history_id = user["learning_history_id"]
             if learning_history_id == '':
-                raise ValueError("Learning profile of user has no learning history")
+                raise ValueError("User profile no learning history")
+            self.ns_customizer.logger.info(f"Learning History Info: {learning_history_id}")
 
-            learning_history = self.sse_search_learning_history_api.learning_history_controller_get_learning_history(
+            personalized_paths = self.sse_search_learning_history_api.learning_history_controller_get_personalized_paths(
                 learning_history_id).to_dict()
-            self.ns_customizer.logger.info(f"Learning History Info:\n{learning_history}")
 
-            started_learning_units = learning_history["started_learning_units"]
-            started_learning_paths = learning_history["personal_paths"]
-
-            # retrieve learning unit skills relevant to query
             relevant_skills = []
+            for personalized_path in personalized_paths["paths"]:
+                personalized_path_id = personalized_path["personalized_path_id"]
 
-            for started_unit_id in started_learning_units:
-                learning_unit = self.sse_search_learning_unit_api.search_learning_unit_controller_get_learning_unit(
-                    started_unit_id).to_dict()
+                verbose_personalized_path = self.sse_search_learning_history_api.learning_history_controller_get_personalized_path(
+                    personalized_path_id).to_dict()
 
-                check_already_learned = lambda x: x not in relevant_skills
-                teachingGoals = learning_unit["teaching_goals"]
-                teachingGoals = list(filter(check_already_learned, teachingGoals))
+                relevant_skills += verbose_personalized_path["goals"]
+                learning_path_id = verbose_personalized_path.get["learning_path_id"]
+                if learning_path_id is not None:
+                    learning_path = self.sse_search_learning_path_api.learning_path_mgmt_controller_get_learning_path(
+                        learning_path_id).to_dict()
 
-                requiredSkills = learning_unit["required_skills"]
-                requiredSkills = list(filter(check_already_learned, requiredSkills))
+                    relevant_skills += learning_path["path_goals"]
 
-                all_skills = teachingGoals + requiredSkills
-
-                relevant_skills += all_skills
-
-            for started_path_id in started_learning_paths:
-                learning_path = self.sse_search_learning_path_api.learning_path_mgmt_controller_get_learning_path(
-                    started_path_id).to_dict()
-
-                check_already_learned = lambda x: x not in relevant_skills
-                path_goals = learning_path["path_goals"]
-                path_goals = list(filter(check_already_learned, path_goals))
-
-                requirements = learning_path["requirements"]
-                requirements = list(filter(check_already_learned, requirements))
-
-                all_skills = path_goals + requirements
-
-                relevant_skills += all_skills
-
+            relevant_skills = list(set(relevant_skills))  # filter out duplicates
             self.ns_customizer.logger.info(f"Relevant Skills:\n{relevant_skills}")
 
         elif use_skill_profile and not use_learning_profile:
@@ -109,23 +80,13 @@ class EmbeddingCustomizer:
             user = self.sse_search_user_api.user_mgmt_controller_get_user_profiles(user_id).to_dict()
             self.ns_customizer.logger.info(f"User Info:\n{user}")
 
-            learning_profile_id = user["learning_profile"]
-            if learning_profile_id == '':
-                raise ValueError("User has no learningProfile")
-
-            learning_profile = self.sse_search_learning_profile_api.learning_profile_controller_get_learning_profile_by_id(
-                learning_profile_id=learning_profile_id).to_dict()
-            self.ns_customizer.logger.info(f"Learning Profile Info:\n{learning_profile}")
-
-            learning_history_id = learning_profile["learning_history_id"]
+            learning_history_id = user["learning_history_id"]
             if learning_history_id == '':
-                raise ValueError("Learning profile of user has no learning history")
+                raise ValueError("User profile no learning history")
+            self.ns_customizer.logger.info(f"Learning History Info: {learning_history_id}")
 
-            learning_history = self.sse_search_learning_history_api.learning_history_controller_get_learning_history(
+            learned_skills = self.sse_search_learning_history_api.learning_history_controller_get_learned_skills(
                 learning_history_id).to_dict()
-            self.ns_customizer.logger.info(f"Learning History Info:\n{learning_history}")
-
-            learned_skills = learning_history["learned_skills"]
 
             # retrieve skills relevant to query
             relevant_skills = learned_skills
@@ -139,60 +100,44 @@ class EmbeddingCustomizer:
             user = self.sse_search_user_api.user_mgmt_controller_get_user_profiles(user_id).to_dict()
             self.ns_customizer.logger.info(f"User Info:\n{user}")
 
-            learning_profile_id = user["learning_profile"]
-            if learning_profile_id == '':
-                raise ValueError("User has no learningProfile")
-
-            learning_profile = self.sse_search_learning_profile_api.learning_profile_controller_get_learning_profile_by_id(
-                learning_profile_id).to_dict()
-            self.ns_customizer.logger.info(f"Learning Profile Info:\n{learning_profile}")
-
-            learning_history_id = learning_profile["learning_history_id"]
+            learning_history_id = user["learning_history_id"]
             if learning_history_id == '':
-                raise ValueError("Learning profile of user has no learning history")
+                raise ValueError("User profile no learning history")
+            self.ns_customizer.logger.info(f"Learning History Info: {learning_history_id}")
 
-            learning_history = self.sse_search_learning_history_api.learning_history_controller_get_learning_history(
+            # skill profile
+            relevant_skills = self.sse_search_learning_history_api.learning_history_controller_get_learned_skills(
                 learning_history_id).to_dict()
-            self.ns_customizer.logger.info(f"Learning History Info:\n{learning_history}")
 
-            started_learning_units = learning_history["started_learning_units"]
-            started_learning_paths = learning_history["personal_paths"]
-            learned_skills = learning_history["learned_skills"]
+            # learning profile
+            personalized_paths = self.sse_search_learning_history_api.learning_history_controller_get_personalized_paths(
+                learning_history_id).to_dict()
 
-            # retrieve skills relevant to query
-            relevant_skills = learned_skills
+            for personalized_path in personalized_paths["paths"]:
+                personalized_path_id = personalized_path["personalized_path_id"]
 
-            for started_unit_id in started_learning_units:
-                learning_unit = self.sse_search_learning_unit_api.search_learning_unit_controller_get_learning_unit(
-                    started_unit_id).to_dict()
+                verbose_personalized_path = self.sse_search_learning_history_api.learning_history_controller_get_personalized_path(
+                    personalized_path_id).to_dict()
 
-                check_already_learned = lambda x: x not in relevant_skills
-                teachingGoals = learning_unit["teaching_goals"]
-                teachingGoals = list(filter(check_already_learned, teachingGoals))
+                relevant_skills += verbose_personalized_path["goals"]
+                learning_path_id = verbose_personalized_path.get["learning_path_id"]
+                if learning_path_id is not None:
+                    learning_path = self.sse_search_learning_path_api.learning_path_mgmt_controller_get_learning_path(
+                        learning_path_id).to_dict()
 
-                requiredSkills = learning_unit["required_skills"]
-                requiredSkills = list(filter(check_already_learned, requiredSkills))
+                    relevant_skills += learning_path["path_goals"]
 
-                all_skills = teachingGoals + requiredSkills
+            relevant_skills = list(set(relevant_skills))  # filter out duplicates
 
-                relevant_skills += all_skills
-
-            for started_path_id in started_learning_paths:
-                learning_path = self.sse_search_learning_path_api.learning_path_mgmt_controller_get_learning_path(
-                    started_path_id).to_dict()
-
-                check_already_learned = lambda x: x not in relevant_skills
-                path_goals = learning_path["path_goals"]
-                path_goals = list(filter(check_already_learned, path_goals))
-
-                requirements = learning_path["requirements"]
-                requirements = list(filter(check_already_learned, requirements))
-
-                all_skills = path_goals + requirements
-
-                relevant_skills += all_skills
             self.ns_customizer.logger.info(f"Relevant Skills:\n{relevant_skills}")
+        return relevant_skills
 
+    def add_after(self, query, use_skill_profile, use_learning_profile, user_id, language_model, dataset_name,
+                  index_method):
+
+        relevant_skills = self._get_relevant_skills(use_skill_profile, use_learning_profile, user_id)
+
+        searcher = Searcher()
         results = searcher.dense_retrieval(
             query=query,
             language_model=language_model,
@@ -213,203 +158,17 @@ class EmbeddingCustomizer:
 
     def add_before(self, query, use_skill_profile, use_learning_profile, user_id, language_model, dataset_name,
                    index_method):
+
+        relevant_skills = self._get_relevant_skills(use_skill_profile, use_learning_profile, user_id)
+        relevant_skills = [self.sse_search_skill_api.skill_mgmt_controller_get_skill(skill).to_dict() for skill in relevant_skills]
+
         searcher = Searcher()
-
-        if not use_skill_profile and not use_learning_profile:
-            ## case 1: not using skill profile and learning profile
-            self.ns_customizer.logger.info("*** case 1: not using skill profile and learning profile ***")
-            # !!No need to change anything in the query!!
-            pass
-
-        elif not use_skill_profile and use_learning_profile:
-            ## case 2: not using skill profile but using learning profile
-            self.ns_customizer.logger.info("*** case 2: not using skill profile but using learning profile ***")
-
-            # retrieve user specific data
-            user = self.sse_search_user_api.user_mgmt_controller_get_user_profiles(user_id).to_dict()
-            self.ns_customizer.logger.info(f"User Info: {user}")
-
-            learning_profile_id = user["learning_profile"]
-            if learning_profile_id is '':
-                raise ValueError("User has no learningProfile")
-
-            learning_profile = self.sse_search_learning_profile_api.learning_profile_controller_get_learning_profile_by_id(
-                learning_profile_id).to_dict()
-            self.ns_customizer.logger.info(f"Learning Profile Info: {learning_profile}")
-
-            learning_history_id = learning_profile["learning_history_id"]
-            if learning_history_id is '':
-                raise ValueError("Learning profile of user has no learning history")
-
-            learning_history = self.sse_search_learning_history_api.learning_history_controller_get_learning_history(
-                learning_history_id).to_dict()
-            self.ns_customizer.logger.info(f"Learning History Info: {learning_history}")
-
-            started_learning_units = learning_history["started_learning_units"]
-            started_learning_paths = learning_history["personal_paths"]
-            learned_skills = learning_history["learned_skills"]
-
-            # retrieve skills relevant to query
-            relevant_skills = []
-            for started_unit_id in started_learning_units:
-                learning_unit = self.sse_search_learning_unit_api.search_learning_unit_controller_get_learning_unit(
-                    started_unit_id).to_dict()
-
-                teachingGoals = learning_unit["teaching_goals"]
-                requiredSkills = learning_unit["required_skills"]
-
-                check_already_learned = lambda x: x in learned_skills
-                teachingGoals = list(filter(check_already_learned, teachingGoals))
-                requiredSkills = list(filter(check_already_learned, requiredSkills))
-                all_skills = teachingGoals + requiredSkills
-                learned_skills += all_skills
-
-                relevant_skills += [self.sse_search_skill_api.skill_mgmt_controller_get_skill(skill_to_learn).to_dict()
-                                    for
-                                    skill_to_learn in all_skills]
-
-            for started_path_id in started_learning_paths:
-                learning_path = self.sse_search_learning_path_api.learning_path_mgmt_controller_get_learning_path(
-                    started_path_id).to_dict()
-
-                check_already_learned = lambda x: x in relevant_skills
-                path_goals = learning_path["path_goals"]
-                path_goals = list(filter(check_already_learned, path_goals))
-
-                requirements = learning_path["requirements"]
-                requirements = list(filter(check_already_learned, requirements))
-
-                all_skills = path_goals + requirements
-
-                learned_skills += all_skills
-                relevant_skills += [self.sse_search_skill_api.skill_mgmt_controller_get_skill(skill_to_learn).to_dict()
-                                    for skill_to_learn in all_skills]
-            self.ns_customizer.logger.info(f"Relevant Skills: {relevant_skills}")
-
-            # get seperator token. Is it needed?
-            sep_token = AutoTokenizer.from_pretrained(searcher.language_models[language_model]).sep_token
-
-            # add skill names to query
-            self.ns_customizer.logger.info(f"Original Query: {query}")
-            for skill in relevant_skills:
-                query += f"{sep_token}{skill['name']}"
-            self.ns_customizer.logger.info(f"Final Query: {query}")
-
-        elif use_skill_profile and not use_learning_profile:
-            ## case 3: using skill profile but not learning profile
-            self.ns_customizer.logger.info("*** case 3: using skill profile but not learning profile ***")
-
-            # retrieve user specific data
-            user = self.sse_search_user_api.user_mgmt_controller_get_user_profiles(user_id).to_dict()
-            self.ns_customizer.logger.info(f"User Info: {user}")
-
-            learning_profile_id = user["learning_profile"]
-            if learning_profile_id is '':
-                raise ValueError("User has no learningProfile")
-
-            learning_profile = self.sse_search_learning_profile_api.learning_profile_controller_get_learning_profile_by_id(
-                learning_profile_id).to_dict()
-            self.ns_customizer.logger.info(f"Learning Profile Info: {learning_profile}")
-
-            learning_history_id = learning_profile["learning_history_id"]
-            if learning_history_id is '':
-                raise ValueError("Learning profile of user has no learning history")
-
-            learning_history = self.sse_search_learning_history_api.learning_history_controller_get_learning_history(
-                learning_history_id).to_dict()
-            self.ns_customizer.logger.info(f"Learning History Info: {learning_history}")
-
-            learned_skills = learning_history["learned_skills"]
-
-            # retrieve skills relevant to query
-            relevant_skills = [self.sse_search_skill_api.skill_mgmt_controller_get_skill(skill).to_dict() for skill in
-                               learned_skills]
-            self.ns_customizer.logger.info(f"Relevant Skills: {relevant_skills}")
-
-            # get seperator token. Is it needed?
-            sep_token = AutoTokenizer.from_pretrained(searcher.language_models[language_model]).sep_token
-
-            # add skill names to query
-            self.ns_customizer.logger.info(f"Original Query: {query}")
-            for skill in relevant_skills:
-                query += f"{sep_token}{skill['name']}"
-            self.ns_customizer.logger.info(f"Final Query: {query}")
-
-        else:
-            ## case 4: using both skill profile and learning profile
-            self.ns_customizer.logger.info("*** case 4: using both skill profile and learning profile ***")
-
-            # retrieve user specific data
-            user = self.sse_search_user_api.user_mgmt_controller_get_user_profiles(user_id).to_dict()
-            self.ns_customizer.logger.info(f"User Info: {user}")
-
-            learning_profile_id = user["learning_profile"]
-            if learning_profile_id is '':
-                raise ValueError("User has no learningProfile")
-
-            learning_profile = self.sse_search_learning_profile_api.learning_profile_controller_get_learning_profile_by_id(
-                learning_profile_id).to_dict()
-            self.ns_customizer.logger.info(f"Learning Profile Info: {learning_profile}")
-
-            learning_history_id = learning_profile["learning_history_id"]
-            if learning_history_id is '':
-                raise ValueError("Learning profile of user has no learning history")
-
-            learning_history = self.sse_search_learning_history_api.learning_history_controller_get_learning_history(
-                learning_history_id).to_dict()
-            self.ns_customizer.logger.info(f"Learning History Info: {learning_history}")
-
-            started_learning_units = learning_history["started_learning_units"]
-            started_learning_paths = learning_history["personal_paths"]
-            learned_skills = learning_history["learned_skills"]
-
-            # retrieve skills relevant to query
-            relevant_skills = [self.sse_search_skill_api.skill_mgmt_controller_get_skill(skill).to_dict() for skill in
-                               learned_skills]
-            for started_unit_id in started_learning_units:
-                learning_unit = self.sse_search_learning_unit_api.search_learning_unit_controller_get_learning_unit(
-                    started_unit_id).to_dict()
-
-                teachingGoals = learning_unit[
-                    "teaching_goals"]
-                requiredSkills = learning_unit[
-                    "required_skills"]
-
-                check_already_learned = lambda x: x in learned_skills
-                teachingGoals = list(filter(check_already_learned, teachingGoals))
-                requiredSkills = list(filter(check_already_learned, requiredSkills))
-                all_skills = teachingGoals + requiredSkills
-                learned_skills += all_skills
-
-                relevant_skills += [self.sse_search_skill_api.skill_mgmt_controller_get_skill(skill_to_learn).to_dict()
-                                    for skill_to_learn in all_skills]
-
-            for started_path_id in started_learning_paths:
-                learning_path = self.sse_search_learning_path_api.learning_path_mgmt_controller_get_learning_path(
-                    started_path_id).to_dict()
-
-                check_already_learned = lambda x: x in relevant_skills
-                path_goals = learning_path["path_goals"]
-                path_goals = list(filter(check_already_learned, path_goals))
-
-                requirements = learning_path["requirements"]
-                requirements = list(filter(check_already_learned, requirements))
-
-                all_skills = path_goals + requirements
-
-                learned_skills += all_skills
-                relevant_skills += [self.sse_search_skill_api.skill_mgmt_controller_get_skill(skill_to_learn).to_dict()
-                                    for skill_to_learn in all_skills]
-            self.ns_customizer.logger.info(f"Relevant Skills: {relevant_skills}")
-
-            # get seperator token. Is it needed?
-            sep_token = AutoTokenizer.from_pretrained(searcher.language_models[language_model]).sep_token
-
-            # add skill names to query
-            self.ns_customizer.logger.info(f"Original Query: {query}")
-            for skill in relevant_skills:
-                query += f"{sep_token}{skill['name']}"
-            self.ns_customizer.logger.info(f"Final Query: {query}")
+        # add skill names to query
+        sep_token = AutoTokenizer.from_pretrained(searcher.language_models[language_model]).sep_token
+        self.ns_customizer.logger.info(f"Original Query: {query}")
+        for skill in relevant_skills:
+            query += f"{sep_token}{skill['name']}"
+        self.ns_customizer.logger.info(f"Final Query: {query}")
 
         results = searcher.dense_retrieval(
             query=query,
@@ -420,8 +179,8 @@ class EmbeddingCustomizer:
 
         return results
 
-class Searcher(object):
 
+class Searcher(object):
     language_models = {
         "bert-base-german-cased": "dbmdz/bert-base-german-cased",
         "xlm-roberta-base": "xlm-roberta-base",
@@ -553,4 +312,4 @@ class Searcher(object):
         n_total = len(x.union(y))
 
         # return float("{:.2f}".format(n_shared/len(x)))
-        return float("{:.2f}".format(n_shared/n_total))
+        return float("{:.2f}".format(n_shared / n_total))
