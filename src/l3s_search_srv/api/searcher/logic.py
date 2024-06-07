@@ -33,7 +33,7 @@ class EmbeddingCustomizer:
 
     def _get_skill_profile(self, learning_history_id):
         learned_skills = self.sse_search_learning_history_api.learning_history_controller_get_learned_skills(
-            learning_history_id).to_dict()
+            learning_history_id)
         return learned_skills
 
     def _get_learning_profile(self, learning_history_id):
