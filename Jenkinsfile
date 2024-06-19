@@ -63,7 +63,7 @@ pipeline {
                         stagingDeploy env.REMOTE_UPDATE_SCRIPT
                     }
                 }
-
+                /*
                 stage('Publish Swagger Clients') {
                      options {
                         timeout(time: 200, unit: 'SECONDS')
@@ -83,6 +83,7 @@ pipeline {
                         }
                     }
                 }
+                */
             }
         }
     }
