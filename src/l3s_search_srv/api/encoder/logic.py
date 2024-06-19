@@ -1,8 +1,8 @@
 import os, json
 # import subprocess
 # from http import HTTPStatus
-# from transformers import XLMRobertaTokenizer, XLMRobertaModel
-from transformers import AutoModel, AutoTokenizer
+from huggingface_hub._login import _login
+from transformers import AutoModel, AutoTokenizer, AutoConfig, XLMRobertaTokenizer, XLMRobertaModel
 import torch
 import string
 
@@ -28,6 +28,8 @@ class DenseEncoer(object):
         self.model = None
         self.model_name = None
         self.punctuation_marks = string.punctuation.replace("-", "")
+        _login(token=os.getenv('huggingface_api_token'), add_to_git_credential=False)
+
 
     def print_model_name(self):
         print(self.model_name)
@@ -82,7 +84,7 @@ class DenseEncoer(object):
             d["preprocessed_contents"] = d["contents"].translate(str.maketrans('', '', self.punctuation_marks))
             d["vector"] = self.query_encoder(d["preprocessed_contents"])
             encoded_data.append(d)
-            print(f"Progress: {(i / l) * 100:.2f}%")
+            print(f"Progress: {(i / l) * 100:.2f}%", flush=True)
             i += 1
 
         with open(output_file_path, "w") as json_file:
@@ -170,6 +172,7 @@ class CrossRobertaSentenceTransformerEncoder(DenseEncoer):
         self.tokenizer = AutoTokenizer.from_pretrained("T-Systems-onsite/cross-en-de-roberta-sentence-transformer")
         self.model = AutoModel.from_pretrained("T-Systems-onsite/cross-en-de-roberta-sentence-transformer")
         self.model_name = "cross-en-de-roberta-sentence-transformer"
+        print(self.model_name, flush=True)
 
 
 class BertGermanCasedDenseEncoder(DenseEncoer):
@@ -178,6 +181,7 @@ class BertGermanCasedDenseEncoder(DenseEncoer):
         self.tokenizer = AutoTokenizer.from_pretrained("dbmdz/bert-base-german-cased")
         self.model = AutoModel.from_pretrained("dbmdz/bert-base-german-cased")
         self.model_name = "bert-base-german-cased"
+        print(self.model_name, flush=True)
 
 
 class BertGermanUncasedDenseEncoder(DenseEncoer):
@@ -186,6 +190,7 @@ class BertGermanUncasedDenseEncoder(DenseEncoer):
         self.tokenizer = AutoTokenizer.from_pretrained("dbmdz/bert-base-german-uncased")
         self.model = AutoModel.from_pretrained("dbmdz/bert-base-german-uncased")
         self.model_name = "bert-base-german-uncased"
+        print(self.model_name, flush=True)
 
     def query_encoder(self, input_text):
         # tokens = self.tokenizer.encode(input_text, add_special_tokens=True, max_length=512, truncation=True)
@@ -212,12 +217,14 @@ class BertGermanUncasedDenseEncoder(DenseEncoer):
         # print(len(dense_vector_list))
         return dense_vector_list
 
+
 class XlmRobertaDenseEncoder(DenseEncoer):
     def __init__(self) -> None:
         super().__init__()
         self.tokenizer = XLMRobertaTokenizer.from_pretrained("xlm-roberta-base")
         self.model = XLMRobertaModel.from_pretrained("xlm-roberta-base")
         self.model_name = "xlm-roberta-base"
+        print(self.model_name, flush=True)
 
 
 class DeBERTaDenseEncoder(DenseEncoer):
@@ -226,6 +233,7 @@ class DeBERTaDenseEncoder(DenseEncoer):
         self.tokenizer = AutoTokenizer.from_pretrained("ikim-uk-essen/geberta-xlarge")
         self.model = AutoModel.from_pretrained("ikim-uk-essen/geberta-xlarge")
         self.model_name = "geberta-xlarge"
+        print(self.model_name, flush=True)
 
 
 class BertMultiLingualUncasedDenseEncoder(DenseEncoer):
@@ -234,6 +242,7 @@ class BertMultiLingualUncasedDenseEncoder(DenseEncoer):
         self.tokenizer = AutoTokenizer.from_pretrained("google-bert/bert-base-multilingual-uncased")
         self.model = AutoModel.from_pretrained("google-bert/bert-base-multilingual-uncased")
         self.model_name = "bert-base-multilingual-uncased"
+        print(self.model_name, flush=True)
 
     def query_encoder(self, input_text):
         # tokens = self.tokenizer.encode(input_text, add_special_tokens=True, max_length=512, truncation=True)
@@ -267,3 +276,81 @@ class BertMultiLingualCasedDenseEncoder(DenseEncoer):
         self.tokenizer = AutoTokenizer.from_pretrained("google-bert/bert-base-multilingual-cased")
         self.model = AutoModel.from_pretrained("google-bert/bert-base-multilingual-cased")
         self.model_name = "bert-base-multilingual-cased"
+        print(self.model_name, flush=True)
+
+
+class NVEmbedDenseEncoder(DenseEncoer):
+    def __init__(self) -> None:
+        super().__init__()
+        self.tokenizer = AutoTokenizer.from_pretrained("nvidia/NV-Embed-v1")
+        self.model = AutoModel.from_pretrained("nvidia/NV-Embed-v1", trust_remote_code=True)
+        self.model_name = "NV-Embed-v1"
+        print(self.model_name, flush=True)
+
+    def query_encoder(self, input_text):
+        # tokens = self.tokenizer.encode(input_text, add_special_tokens=True, max_length=512, truncation=True)
+        tokens = self.tokenizer(input_text,
+                                #  add_special_tokens=True,
+                                #  padding='max_length',
+                                padding=False,
+                                max_length=512,
+                                truncation=True,
+                                return_tensors='pt'
+                                )
+
+        input_ids = tokens.get('input_ids')
+        outputs = self.model(input_ids, tokens.get('attention_mask'))
+        print(outputs, flush=True)
+        embeddings = outputs['sentence_embeddings']
+        masks = tokens.get('attention_mask').unsqueeze(-1).expand(embeddings.size()).float()
+        masked_embeddings = embeddings * masks
+        summed = torch.sum(masked_embeddings, 1)
+        counted = torch.clamp(masks.sum(1), min=1e-9)
+        mean_pooled = summed / counted
+        # Convert the dense vector to a numpy array
+        dense_vector_list = mean_pooled.tolist()[0]
+        # print(len(dense_vector_list))
+        return dense_vector_list
+
+
+class LLama3DenseEncoder(DenseEncoer):
+    def __init__(self) -> None:
+        super().__init__()
+        self.tokenizer = AutoTokenizer.from_pretrained("meta-llama/Meta-Llama-3-8B")
+        self.model = AutoModel.from_pretrained("meta-llama/Meta-Llama-3-8B")
+        self.model_name = "Meta-Llama-3-8B"
+        print(self.model_name, flush=True)
+
+    def query_encoder(self, input_text):
+        # tokens = self.tokenizer.encode(input_text, add_special_tokens=True, max_length=512, truncation=True)
+        tokens = self.tokenizer(input_text,
+                                #  add_special_tokens=True,
+                                #  padding='max_length',
+                                padding=False,
+                                max_length=512,
+                                truncation=True,
+                                return_tensors='pt'
+                                )
+
+        input_ids = tokens.get('input_ids')
+        outputs = self.model(input_ids, tokens.get('attention_mask'))
+        print(outputs, flush=True)
+        embeddings = outputs.last_hidden_state
+        masks = tokens.get('attention_mask').unsqueeze(-1).expand(embeddings.size()).float()
+        masked_embeddings = embeddings * masks
+        summed = torch.sum(masked_embeddings, 1)
+        counted = torch.clamp(masks.sum(1), min=1e-9)
+        mean_pooled = summed / counted
+        # Convert the dense vector to a numpy array
+        dense_vector_list = mean_pooled.tolist()[0]
+        # print(len(dense_vector_list))
+        return dense_vector_list
+
+
+class E5LargeMultiLingualDenseEncoder(DenseEncoer):
+    def __init__(self) -> None:
+        super().__init__()
+        self.tokenizer = AutoTokenizer.from_pretrained("intfloat/multilingual-e5-large")
+        self.model = AutoModel.from_pretrained("intfloat/multilingual-e5-large")
+        self.model_name = "multilingual-e5-large"
+        print(self.model_name, flush=True)

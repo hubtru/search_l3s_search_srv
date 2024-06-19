@@ -104,7 +104,7 @@ class SearcherUpdate(Resource):
             else:
                 ## if exists, raise error
                 print(f"Directory '{save_to}' already exists.")
-                raise FileExistsError("Confilict: Directory already exists.")
+                raise FileExistsError("Conflict: Directory already exists.")
 
             ns_searcher.logger.info("Success: file name and directory created.")
 

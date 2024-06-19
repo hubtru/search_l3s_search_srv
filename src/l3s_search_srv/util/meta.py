@@ -15,7 +15,7 @@ class SearchSrvMeta(object):
     INDEX_METHODS = ['flat-ip', 'flat-l2']
     ENCODE_METHODS = ['bm25', 'dense', 'sparse']
 
-    LANGUAGE_MODELS = ['cross-en-de-roberta-sentence-transformer', 'bert-base-german-cased', 'xlm-roberta-base', 'geberta-xlarge', 'bert-base-german-uncased', 'bert-base-multilingual-uncased', 'bert-base-multilingual-cased']
+    LANGUAGE_MODELS = ['cross-en-de-roberta-sentence-transformer', 'bert-base-german-cased', 'xlm-roberta-base', 'geberta-xlarge', 'bert-base-german-uncased', 'bert-base-multilingual-uncased', 'bert-base-multilingual-cased',  "multilingual-e5-large"] #, "NV-Embed-v1", "Meta-Llama-3-8B",]
     
     
     def __get_subdirs(self, dir):

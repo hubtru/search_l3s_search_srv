@@ -3,7 +3,9 @@ import os
 from flask_restx import Namespace, Resource
 
 
-from .logic import CrossRobertaSentenceTransformerEncoder, XlmRobertaDenseEncoder, BertGermanCasedDenseEncoder, DeBERTaDenseEncoder, BertGermanUncasedDenseEncoder, BertMultiLingualUncasedDenseEncoder, BertMultiLingualCasedDenseEncoder
+from .logic import CrossRobertaSentenceTransformerEncoder, XlmRobertaDenseEncoder, BertGermanCasedDenseEncoder, \
+    DeBERTaDenseEncoder, BertGermanUncasedDenseEncoder, BertMultiLingualUncasedDenseEncoder, \
+    BertMultiLingualCasedDenseEncoder, NVEmbedDenseEncoder, LLama3DenseEncoder, E5LargeMultiLingualDenseEncoder
 from l3s_search_srv.util.meta import SearchSrvMeta
 
 ns_encoder = Namespace("Encoder", validate=True)
@@ -79,6 +81,10 @@ class EncodeUpdater(Resource):
                         enc = BertGermanCasedDenseEncoder()
                         p = enc.dataset_encoder(d)
                         r["state"] = p
+                    elif language_model == "xlm-roberta-base":
+                        enc = XlmRobertaDenseEncoder()
+                        p = enc.dataset_encoder(d)
+                        r["state"] = p
                     elif language_model == "cross-en-de-roberta-sentence-transformer":
                         enc = CrossRobertaSentenceTransformerEncoder()
                         p = enc.dataset_encoder(d)
@@ -97,6 +103,18 @@ class EncodeUpdater(Resource):
                         r["state"] = p
                     elif language_model == "bert-base-multilingual-cased":
                         enc = BertMultiLingualCasedDenseEncoder()
+                        p = enc.dataset_encoder(d)
+                        r["state"] = p
+                    elif language_model == "NV-Embed-v1":
+                        enc = NVEmbedDenseEncoder()
+                        p = enc.dataset_encoder(d)
+                        r["state"] = p
+                    elif language_model == "Meta-Llama-3-8B":
+                        enc = LLama3DenseEncoder()
+                        p = enc.dataset_encoder(d)
+                        r["state"] = p
+                    elif language_model == "multilingual-e5-large":
+                        enc = E5LargeMultiLingualDenseEncoder()
                         p = enc.dataset_encoder(d)
                         r["state"] = p
                     
@@ -130,9 +148,33 @@ class DenseEncodeQuery(Resource):
                 if model_name == "bert-base-german-cased":
                     enc = BertGermanCasedDenseEncoder()
                     dense_vector_list = enc.query_encoder(input_data)
+                elif model_name == "xlm-roberta-base":
+                    enc = XlmRobertaDenseEncoder()
+                    dense_vector_list = enc.query_encoder(input_data)
                 elif model_name == "cross-en-de-roberta-sentence-transformer":
                     enc = CrossRobertaSentenceTransformerEncoder()
-                    dense_vector_list = enc.query_encoder(input_data) 
+                    dense_vector_list = enc.query_encoder(input_data)
+                elif model_name == "geberta-xlarge":
+                    enc = DeBERTaDenseEncoder()
+                    dense_vector_list = enc.query_encoder(input_data)
+                elif model_name == "bert-base-german-uncased":
+                    enc = BertGermanUncasedDenseEncoder()
+                    dense_vector_list = enc.query_encoder(input_data)
+                elif model_name == "bert-base-multilingual-uncased":
+                    enc = BertMultiLingualUncasedDenseEncoder()
+                    dense_vector_list = enc.query_encoder(input_data)
+                elif model_name == "bert-base-multilingual-cased":
+                    enc = BertMultiLingualCasedDenseEncoder()
+                    dense_vector_list = enc.query_encoder(input_data)
+                elif model_name == "NV-Embed-v1":
+                    enc = NVEmbedDenseEncoder()
+                    dense_vector_list = enc.query_encoder(input_data)
+                elif model_name == "Meta-Llama-3-8B":
+                    enc = LLama3DenseEncoder()
+                    dense_vector_list = enc.query_encoder(input_data)
+                elif model_name == "multilingual-e5-large":
+                    enc = E5LargeMultiLingualDenseEncoder()
+                    dense_vector_list = enc.query_encoder(input_data)
                 else:
                     raise ValueError("********* Error: Invalid Language Model *********")
             
@@ -165,6 +207,9 @@ class DenseEncodeDataset(Resource):
         if model_name == "bert-base-german-cased":
             enc = BertGermanCasedDenseEncoder()
             p = enc.dataset_encoder(dataset_name)
+        elif model_name == "xlm-roberta-base":
+            enc = XlmRobertaDenseEncoder()
+            p = enc.dataset_encoder(dataset_name)
         elif model_name == "cross-en-de-roberta-sentence-transformer":
             enc = CrossRobertaSentenceTransformerEncoder()
             p = enc.dataset_encoder(dataset_name)
@@ -179,6 +224,15 @@ class DenseEncodeDataset(Resource):
             p = enc.dataset_encoder(dataset_name)
         elif model_name == "bert-base-multilingual-cased":
             enc = BertMultiLingualCasedDenseEncoder()
+            p = enc.dataset_encoder(dataset_name)
+        elif model_name == "NV-Embed-v1":
+            enc = NVEmbedDenseEncoder()
+            p = enc.dataset_encoder(dataset_name)
+        elif model_name == "Meta-Llama-3-8B":
+            enc = LLama3DenseEncoder()
+            p = enc.dataset_encoder(dataset_name)
+        elif model_name == "multilingual-e5-large":
+            enc = E5LargeMultiLingualDenseEncoder()
             p = enc.dataset_encoder(dataset_name)
 
         if p == HTTPStatus.NOT_FOUND:

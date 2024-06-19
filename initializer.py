@@ -2,7 +2,8 @@ import os, requests
 from transformers import AutoModel, AutoTokenizer
 
 ## download the pre-trained models
-models = ["dbmdz/bert-base-german-cased",
+models = ["intfloat/multilingual-e5-large",
+          "dbmdz/bert-base-german-cased",
           "xlm-roberta-base",
           "dbmdz/german-gpt2-faust",
           "ikim-uk-essen/geberta-xlarge",

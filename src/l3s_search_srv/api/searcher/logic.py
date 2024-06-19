@@ -13,7 +13,7 @@ from transformers import AutoTokenizer
 
 from l3s_search_srv.api.encoder.logic import BertGermanCasedDenseEncoder, XlmRobertaDenseEncoder, DeBERTaDenseEncoder, \
     BertGermanUncasedDenseEncoder, BertMultiLingualUncasedDenseEncoder, BertMultiLingualCasedDenseEncoder, \
-    CrossRobertaSentenceTransformerEncoder
+    CrossRobertaSentenceTransformerEncoder, NVEmbedDenseEncoder, LLama3DenseEncoder, E5LargeMultiLingualDenseEncoder
 
 
 class EmbeddingCustomizer:
@@ -174,7 +174,10 @@ class Searcher(object):
         "geberta-xlarge": "ikim-uk-essen/geberta-xlarge",
         "bert-base-german-uncased": "dbmdz/bert-base-german-uncased",
         "bert-base-multilingual-uncased": "google-bert/bert-base-multilingual-uncased",
-        "bert-base-multilingual-cased": "google-bert/bert-base-multilingual-cased"
+        "bert-base-multilingual-cased": "google-bert/bert-base-multilingual-cased",
+        "NV-Embed-v1": "nvidia/NV-Embed-v1",
+        "Meta-Llama-3-8B": "meta-llama/Meta-Llama-3-8B",
+        "multilingual-e5-large": "intfloat/multilingual-e5-large"
     }
     punctuation_marks = string.punctuation.replace("-", "")
 
@@ -237,6 +240,12 @@ class Searcher(object):
             encoder = BertMultiLingualUncasedDenseEncoder()
         elif language_model == "bert-base-multilingual-cased":
             encoder = BertMultiLingualCasedDenseEncoder()
+        elif language_model == "NV-Embed-v1":
+            encoder = NVEmbedDenseEncoder()
+        elif language_model == "Meta-Llama-3-8B":
+            encoder = LLama3DenseEncoder()
+        elif language_model == "multilingual-e5-large":
+            encoder = E5LargeMultiLingualDenseEncoder()
         else:
             raise ValueError("search with the given language model is not implemented")
 
