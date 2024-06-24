@@ -12,6 +12,7 @@ RUN java --version
 
 RUN apt-get -y install python3-dev
 RUN pip install --upgrade pip setuptools wheel pybind11
+RUN pip install -e ./skill-service-client
 RUN pip install -r requirements.txt
 RUN pip install -e .
 
