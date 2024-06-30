@@ -20,21 +20,21 @@ ns_searcher.models[dto_simple_search_request.name] = dto_simple_search_request
 ns_searcher.models[dto_simple_search_response.name] = dto_simple_search_response
 
 ## ------------ config: sse_search_client --------------- ##
-from swagger_client import sse_search_client
+import swagger_client
 
-sse_search_config = sse_search_client.Configuration()
+sse_search_config = swagger_client.Configuration()
 sse_search_config.host = os.getenv("SSE_SEARCH_HOST")
 print("*" * 80)
 print("sse-search-host: ", sse_search_config.host)
 print("*" * 80)
 
-client_sse_search = sse_search_client.ApiClient(sse_search_config)
-sse_search_user_api = sse_search_client.UserApi(client_sse_search)
-sse_search_learning_profile_api = sse_search_client.LearningProfilesApi(client_sse_search)
-sse_search_learning_history_api = sse_search_client.LearningHistoryApi(client_sse_search)
-sse_search_learning_unit_api = sse_search_client.LearningUnitsApi(client_sse_search)
-sse_search_learning_path_api = sse_search_client.LearningPathApi(client_sse_search)
-sse_search_skill_api = sse_search_client.SkillApi(client_sse_search)
+client_sse_search = swagger_client.ApiClient(sse_search_config)
+sse_search_user_api = swagger_client.UserApi(client_sse_search)
+sse_search_learning_profile_api = swagger_client.LearningProfilesApi(client_sse_search)
+sse_search_learning_history_api = swagger_client.LearningHistoryApi(client_sse_search)
+sse_search_learning_unit_api = swagger_client.LearningUnitsApi(client_sse_search)
+sse_search_learning_path_api = swagger_client.LearningPathApi(client_sse_search)
+sse_search_skill_api = swagger_client.SkillApi(client_sse_search)
 
 # @ns_searcher.route("/test", endpoint="searcher-test")
 # class SearcherTest(Resource):

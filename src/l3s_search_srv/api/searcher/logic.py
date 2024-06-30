@@ -8,8 +8,9 @@ from flask_restx import Namespace
 # from pyserini.search.lucene import LuceneSearcher
 # from pyserini.search.faiss import FaissSearcher, TctColBertQueryEncoder
 import faiss
-from swagger_client import sse_search_client
 from transformers import AutoTokenizer
+
+import swagger_client
 
 from l3s_search_srv.api.encoder.logic import BertGermanCasedDenseEncoder, XlmRobertaDenseEncoder, DeBERTaDenseEncoder, \
     BertGermanUncasedDenseEncoder, BertMultiLingualUncasedDenseEncoder, BertMultiLingualCasedDenseEncoder, \
@@ -18,15 +19,15 @@ from l3s_search_srv.api.encoder.logic import BertGermanCasedDenseEncoder, XlmRob
 
 class EmbeddingCustomizer:
     ns_customizer = Namespace("CustomizedEmbedding", validate=True)
-    sse_search_config = sse_search_client.Configuration()
+    sse_search_config = swagger_client.Configuration()
     sse_search_config.host = os.getenv("SSE_SEARCH_HOST")
-    client_sse_search = sse_search_client.ApiClient(sse_search_config)
-    sse_search_user_api = sse_search_client.UserApi(client_sse_search)
-    sse_search_learning_profile_api = sse_search_client.LearningProfilesApi(client_sse_search)
-    sse_search_learning_history_api = sse_search_client.LearningHistoryApi(client_sse_search)
-    sse_search_learning_unit_api = sse_search_client.LearningUnitsApi(client_sse_search)
-    sse_search_learning_path_api = sse_search_client.LearningPathApi(client_sse_search)
-    sse_search_skill_api = sse_search_client.SkillApi(client_sse_search)
+    client_sse_search = swagger_client.ApiClient(sse_search_config)
+    sse_search_user_api = swagger_client.UserApi(client_sse_search)
+    sse_search_learning_profile_api = swagger_client.LearningProfilesApi(client_sse_search)
+    sse_search_learning_history_api = swagger_client.LearningHistoryApi(client_sse_search)
+    sse_search_learning_unit_api = swagger_client.LearningUnitsApi(client_sse_search)
+    sse_search_learning_path_api = swagger_client.LearningPathApi(client_sse_search)
+    sse_search_skill_api = swagger_client.SkillApi(client_sse_search)
 
     def __init__(self):
         pass
@@ -38,14 +39,17 @@ class EmbeddingCustomizer:
 
     def _get_learning_profile(self, learning_history_id):
         personalized_paths = self.sse_search_learning_history_api.learning_history_controller_get_personalized_paths(
-            learning_history_id).to_dict()
+            learning_history_id
+        ).to_dict()
 
         relevant_skills = []
         for personalized_path in personalized_paths["paths"]:
             personalized_path_id = personalized_path["personalized_path_id"]
 
             verbose_personalized_path = self.sse_search_learning_history_api.learning_history_controller_get_personalized_path(
-                personalized_path_id).to_dict()
+                learning_history_id,
+                personalized_path_id
+            ).to_dict()
 
             relevant_skills += verbose_personalized_path["goals"]
             learning_path_id = verbose_personalized_path.get("learning_path_id")
@@ -123,6 +127,8 @@ class EmbeddingCustomizer:
 
         relevant_skills = self._get_relevant_skills(use_skill_profile, use_learning_profile, user_id)
 
+        self.store_relevant_skills(user_id, use_skill_profile, use_learning_profile, relevant_skills, "after")
+
         searcher = Searcher()
         results = searcher.dense_retrieval(
             query=query,
@@ -148,6 +154,9 @@ class EmbeddingCustomizer:
         relevant_skills = self._get_relevant_skills(use_skill_profile, use_learning_profile, user_id)
         relevant_skills = [self.sse_search_skill_api.skill_mgmt_controller_get_skill(skill).to_dict() for skill in relevant_skills]
 
+        self.store_relevant_skills(user_id, use_skill_profile, use_learning_profile, relevant_skills, "before")
+
+
         searcher = Searcher()
         # add skill names to query
         sep_token = AutoTokenizer.from_pretrained(searcher.language_models[language_model]).sep_token
@@ -164,6 +173,28 @@ class EmbeddingCustomizer:
         )
 
         return results
+
+
+    def store_relevant_skills(self, user_id, use_skill_profile, use_learning_profile, relevant_skills, prefix):
+        path_to_file = pathlib.Path(f"./user_context/{user_id}.json")
+
+        if not path_to_file.parent.exists():
+            path_to_file.parent.mkdir(parents=True)
+
+        if not path_to_file.exists():
+            context = {}
+        else:
+            with path_to_file.open("r") as f:
+                context = json.load(f)
+
+        prefix_dict = context.get(prefix, {})
+        relevant_key = f"{int(use_skill_profile)}_{int(use_learning_profile)}"
+        prefix_dict[relevant_key] = relevant_skills
+
+        context[prefix] = prefix_dict
+
+        with path_to_file.open("w") as f:
+            json.dump(context, f)
 
 
 class Searcher(object):
