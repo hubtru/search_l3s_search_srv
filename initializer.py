@@ -6,3 +6,4 @@ models = ["dbmdz/bert-base-german-cased", "T-Systems-onsite/cross-en-de-roberta-
 
 for model in models:
     tokenizer = AutoTokenizer.from_pretrained(model)
+    dl_model = AutoModel.from_pretrained(model)

@@ -7,7 +7,7 @@ import regex as re
 # from pyserini.search.lucene import LuceneSearcher
 # from pyserini.search.faiss import FaissSearcher, TctColBertQueryEncoder
 import faiss
-from swagger_client import sse_search_client
+import swagger_client
 from flask_restx import Namespace
 
 from l3s_search_srv.api.encoder.logic import BertGermanCasedDenseEncoder, CrossRobertaSentenceTransformerEncoder
@@ -15,15 +15,15 @@ from l3s_search_srv.api.encoder.logic import BertGermanCasedDenseEncoder, CrossR
 
 class EmbeddingCustomizer:
     ns_customizer = Namespace("CustomizedEmbedding", validate=True)
-    sse_search_config = sse_search_client.Configuration()
+    sse_search_config = swagger_client.Configuration()
     sse_search_config.host = os.getenv("SSE_SEARCH_HOST")
-    client_sse_search = sse_search_client.ApiClient(sse_search_config)
-    sse_search_user_api = sse_search_client.UserApi(client_sse_search)
-    sse_search_learning_profile_api = sse_search_client.LearningProfilesApi(client_sse_search)
-    sse_search_learning_history_api = sse_search_client.LearningHistoryApi(client_sse_search)
-    sse_search_learning_unit_api = sse_search_client.LearningUnitsApi(client_sse_search)
-    sse_search_learning_path_api = sse_search_client.LearningPathApi(client_sse_search)
-    sse_search_skill_api = sse_search_client.SkillApi(client_sse_search)
+    client_sse_search = swagger_client.ApiClient(sse_search_config)
+    sse_search_user_api = swagger_client.UserApi(client_sse_search)
+    sse_search_learning_profile_api = swagger_client.LearningProfilesApi(client_sse_search)
+    sse_search_learning_history_api = swagger_client.LearningHistoryApi(client_sse_search)
+    sse_search_learning_unit_api = swagger_client.LearningUnitsApi(client_sse_search)
+    sse_search_learning_path_api = swagger_client.LearningPathApi(client_sse_search)
+    sse_search_skill_api = swagger_client.SkillApi(client_sse_search)
 
     def __init__(self):
         pass
@@ -42,6 +42,7 @@ class EmbeddingCustomizer:
             personalized_path_id = personalized_path["personalized_path_id"]
 
             verbose_personalized_path = self.sse_search_learning_history_api.learning_history_controller_get_personalized_path(
+                learning_history_id,
                 personalized_path_id).to_dict()
 
             relevant_skills += verbose_personalized_path["goals"]
